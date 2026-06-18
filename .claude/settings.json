@@ -1,0 +1,24 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "printf '[%s]' \"$(cat .claude/output-mode 2>/dev/null | tr -d '[:space:]' || printf 'caveman')\""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(echo caveman > .claude/output-mode)",
+      "Bash(echo normal > .claude/output-mode)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo caveman > .claude/output-mode"
+          }
+        ]
+      }
+    ]
+  }
+}

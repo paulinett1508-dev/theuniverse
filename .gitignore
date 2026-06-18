@@ -1,0 +1,8 @@
+# Vault — never push
+.vault
+*.vault
+.secrets
+.env.local
+
+# agnostic-core runtime
+.claude/output-mode
