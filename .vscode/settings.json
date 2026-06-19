@@ -1,0 +1,31 @@
+{
+  "workbench.colorCustomizations": {
+    // === TITLE BAR ===
+    // #BF9000 — ouro escuro, contraste branco ~4.9:1 (AA)
+    "titleBar.activeBackground": "#BF9000",
+    "titleBar.activeForeground": "#FFFFFF",
+    "titleBar.inactiveBackground": "#7A5C00",
+    "titleBar.inactiveForeground": "#D4B84A",
+    "titleBar.border": "#F5C518",
+
+    // === ACTIVITY BAR ===
+    // fundo quase-preto com tint âmbar, ícones ouro
+    "activityBar.background": "#1A1500",
+    "activityBar.foreground": "#F5C518",
+    "activityBar.inactiveForeground": "#665500",
+    "activityBar.activeBorder": "#F5C518",
+    "activityBar.activeBackground": "#2D2600",
+    "activityBar.dropBorder": "#F5C518",
+    "activityBarBadge.background": "#F5C518",
+    "activityBarBadge.foreground": "#1A1500",
+
+    // === STATUS BAR ===
+    "statusBar.background": "#BF9000",
+    "statusBar.foreground": "#FFFFFF",
+    "statusBar.border": "#F5C518",
+    "statusBar.debuggingBackground": "#E06000",
+    "statusBar.debuggingForeground": "#FFFFFF",
+    "statusBar.noFolderBackground": "#7A5C00",
+    "statusBar.noFolderForeground": "#FFFFFF"
+  }
+}
