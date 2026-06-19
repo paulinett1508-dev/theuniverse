@@ -1,0 +1,52 @@
+{
+  "known_repos": [
+    "agnostic-core",
+    "agnvendas-painelsbr",
+    "AlgodaoAtelie",
+    "bolaocopa2026",
+    "botclinop",
+    "centroculturalsbr",
+    "CertiSYS",
+    "contabilplus",
+    "f1-pulse",
+    "FinanceFlow",
+    "florianorun",
+    "flowdigitalstudio",
+    "GessoExpress",
+    "hqplus",
+    "imersaobitrix24",
+    "lp-ellenpedrosa",
+    "lp-restauranteflutuante",
+    "lpjaraujoinfo",
+    "matrix-core",
+    "mcp-eventos",
+    "nexus-labsobral",
+    "pedidomobile",
+    "sbrchecks",
+    "sbrgestao",
+    "sicefsus-sistema",
+    "sigmed",
+    "SuperCartolaManagerv5-production",
+    "temperodemamae",
+    "the-matrix",
+    "tokentown",
+    "vibegaminghub"
+  ],
+  "last_run_id": {
+    "agnostic-core": 27538762728,
+    "agnvendas-painelsbr": 24652832547,
+    "CertiSYS": 27744294783,
+    "f1-pulse": 27745122985,
+    "FinanceFlow": 27261030447,
+    "florianorun": 24616718971,
+    "hqplus": 25411579822,
+    "mcp-eventos": 27564286266,
+    "pedidomobile": 24175958490,
+    "sbrgestao": 27829930768,
+    "sicefsus-sistema": 27812954255,
+    "SuperCartolaManagerv5-production": 27812757389
+  },
+  "last_issue_number": {
+    "agnostic-core": 29
+  }
+}
