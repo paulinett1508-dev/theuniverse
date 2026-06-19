@@ -1,5 +1,9 @@
 # theuniverse — O Guardião
 
+## ⚡ Início de sessão (LEIA PRIMEIRO)
+
+**Sempre comece lendo `ESTADO.md`** — é o handoff com as frentes abertas e o ponto de retomada. Depois confira o `CHANGELOG.md` para os eventos recentes. Risco zero de esquecimento.
+
 ## Papel
 
 Este repo é o **olho que tudo vê**: auditor, fiscal, balizador e orquestrador de todos os repos de `paulinett1508-dev`.

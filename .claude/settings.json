@@ -16,6 +16,10 @@
           {
             "type": "command",
             "command": "echo caveman > .claude/output-mode"
+          },
+          {
+            "type": "command",
+            "command": "echo '=== ESTADO DO UNIVERSO (handoff) ==='; cat ESTADO.md 2>/dev/null"
           }
         ]
       }

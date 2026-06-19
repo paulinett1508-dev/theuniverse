@@ -2,6 +2,14 @@
 
 Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de planetas.
 
+## 2026-06-19 — Hibernação saudável (handoff entre sessões)
+
+### 💾 Persistência com risco zero de esquecimento
+- Criado `ESTADO.md` — handoff auto-suficiente (frentes abertas + ponto de retomada). Não exige colar nada da sessão anterior.
+- Hook SessionStart injeta o `ESTADO.md` no contexto automaticamente toda nova sessão.
+- `CLAUDE.md` aponta `ESTADO.md` como leitura inicial. Memórias atualizadas (project + user Sol).
+- Spec do **Hermes-Oráculo** (subsistema A) materializado em `docs/ecossistema/A-hermes-oraculo-spec.md` (design aprovado, pronto pra plano).
+
 ## 2026-06-19 — Censo automático
 
 ### 🆕 Planetas descobertos
