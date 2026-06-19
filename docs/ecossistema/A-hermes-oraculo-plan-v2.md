@@ -289,12 +289,13 @@ def test_summarize_repo_computes_idle():
 
 
 def test_format_context_sorts_by_idle_desc():
+    # nomes distintos (1 letra colidiria com o texto do cabeçalho)
     summaries = [
-        {"name": "a", "idle_days": 5, "lang": "JS", "issues": 0, "private": False},
-        {"name": "b", "idle_days": 90, "lang": "Go", "issues": 1, "private": True},
+        {"name": "vibegaminghub", "idle_days": 5, "lang": "JS", "issues": 0, "private": False},
+        {"name": "tokentown", "idle_days": 90, "lang": "Go", "issues": 1, "private": True},
     ]
     out = context.format_context(summaries)
-    assert out.index("b") < out.index("a")   # b (90d) antes de a (5d)
+    assert out.index("tokentown") < out.index("vibegaminghub")   # 90d antes de 5d
     assert "90" in out and "Go" in out
 ```
 
