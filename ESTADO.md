@@ -54,7 +54,7 @@ Adicionar secret no GitHub: **Settings → Secrets and variables → Actions →
 Rigel = build/CI · Bellatrix = banco · Vega = monitoramento. Registrado em `docs/ecossistema/frota.md`. Frota 100% mapeada.
 
 ### 4. Subsistemas futuros (ordem B→C→D)
-- **B** — Sistema Nervoso (notificar tudo): eventos dos planetas → bot. Depende de A.
+- **B** — Sistema Nervoso: spec aprovado → `docs/ecossistema/B-sistema-nervoso-spec.md`. Roda no theuniverse (Actions, não Polaris), poll da API → Telegram. Implementável EM CASA (Guardião coda aqui!). Próximo: writing-plans. Precisa dos tokens do bot (Sol gera no deploy).
 - **C** — Guardião da Galáxia (segurança): curadoria de skills + varredura local + escudos. Dívida registrada: `hermes-dashboard.service` roda inseguro em `0.0.0.0:9119`.
 - **D** — Satélites Naturais (motores IA locais por planeta). Nebuloso, precisa brainstorm próprio.
 
