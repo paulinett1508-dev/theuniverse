@@ -82,7 +82,7 @@ def test_list_repos_paginates_and_excludes_self():
     calls = []
 
     def fake_api(path, tok):
-        page = int(path.split("page=")[1].split("&")[0])
+        page = int(path.split("&page=")[1].split("&")[0])  # &page= evita casar com per_page=
         calls.append(page)
         return pages[page], {}
 

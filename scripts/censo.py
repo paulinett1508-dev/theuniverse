@@ -10,21 +10,15 @@ Uso:
   python scripts/censo.py            # detecta e aplica mudanças
   python scripts/censo.py --dry-run  # só reporta, não escreve
 """
-import os
 import sys
-import json
 import base64
 import argparse
-import urllib.request
-import urllib.error
-from pathlib import Path
 from datetime import datetime, timezone
 
-API = "https://api.github.com"
-ROOT = Path(__file__).resolve().parent.parent
+from gh import API, ROOT, SELF, token, api, list_repos
+
 PLANETS = ROOT / "planets"
 CHANGELOG = ROOT / "CHANGELOG.md"
-SELF = "theuniverse"  # o observatório não é planeta
 
 CLUSTERS = {
     "sbrgestao": "sobral-core", "sbrchecks": "sobral-core", "agnvendas-painelsbr": "sobral-core",
@@ -41,41 +35,6 @@ CLUSTERS = {
     "imersaobitrix24": "landing-clientes", "GessoExpress": "landing-clientes",
     "botclinop": "landing-clientes",
 }
-
-
-def token():
-    t = os.getenv("GITHUB_TOKEN")
-    if t:
-        return t.strip()
-    vault = ROOT / ".vault"
-    if vault.exists():
-        for line in vault.read_text(encoding="utf-8").splitlines():
-            if line.startswith("GITHUB_TOKEN="):
-                return line.split("=", 1)[1].strip()
-    sys.exit("ERRO: GITHUB_TOKEN ausente (env ou .vault).")
-
-
-def api(path, tok):
-    req = urllib.request.Request(
-        path if path.startswith("http") else API + path,
-        headers={"Authorization": f"token {tok}",
-                 "Accept": "application/vnd.github+json",
-                 "X-GitHub-Api-Version": "2022-11-28",
-                 "User-Agent": "theuniverse-censo"},
-    )
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read().decode()), r.headers
-
-
-def list_repos(tok):
-    repos, page = [], 1
-    while True:
-        batch, _ = api(f"/user/repos?per_page=100&page={page}&affiliation=owner", tok)
-        if not batch:
-            break
-        repos.extend(batch)
-        page += 1
-    return [r for r in repos if r["name"] != SELF]
 
 
 def readme_excerpt(full_name, tok):
