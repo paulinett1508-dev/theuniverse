@@ -1,4 +1,6 @@
-# Hermes-Oráculo Implementation Plan
+> ⚠️ **OBSOLETO (2026-06-19).** Este plano implementava o design v1 (RAG-puro Ollama+Qdrant no nexus-labsobral). O spec foi reescrito pra v2 (agente/receita-SHELDON: Groq+BM25, código no theuniverse, runtime na Polaris) — ver `A-hermes-oraculo-spec.md`. Um novo plano será escrito. Mantido só como histórico.
+
+# Hermes-Oráculo Implementation Plan (v1 — OBSOLETO)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 >

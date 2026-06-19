@@ -79,8 +79,8 @@ Rotina que materializa a Observação: lista todos os repos (API), faz diff cont
 
 | # | Subsistema | Papel | Depende de | Status |
 |---|---|---|---|---|
-| **A** | Hermes-Bot (canal) | Bot Telegram ↔ motor Hermes. Fundação da comunicação | — | 🔜 próximo ciclo |
-| **B** | Sistema Nervoso (notificar) | Eventos observados (API) → Telegram. Roda no theuniverse (Actions), não na Polaris | A (só o bot) | 📋 spec aprovado |
+| **A** | Hermes-Oráculo (canal) | Oráculo conversacional: RAG (BM25) + estado vivo (API) via Groq. Receita SHELDON. Código no theuniverse, runtime na Polaris | — (bot já existe) | 📋 spec v2 aprovado |
+| **B** | Sistema Nervoso (notificar) | Eventos observados (API) → Telegram. Roda no theuniverse (Actions), não na Polaris | A (só o bot) | ✅ implementado/ativo |
 | **C** | Guardião da Galáxia (segurança) | Curadoria de skills + varredura local + escudos | A, B | ⏳ |
 | **D** | Satélites Naturais (helpers locais) | Motor de IA por planeta (nebuloso, refino próprio) | A, B | ⏳ |
 

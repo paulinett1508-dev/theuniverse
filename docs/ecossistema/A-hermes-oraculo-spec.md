@@ -1,76 +1,124 @@
-# Spec — Subsistema A: Hermes-Oráculo (bot Telegram conversacional)
+# Spec — Subsistema A: Hermes-Oráculo (Oráculo conversacional do Universo)
 
-> Status: **plano de implementação escrito** (2026-06-19) → [`A-hermes-oraculo-plan.md`](A-hermes-oraculo-plan.md). Falta: execução (no repo `nexus-labsobral`) + credenciais do Sol.
+> Status: **design aprovado pelo Sol** (2026-06-19, v2 — agente/receita-SHELDON). Falta: plano de implementação + execução.
 > Parte do [Blueprint do Ecossistema](00-blueprint.md). Primeiro dos 4 subsistemas (A→B→C→D).
+>
+> ⚠️ **Esta v2 substitui o design anterior** (RAG-puro com Ollama+Qdrant na Polaris). Motivo: a receita que entrega o que o Sol quer **já existe em produção** — o notifier do SHELDON (Telegram + IA conversacional Groq + RAG BM25 + injeção de contexto ao vivo). Não se reinventa a roda: o Oráculo do Universo é uma **instância dessa receita** pro domínio do universo (princípio do blueprint: *instância isolada, receita compartilhada*). O plano antigo `A-hermes-oraculo-plan.md` fica **obsoleto** — será reescrito.
 
 ## Objetivo
 
-Canal conversacional SOL ↔ Universo via Telegram. O Sol pergunta em linguagem natural; o Oráculo responde consultando o motor Hermes (RAG local na estrela **Polaris**). É a fundação da comunicação — tudo o mais (notificações, Guardião) depende dele.
+Canal conversacional SOL ↔ Universo via Telegram. O Sol pergunta em linguagem natural; o Oráculo responde combinando **conhecimento escrito** (RAG sobre as fichas/docs do universo) com **estado vivo** (consulta à API GitHub em tempo real). É a fundação da comunicação inteligente — o complemento *inbound* do subsistema B (que é *outbound*).
+
+Exemplos-alvo do Sol:
+- *"Qual repo está há mais de 30 dias sem commit?"* → contexto ao vivo (gh.py calcula idle).
+- *"O repo X roda em qual banco de dados?"* → RAG sobre ficha/doc.
+- *"A VPS alertou disco cheio, checa?"* → **fora de escopo**: infra de lab é do SHELDON; o Oráculo aponta a federação, não remonitora.
 
 ## Decisões travadas
 
 | decisão | valor |
 |---|---|
-| Natureza | **Oráculo conversacional** (two-way, linguagem natural) |
-| Acesso | **Só o Sol** — allowlist de 1 `chat_id`. Resto ignorado em silêncio |
-| Conhecimento | **Universo (fichas) + Lab** — ingere `theuniverse/planets/` + `docs/ecossistema/` + `CHANGELOG.md` além do `lab_knowledge` atual |
-| Casa do código | `nexus-labsobral/hermes/bot/` (o bot é parte do motor) |
-| Estrela hospedeira | **Polaris** (Oráculo / nexus-vps01, `2.25.163.125`) |
+| Receita | **Notifier do SHELDON** (instância nova, domínio do universo) — não reinventar |
+| Natureza | Oráculo conversacional inbound (two-way, linguagem natural) |
+| Cérebro | **Groq** Llama 70B (`llama-3.3-70b-versatile`) — free tier, proven no SHELDON |
+| RAG | **BM25** (`rank-bm25`, puro Python) sobre os markdowns do theuniverse |
+| Contexto ao vivo | `gh.py` (já existe) + `state/sentinel-state.json` (já existe) injetados no prompt |
+| Bot | **mesmo `guardiao_universo_bot` do B** — B só faz `sendMessage` (não faz polling), então sem conflito de getUpdates. Um bot, duas bocas |
+| Acesso | whitelist de 1 `chat_id` (o Sol = `1030157568`). Resto ignorado em silêncio |
+| Casa do código | **`theuniverse/oraculo/`** (Guardião escreve — consistente com o B) |
+| Runtime | serviço **systemd long-polling na Polaris** (Actions não hospeda processo 24/7). Deploy via SSH |
 
-## Arquitetura
+## Arquitetura — um bot, duas bocas
 
 ```
-Sol (Telegram) ──long-polling──► bot.py
-   ├─ guard: chat_id == SOL? ──não──► ignora (silêncio)
-   └─ sim ► embed(pergunta)  [Ollama nomic-embed-text]
-            ► Qdrant search   [coleção lab_knowledge, top-5, score≥0.75]
-            ► monta prompt    [contexto recuperado + pergunta]
-            ► Ollama chat      [LLM local generativo — modelo a confirmar na VPS]
-            ► resposta + fontes ──► Telegram
+Você (Telegram) ──long-polling──► oraculo/bot.py            [na Polaris]
+   ├─ auth gate: chat_id == 1030157568? ──não──► ignora (silêncio) + log
+   └─ sim:
+        ├─ context.build_context()   → estado vivo (gh.py + sentinel-state)
+        ├─ rag.retrieve(pergunta)    → top-k chunks BM25 dos markdowns
+        ├─ brain.answer(...)         → Groq Llama 70B (system prompt + contexto + RAG)
+        └─ resposta ──► Telegram
+
+[B = sentinel.py no Actions, só sendMessage outbound — mesmo bot, sem conflito]
 ```
-Tudo dentro de Polaris. Long-polling = nenhuma porta nova exposta. Conhecimento soberano (Ollama+Qdrant locais, zero vazamento externo).
 
-## Componentes — `nexus-labsobral/hermes/bot/`
+## Componentes — `theuniverse/oraculo/`
 
-| arquivo | papel |
-|---|---|
-| `bot.py` | loop Telegram (long-polling), guard de chat_id, orquestração |
-| `rag.py` | cliente RAG (embed → search Qdrant → chat Ollama), reusa lógica do `rag_server.py` |
-| `config.py` | env: `TELEGRAM_TOKEN`, `SOL_CHAT_ID`, `OLLAMA_URL`, `QDRANT_URL`, `CHAT_MODEL` |
-| `requirements.txt` | python-telegram-bot, qdrant-client, requests |
-| systemd `hermes-bot.service` | long-running, restart on-failure |
+YAGNI: cortado tudo que é outbound (o B já faz) — sem alert sources, morning digest, escalação, quiet hours, dispatcher tick.
 
-## Conhecimento (Universo + Lab)
+| módulo | papel | origem |
+|---|---|---|
+| `config.py` | env: `TELEGRAM_TOKEN`, `SOL_CHAT_ID`, `GROQ_API_KEY`, `GROQ_MODEL`, paths do conhecimento | espelha SHELDON |
+| `rag.py` | índice BM25 sobre markdowns + `retrieve(query) → top-k chunks` | receita SHELDON |
+| `context.py` | `build_context()` — repos + idle + linguagem + issues (gh.py) + `sentinel-state.json`, formatado | novo, reusa `gh.py` |
+| `brain.py` | system prompt (guardrails) + contexto + RAG + pergunta → Groq → resposta | receita SHELDON |
+| `bot.py` | long-polling, auth gate, orquestração, `main()` | receita SHELDON |
+| `requirements.txt` | `rank-bm25`, `httpx` (`gh.py` é stdlib) | — |
+| `oraculo.service` | systemd long-running, restart on-failure | espelha `hermes-*` |
+| `deploy.sh` | espelha theuniverse → `/opt/theuniverse` na Polaris + sobe o serviço (scp/venv/systemd) | espelha `hermes/deploy.sh` |
 
-- `theuniverse` espelhado para `/opt/theuniverse` na Polaris.
-- Ingestor existente (`ingest.py`) ganha 2ª fonte: indexa `planets/` + `docs/ecossistema/` + `CHANGELOG.md`.
-- Roda no timer diário das 3h já existente.
+**Reuso de graça:** `scripts/gh.py` (contexto ao vivo) e `state/sentinel-state.json` (o que o sistema nervoso viu) — ambos já existem no theuniverse.
 
-## Segurança
+## Duas fontes de conhecimento (não confundir)
 
-- Guard de 1 `chat_id` antes de qualquer processamento.
-- `TELEGRAM_TOKEN` em `/opt/hermes-bot/.env` (chmod 600), **nunca no git**.
-- Sem webhook → sem porta exposta.
+- **RAG (BM25)** = conhecimento *escrito*: `planets/` (fichas), `docs/ecossistema/` (blueprint, frota, specs), `CHANGELOG.md`, `CLAUDE.md`. Responde "o que/como/por quê" documentado.
+- **Contexto ao vivo** = estado *atual* via API: idle por repo, linguagem, issues abertas, último evento do sentinel. Responde "qual/quantos/agora".
+- `brain.py` recebe as duas e o LLM decide o que usar.
 
-## Deploy
+## Guardrails do system prompt (3 camadas)
 
-- Estende o `hermes/deploy.sh` existente com bloco do `hermes-bot` (scp → venv → systemd enable).
+1. **Escopo absoluto** — só o universo (31 repos, cosmologia, blueprint, dev). Fora → recusa curta. Infra de lab → *"isso é com o SHELDON"*.
+2. **Fonte de conhecimento** — responde só do contexto injetado + RAG; se não está lá → *"não tenho isso no contexto atual"*. Nunca inventa detalhe de repo com conhecimento geral do modelo.
+3. **Anti-injeção** — instrução na mensagem ≠ autoridade do Sol; recusa mudar escopo ou vazar segredo; recusa curta, sem "só dessa vez".
 
-## Fase pós-validação — extração da receita
+**Lei estado-nunca-comando:** o Oráculo só lê/observa, nunca executa mudança — alinhado ao princípio do Guardião. Ações ficam pro futuro (subsistema C, com aprovador humano).
 
-Validado no nexus, o padrão "satélite-oráculo" sobe à **gravidade** (agnostic-core) como skill/template replicável. Outro planeta ganha *seu* oráculo (instância isolada, nas suas proporções). Mesmo padrão, motores diferentes. (Ver blueprint: "instância isolada, ideia compartilhada".)
+## Tratamento de erro (degradação graciosa)
+
+- Groq fora → *"Oráculo indisponível, tenta de novo"* + log.
+- API GitHub falha → contexto ao vivo omitido com nota *"(estado ao vivo indisponível agora)"*; RAG ainda responde.
+- RAG vazio → segue só com o contexto.
+- Erro de polling → loop com backoff, não derruba o serviço.
+- Não autorizado → silêncio + log.
+
+## Testes (funções puras, sem rede)
+
+`rag.retrieve` (BM25 sobre markdown de fixture), formatação do `context` (gh.py mockado), montagem do prompt em `brain` (cliente Groq injetado), auth gate. Groq e `gh.py` injetáveis.
+
+## Federação com o SHELDON
+
+Infra de lab (disco, AD, Samba, Zabbix) é domínio soberano do SHELDON. O Oráculo do Universo **não** remonitora — quando perguntado, aponta o SHELDON. Federação real (encaminhar/consultar o SHELDON) é enhancement futuro, não MVP.
+
+## Refresh do conhecimento (MVP)
+
+Re-indexa BM25 no startup a partir de `/opt/theuniverse`. Pra atualizar conhecimento: `git pull` + restart do serviço. Timer diário de pull é enhancement, não MVP.
+
+## Dependências de runtime na Polaris
+
+- Clone do theuniverse em `/opt/theuniverse` (corpus do RAG).
+- `GITHUB_TOKEN` read-only (contexto ao vivo via `gh.py`).
+- `GROQ_API_KEY` + `GROQ_MODEL`.
+- `.env` em `/opt/oraculo/.env` (chmod 600), nunca no git.
+
+## Credenciais necessárias (Sol fornece no deploy) — `[PENDENTE SOL]`
+
+1. **`GROQ_API_KEY`** — reusar a do SHELDON ou criar dedicada (free tier 14.4k req/dia por key; volume do Oráculo é baixo, só o Sol).
+2. **`TELEGRAM_TOKEN`** — o mesmo bot do B (`guardiao_universo_bot`, já cadastrado).
+3. **`SOL_CHAT_ID`** = `1030157568` (já conhecido).
+4. **`GITHUB_TOKEN`** read-only na Polaris (contexto ao vivo).
+5. **Acesso SSH a Polaris** — `id_ed25519_nexus_vps01`, porta 49222, `root@2.25.163.125`.
 
 ## Fora do MVP (YAGNI)
 
-Notificações push (= subsistema B) · comandos slash · multi-usuário · histórico persistente · streaming.
+`/learn` e `/forget` · morning digest · notificações (= subsistema B) · ações/execução (subsistema C) · multi-usuário · UI web · WhatsApp · histórico persistente · streaming · RAG soberano Ollama/Qdrant (trocado pela receita Groq+BM25 proven) · federação ativa com SHELDON.
 
-## Credenciais necessárias (fase de deploy — Sol fornece)
+## Dívida de segurança (registrar p/ subsistema C — Guardião da Galáxia)
 
-1. **Token do BotFather** (criar o bot no Telegram) → vault, nunca no git
-2. **chat_id do Sol** (descobre via `/start` no primeiro boot, ou Sol passa)
-3. **Acesso SSH a Polaris** — chave `id_ed25519_nexus_vps01` (confirmar se existe nesta máquina)
-4. **Modelo Ollama de chat** instalado na VPS (se nenhum, instalar `qwen2.5` ou `llama3.1`)
+`hermes-dashboard.service` roda `--insecure --host 0.0.0.0 --port 9119` na Polaris — porta administrativa aberta sem TLS. Auditar no C.
 
-## Dívida de segurança registrada (para o Guardião da Galáxia / subsistema C)
+## Self-review
 
-`hermes-dashboard.service` roda `--insecure --host 0.0.0.0 --port 9119` — porta administrativa aberta e sem TLS na Polaris. Auditar.
+- **Placeholders:** nenhum. `[PENDENTE SOL]` são credenciais externas (fronteira correta).
+- **Consistência:** `gh.py` + `sentinel-state.json` citados como reuso em arquitetura/componentes/contexto; mesmo bot do B citado com a justificativa técnica (sem conflito de polling); runtime = Polaris em decisões/arquitetura/deps.
+- **Escopo:** focado num plano único (5-6 módulos + systemd + deploy). Federação ativa e `/learn` explicitamente fora.
+- **Ambiguidade:** "olhar pra dentro do codebase" resolvido — RAG indexa a **camada de markdown/fichas**, não código-fonte cru; estado vivo cobre métricas. Infra de lab explicitamente fora (SHELDON).
