@@ -98,3 +98,23 @@ def test_apply_event_planeta_sumido_remove():
 def test_format_event_has_emoji_and_repo():
     txt = sentinel.format_event({"kind": "ci_falhou", "repo": "alpha", "run_id": 1, "detail": "build"})
     assert "🔴" in txt and "alpha" in txt
+
+
+def test_notify_avanca_so_em_envio_ok():
+    state = {"known_repos": ["alpha"], "last_run_id": {"alpha": 10}, "last_issue_number": {}}
+    snap = _snapshot(["alpha"])
+    events = [
+        {"kind": "ci_falhou", "repo": "alpha", "run_id": 11, "detail": "x"},
+        {"kind": "issue_nova", "repo": "alpha", "number": 5, "detail": "y"},
+    ]
+    sent = []
+
+    def send_fn(text):
+        sent.append(text)
+        if "Issue" in text:
+            raise RuntimeError("telegram caiu")
+
+    new_state, count = sentinel.notify(events, state, snap, send_fn)
+    assert count == 1                                   # só o CI foi
+    assert new_state["last_run_id"]["alpha"] == 11      # CI avançou
+    assert "alpha" not in new_state["last_issue_number"]  # issue NÃO avançou → re-tenta

@@ -106,3 +106,81 @@ def format_event(event):
     if event["kind"] == "issue_nova":
         return f"{emoji} Issue nova em *{repo}* #{event['number']}: {event['detail']}"
     return f"Evento em {repo}"
+
+
+def notify(events, state, snapshot, send_fn):
+    sent = 0
+    for event in events:
+        try:
+            send_fn(format_event(event))
+        except Exception as e:
+            print(f"  envio falhou ({event['kind']} {event['repo']}): {e}", file=sys.stderr)
+            continue
+        state = apply_event(state, event, snapshot)
+        sent += 1
+    return state, sent
+
+
+def send_telegram(text):
+    tg_token = os.environ["TELEGRAM_TOKEN"]
+    chat_id = os.environ["SOL_CHAT_ID"]
+    payload = urllib.parse.urlencode({
+        "chat_id": chat_id, "text": text, "parse_mode": "Markdown",
+    }).encode()
+    req = urllib.request.Request(
+        f"https://api.telegram.org/bot{tg_token}/sendMessage",
+        data=payload, method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=30) as r:
+        if r.status != 200:
+            raise RuntimeError(f"Telegram status {r.status}")
+
+
+def build_snapshot(tok):
+    repo_objs = list_repos(tok)
+    repos = [r["name"] for r in repo_objs]
+    full = {r["name"]: r["full_name"] for r in repo_objs}
+    latest_run, issues = {}, {}
+    for name in repos:
+        fn = full[name]
+        try:
+            runs, _ = api(f"/repos/{fn}/actions/runs?per_page=1", tok)
+            items = runs.get("workflow_runs", [])
+            latest_run[name] = (
+                {"id": items[0]["id"], "conclusion": items[0].get("conclusion") or "",
+                 "name": items[0].get("name", "")}
+                if items else None
+            )
+        except Exception as e:
+            print(f"  runs falhou em {fn}: {e}", file=sys.stderr)
+            latest_run[name] = None
+        try:
+            raw, _ = api(f"/repos/{fn}/issues?state=open&sort=created&direction=asc&per_page=100", tok)
+            issues[name] = [{"number": i["number"], "title": i["title"]}
+                            for i in raw if "pull_request" not in i]
+        except Exception as e:
+            print(f"  issues falhou em {fn}: {e}", file=sys.stderr)
+            issues[name] = []
+    return {"repos": repos, "latest_run": latest_run, "issues": issues}
+
+
+def main():
+    tok = token()
+    snapshot = build_snapshot(tok)
+    state = load_state(STATE_PATH)
+    if state is None:
+        save_state(STATE_PATH, seed_state(snapshot))
+        print(f"Baseline semeado: {len(snapshot['repos'])} planetas. (sem notificar)")
+        return 0
+    events = compute_events(state, snapshot)
+    if not events:
+        print("Universo quieto — nenhum evento novo.")
+        return 0
+    new_state, sent = notify(events, state, snapshot, send_telegram)
+    save_state(STATE_PATH, new_state)
+    print(f"Eventos: {len(events)} detectados, {sent} notificados.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
