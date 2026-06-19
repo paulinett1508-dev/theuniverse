@@ -54,7 +54,10 @@ Adicionar secret no GitHub: **Settings → Secrets and variables → Actions →
 Rigel = build/CI · Bellatrix = banco · Vega = monitoramento. Registrado em `docs/ecossistema/frota.md`. Frota 100% mapeada.
 
 ### 4. Subsistemas futuros (ordem B→C→D)
-- **B** — Sistema Nervoso: spec + **plano** aprovados → `docs/ecossistema/B-sistema-nervoso-{spec,plan}.md`. 5 tasks TDD, stdlib, roda no theuniverse (Actions). Tasks 1-4 (gh.py + sentinel.py + testes) implementáveis SEM secret; Task 5 (workflow) só ativa com os 3 secrets (`UNIVERSE_PAT`, `TELEGRAM_TOKEN`, `SOL_CHAT_ID` — Sol gera os 2 do bot). Próximo: executar (executing-plans/subagent).
+- **B** — Sistema Nervoso: ✅ **IMPLEMENTADO** (5/5 tasks, 13 testes passando). `scripts/gh.py` + `scripts/sentinel.py` + `.github/workflows/sentinel.yml`. Censo refatorado pra usar `gh.py` (smoke OK). **Falta só ativar:**
+  1. Cadastrar 3 secrets no GitHub Actions: `UNIVERSE_PAT` (=Censo), `TELEGRAM_TOKEN` + `SOL_CHAT_ID` (Sol gera os 2 do bot).
+  2. `workflow_dispatch` manual → 1ª run semeia `state/sentinel-state.json` em silêncio (baseline). 2ª run em diante notifica.
+  - **PUSH pendente:** commits locais no master ainda não foram pra origin (workflow só roda após push).
 - **C** — Guardião da Galáxia (segurança): curadoria de skills + varredura local + escudos. Dívida registrada: `hermes-dashboard.service` roda inseguro em `0.0.0.0:9119`.
 - **D** — Satélites Naturais (motores IA locais por planeta). Nebuloso, precisa brainstorm próprio.
 

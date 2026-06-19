@@ -2,6 +2,15 @@
 
 Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de planetas.
 
+## 2026-06-19 — Subsistema B implementado (Sistema Nervoso)
+
+### 🧠 Sensorial do universo — código vivo
+- `scripts/gh.py` — cliente GitHub compartilhado (extraído do `censo.py`, DRY).
+- `scripts/sentinel.py` — poll API → detecção de 4 eventos (novo/sumido planeta, CI falhou, issue nova) → Telegram. Entrega-antes-de-avançar, baseline silencioso.
+- `.github/workflows/sentinel.yml` — cron `*/15`, commita estado em casa.
+- 13 testes passando; Censo refatorado sem quebrar (smoke OK). Spec+plano em `docs/ecossistema/B-*`.
+- Falta ativar: 3 secrets no Actions + dispatch inicial. Primeiro subsistema do ecossistema a virar código.
+
 ## 2026-06-19 — Frota 100% mapeada
 
 ### ⭐ 3 estrelas confirmadas pelo Sol
