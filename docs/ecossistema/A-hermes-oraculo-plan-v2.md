@@ -157,8 +157,11 @@ def test_chunk_text_splits_on_blank_lines():
 
 
 def test_retrieve_ranks_relevant_first(tmp_path):
+    # 3 docs: BM25Okapi zera o IDF quando um termo aparece em metade do corpus
+    # (n = N/2). Com 3 docs o IDF destrava — em corpus real isso nunca ocorre.
     (tmp_path / "zion.md").write_text("O planeta Zion roda no banco PostgreSQL.", encoding="utf-8")
-    (tmp_path / "outro.md").write_text("Texto sobre frota de estrelas e cosmologia.", encoding="utf-8")
+    (tmp_path / "frota.md").write_text("Texto sobre frota de estrelas e cosmologia.", encoding="utf-8")
+    (tmp_path / "censo.md").write_text("O Censo varre os planetas e atualiza fichas.", encoding="utf-8")
     rag = Rag.from_paths([str(tmp_path)])
     hits = rag.retrieve("qual banco de dados do zion", k=2)
     assert hits
