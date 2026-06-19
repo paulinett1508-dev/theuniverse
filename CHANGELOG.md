@@ -2,6 +2,22 @@
 
 Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de planetas.
 
+## 2026-06-19 — Frota 100% mapeada
+
+### ⭐ 3 estrelas confirmadas pelo Sol
+- **Rigel** (labsobral-214) — a forja: build / CI.
+- **Bellatrix** (labsrv05-218) — a guardiã: banco de dados.
+- **Vega** (labtools01-150) — a vigia: monitoramento (coexiste com Mira/Zabbix).
+- Censo validado em dry-run: 31 planetas, 0 drift, auth local via `.vault` OK.
+
+## 2026-06-19 — Plano do Hermes-Oráculo (subsistema A)
+
+### 📋 Plano de implementação escrito
+- `docs/ecossistema/A-hermes-oraculo-plan.md` — 6 tasks TDD, código completo, executável no `nexus-labsobral`.
+- Baseado na leitura do código real do `hermes/` (rag_server.py, ingest.py, deploy.sh, systemd) via API.
+- Decisões: `rag.py` reusa embed/busca do MCP + chat Ollama; `ingest.py` ganha `--source-dir` repetível (2ª fonte = fichas do theuniverse); `deploy.sh` espelha theuniverse em `/opt/theuniverse`.
+- Guardião escreveu o plano (doc, em casa); execução roda no `nexus-labsobral` (regra de ouro: não codar fora).
+
 ## 2026-06-19 — Hibernação saudável (handoff entre sessões)
 
 ### 💾 Persistência com risco zero de esquecimento

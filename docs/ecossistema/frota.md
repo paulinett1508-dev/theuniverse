@@ -28,9 +28,9 @@ Resolve o conflito planeta↔servidor: planeta é a *obra* (repo); estrela é a 
 |---|---|---|
 | **Atlas** ⭐ | labsrvfiles-213 | sustenta a memória — servidor de arquivos |
 | **Mira** ⭐ | labsrvzabbix-216 | a observadora — monitoramento Zabbix |
-| **Rigel** ⭐ | labsobral-214 | server interno *(função a confirmar)* |
-| **Bellatrix** ⭐ | labsrv05-218 | server interno *(função a confirmar)* |
-| **Vega** ⭐ | labtools01-150 | ferramentas / utilidades *(função a confirmar)* |
+| **Rigel** ⭐ | labsobral-214 | a forja — build / CI (compila e integra) |
+| **Bellatrix** ⭐ | labsrv05-218 | a guardiã — banco de dados |
+| **Vega** ⭐ | labtools01-150 | a vigia — monitoramento |
 
 ## Fronteira
 
@@ -42,4 +42,5 @@ Resolve o conflito planeta↔servidor: planeta é a *obra* (repo); estrela é a 
 
 - Nomes de estrelas reais escolhidos pelo significado: Polaris guia, Antares é "coração", Sirius é a mais brilhante, Atlas sustenta, Mira ("a maravilhosa") observa.
 - As designações anteriores (Oráculo/Zion = tema Matrix) ficam registradas — o universo honra sua própria história.
-- Associações *função a confirmar* aguardam validação do Sol.
+- Frota 100% mapeada (2026-06-19): Rigel/Bellatrix/Vega confirmados pelo Sol.
+- Vega (monitoramento) e Mira (Zabbix) coexistem — vigílias distintas; detalhar a divisão de papéis quando relevante.

@@ -1,6 +1,6 @@
 # Spec — Subsistema A: Hermes-Oráculo (bot Telegram conversacional)
 
-> Status: **design aprovado pelo Sol** (2026-06-19). Falta: plano de implementação + execução.
+> Status: **plano de implementação escrito** (2026-06-19) → [`A-hermes-oraculo-plan.md`](A-hermes-oraculo-plan.md). Falta: execução (no repo `nexus-labsobral`) + credenciais do Sol.
 > Parte do [Blueprint do Ecossistema](00-blueprint.md). Primeiro dos 4 subsistemas (A→B→C→D).
 
 ## Objetivo
