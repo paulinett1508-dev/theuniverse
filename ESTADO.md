@@ -49,7 +49,8 @@ Adicionar secret no GitHub: **Settings → Secrets and variables → Actions →
 - **Redesenhado** (v2): de RAG-puro Ollama/Qdrant → **receita do SHELDON** (Groq Llama 70B + RAG BM25 + injeção de contexto ao vivo). Plano antigo `A-...-plan.md` está OBSOLETO.
 - Spec v2: `docs/ecossistema/A-hermes-oraculo-spec.md`. Código em `theuniverse/oraculo/` (Guardião escreve), runtime systemd long-polling na **Polaris**. Mesmo bot do B (sem conflito: B só sendMessage).
 - Responde: "qual repo >30 dias?" (contexto ao vivo via gh.py) + "repo X roda em qual banco?" (RAG sobre fichas). Infra de lab = federa com SHELDON, não remonitora.
-- Próximo passo: **writing-plans** (novo plano v2).
+- Plano v2: `docs/ecossistema/A-hermes-oraculo-plan-v2.md` (6 tasks TDD, código completo). Tasks 1-5 implementáveis/testáveis EM CASA; Task 6 (deploy) só roda contra a Polaris.
+- Próximo passo: **executar** (executing-plans) — igual ao B.
 - Credenciais `[PENDENTE SOL]` no deploy: `GROQ_API_KEY` (reusar do SHELDON ou nova), `GITHUB_TOKEN` read-only na Polaris, SSH Polaris (`id_ed25519_nexus_vps01`:49222, root@2.25.163.125). TELEGRAM_TOKEN + SOL_CHAT_ID já conhecidos.
 
 ### 3. Frota — ✅ FECHADA (2026-06-19)
