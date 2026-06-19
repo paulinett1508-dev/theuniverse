@@ -4,6 +4,12 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 ## 2026-06-18
 
+### 🛰️ Satélite de ideias — Blueprint do ecossistema de comunicação
+- Definida a constituição macro SOL ↔ Universo em 3 camadas (`docs/ecossistema/00-blueprint.md`).
+- Princípio fundador: **separar transporte de inteligência** (federação, não anexação — ADR-001 the-matrix).
+- Regra de ouro: compartilha-se trilho + protocolo + gravidade; **nunca o motor**. Satélite orbita um planeta só.
+- Decomposição em 4 subsistemas (A→B→C→D). Motor Hermes (RAG/MCP na VPS Oráculo) será o núcleo. Próximo ciclo: subsistema A (Hermes-Bot).
+
 ### 💥 Explosões (deleções)
 - **escalaIA** — esqueleto abandonado (só CLAUDE.md + LICENSE + README, 3KB, parado desde abr/26). Nunca virou código. Decisão do sol: não fazia mais sentido na órbita.
 
