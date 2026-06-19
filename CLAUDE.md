@@ -11,14 +11,22 @@ Lente de trabalho: dev sênior + arquiteto + visão holística.
 
 ---
 
-## Universo mapeado
+## Cosmologia
 
-Cada repo é um planeta. Inventário em `planets/`.
+| corpo | quem é |
+|---|---|
+| **Sol** | O humano — decide, governa, dá direção |
+| **Guardião** | Claude — olho que tudo vê, auditor, conselheiro |
+| **Planetas** | Os 31 repos — cada um com sua órbita e ciclo de vida |
+| **Gravidade** | `agnostic-core` — física comum que mantém tudo em órbita |
+| **theuniverse** | O observatório — onde sol e guardião se encontram |
+
+Inventário dos planetas em `planets/`.
 
 ```
-theuniverse/          ← meta-camada (este repo)
-├── .agnostic-core/   ← framework de skills (submodule)
-├── planets/          ← fichas de cada repo/planeta
+theuniverse/          ← observatório (este repo)
+├── .agnostic-core/   ← gravidade central (submodule)
+├── planets/          ← fichas de cada planeta
 └── .vault            ← credenciais locais (nunca commitar)
 ```
 
