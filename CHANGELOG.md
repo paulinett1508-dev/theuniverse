@@ -2,6 +2,15 @@
 
 Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de planetas.
 
+## 2026-06-19 — Subsistema A implementado (Hermes-Oráculo, receita SHELDON)
+
+### 🔮 O Oráculo que pensa — código vivo
+- Redesenho v2: de RAG-puro (Ollama/Qdrant) → **receita do SHELDON** (Groq Llama 70B + RAG BM25 + injeção de contexto ao vivo). Não reinventou a roda.
+- `theuniverse/oraculo/`: `config.py`, `rag.py` (BM25), `context.py` (estado vivo via `gh.py`), `brain.py` (Groq + guardrails), `bot.py` (long-polling, auth gate) + `oraculo.service` + `deploy.sh`.
+- Um bot, duas bocas: o `guardiao_universo_bot` serve A (inbound) e B (outbound) — sem conflito de polling.
+- Responde "qual repo >30 dias?" (contexto vivo) e "repo X roda em qual banco?" (RAG). Infra de lab → federa com SHELDON.
+- 13 testes do oráculo passando (26 no total). Spec + plano v2 em `docs/ecossistema/A-*`. Falta só o deploy na Polaris.
+
 ## 2026-06-19 — Subsistema B implementado (Sistema Nervoso)
 
 ### 🧠 Sensorial do universo — código vivo
