@@ -2,6 +2,14 @@
 
 Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de planetas.
 
+## 2026-06-19
+
+### ⭐ A Frota batizada — estrelas do universo
+- Taxonomia: **servidor = estrela** (a fornalha que sustenta os planetas em deploy). Registrada em `docs/ecossistema/frota.md` (sem IPs).
+- VPS: **Polaris** (Oráculo/Hermes), **Antares** (Zion/prod Sobral), **Sirius** (Hostinger/SCM).
+- Aglomerado do Lab: **Atlas** (arquivos), **Mira** (Zabbix), **Rigel**, **Bellatrix**, **Vega** (3 últimas: função a confirmar).
+- Fronteira: **Heliopausa** (pfsense). Designações Matrix anteriores (Zion/Oráculo) preservadas como histórico.
+
 ## 2026-06-18
 
 ### 🛰️ Satélite de ideias — Blueprint do ecossistema de comunicação
