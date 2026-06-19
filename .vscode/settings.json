@@ -2,8 +2,8 @@
   "workbench.colorCustomizations": {
     // === TITLE BAR ===
     // #00BFFF — deep sky blue, preto intenso no nome do projeto (~9:1 AAA)
-    "titleBar.activeBackground": "#00BFFF",
-    "titleBar.activeForeground": "#0A0A0A",
+    "titleBar.activeBackground": "#000000",
+    "titleBar.activeForeground": "#00BFFF",
     "titleBar.inactiveBackground": "#0099CC",
     "titleBar.inactiveForeground": "#003D5C",
     "titleBar.border": "#0099CC",
