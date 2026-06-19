@@ -46,3 +46,63 @@ def seed_state(snapshot):
         "last_run_id": last_run_id,
         "last_issue_number": last_issue,
     }
+
+
+def compute_events(state, snapshot):
+    events = []
+    known = set(state["known_repos"])
+    cur = set(snapshot["repos"])
+
+    for r in sorted(cur - known):
+        events.append({"kind": "novo_planeta", "repo": r})
+    for r in sorted(known - cur):
+        events.append({"kind": "planeta_sumido", "repo": r})
+
+    for r in sorted(cur & known):
+        run = snapshot["latest_run"].get(r)
+        if (run and run["conclusion"] == "failure"
+                and run["id"] != state["last_run_id"].get(r)):
+            events.append({"kind": "ci_falhou", "repo": r,
+                           "run_id": run["id"], "detail": run.get("name", "")})
+        baseline = state["last_issue_number"].get(r, 0)
+        for issue in sorted(snapshot["issues"].get(r, []), key=lambda i: i["number"]):
+            if issue["number"] > baseline:
+                events.append({"kind": "issue_nova", "repo": r,
+                               "number": issue["number"], "detail": issue["title"]})
+    return events
+
+
+def apply_event(state, event, snapshot):
+    s = copy.deepcopy(state)
+    kind, repo = event["kind"], event["repo"]
+    if kind == "novo_planeta":
+        if repo not in s["known_repos"]:
+            s["known_repos"].append(repo)
+        run = snapshot["latest_run"].get(repo)
+        if run:
+            s["last_run_id"][repo] = run["id"]
+        issues = snapshot["issues"].get(repo, [])
+        if issues:
+            s["last_issue_number"][repo] = max(i["number"] for i in issues)
+    elif kind == "planeta_sumido":
+        if repo in s["known_repos"]:
+            s["known_repos"].remove(repo)
+    elif kind == "ci_falhou":
+        s["last_run_id"][repo] = event["run_id"]
+    elif kind == "issue_nova":
+        s["last_issue_number"][repo] = max(s["last_issue_number"].get(repo, 0), event["number"])
+    return s
+
+
+def format_event(event):
+    emoji = _EMOJI[event["kind"]]
+    repo = event["repo"]
+    if event["kind"] == "novo_planeta":
+        return f"{emoji} Novo planeta detectado: *{repo}*"
+    if event["kind"] == "planeta_sumido":
+        return f"{emoji} Planeta sumiu do GitHub: *{repo}*"
+    if event["kind"] == "ci_falhou":
+        return f"{emoji} CI falhou em *{repo}* (run {event['run_id']})"
+    if event["kind"] == "issue_nova":
+        return f"{emoji} Issue nova em *{repo}* #{event['number']}: {event['detail']}"
+    return f"Evento em {repo}"
