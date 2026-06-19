@@ -1,0 +1,43 @@
+name: Sentinel — Sistema Nervoso
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # a cada 15 min
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# evita runs concorrentes pisando no estado
+concurrency:
+  group: sentinel
+  cancel-in-progress: false
+
+jobs:
+  sentinel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rodar Sentinel
+        env:
+          GITHUB_TOKEN: ${{ secrets.UNIVERSE_PAT }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          SOL_CHAT_ID: ${{ secrets.SOL_CHAT_ID }}
+        run: python scripts/sentinel.py
+
+      - name: Commitar estado (se mudou)
+        run: |
+          git config user.name  "guardiao-do-universo"
+          git config user.email "guardiao@theuniverse.local"
+          if [ -n "$(git status --porcelain state/)" ]; then
+            git add state/sentinel-state.json
+            git commit -m "sentinel: atualiza estado do sistema nervoso"
+            git push
+          else
+            echo "Estado inalterado."
+          fi
