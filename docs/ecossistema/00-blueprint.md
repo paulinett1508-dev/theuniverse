@@ -43,6 +43,17 @@ cada planeta varre o próprio stack com o próprio escudo.
 
 O universo compartilha **como se comunica e quais padrões segue** — jamais **a inteligência que pensa por cada planeta**.
 
+## Instância isolada, ideia compartilhada — o universo conspira a favor
+
+Isolamento ≠ ilhamento. A distinção é entre **instância** e **receita**:
+
+- **Instância** (local, isolada): o satélite concreto — código, dados, motor — de um planeta. Órbita exclusiva. Nunca serve outro planeta.
+- **Receita** (universal, replicável): a arquitetura/abordagem que fez aquele satélite funcionar. Quando uma ideia roda bem num planeta, ela **pode e deve** ser replicada em qualquer outro, **dadas suas proporções**.
+
+Não se reinventa o que já foi validado. Uma vitória num planeta vira conhecimento coletivo — sobe pra **gravidade** (agnostic-core) como skill/template, e desce em cada planeta ajustada ao seu tamanho e stack.
+
+> Exemplo: o **Hermes-Oráculo** nasce no nexus/Lab. Validado, sua receita sobe à gravidade. Outro planeta ganha o *seu* oráculo — instância nova, isolada, nas suas proporções. Mesmo padrão, motores diferentes.
+
 ## Decisões travadas
 
 - **Casa do satélite**: dentro do próprio planeta (pasta/submodule no repo). Motor nasce e morre com o planeta.
