@@ -1,0 +1,18 @@
+[Unit]
+Description=Oráculo do Universo — bot Telegram conversacional
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/theuniverse
+EnvironmentFile=/opt/oraculo/.env
+ExecStart=/opt/oraculo/venv/bin/python /opt/theuniverse/oraculo/bot.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=oraculo
+
+[Install]
+WantedBy=multi-user.target
