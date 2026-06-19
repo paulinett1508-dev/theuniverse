@@ -59,6 +59,22 @@ Não se reinventa o que já foi validado. Uma vitória num planeta vira conhecim
 - **Casa do satélite**: dentro do próprio planeta (pasta/submodule no repo). Motor nasce e morre com o planeta.
 - **Núcleo na VPS Oráculo** (`2.25.163.125`, SSH :49222), reaproveitando o motor Hermes (ingestor + RAG + MCP já instalados em `/opt/hermes-*`).
 
+## Os dois fluxos — o universo nunca afeta a vida dos planetas
+
+| fluxo | direção | natureza | toca o planeta? |
+|---|---|---|---|
+| **Observação** | universo ← planetas | só **leitura** (API) → vira ficha | ❌ nunca |
+| **Gravidade** | agnostic-core → planetas | **opt-in** (o planeta puxa o submodule) | só se o planeta quiser |
+
+O único `git push` que existe é **no theuniverse** (as observações). Jamais se empurra código pra dentro de outro repo. O guardião lê tudo, escreve só em casa.
+
+### O Censo
+Rotina que materializa a Observação: lista todos os repos (API), faz diff contra `planets/`, detecta 🆕 novos / 💥 explodidos / 🔄 mudanças, atualiza fichas + índice + changelog, commita **só no theuniverse**.
+
+- **Cadência**: agendado (GitHub Actions, cron diário). Token vive como *secret* `UNIVERSE_PAT`, nunca no código.
+- Planeta novo é **auto-descoberto** — o Sol não precisa anunciar.
+- *(futuro)* quando o Hermes-Oráculo existir, o Censo notifica via Telegram: "novo planeta detectado".
+
 ## Subsistemas (ordem de construção)
 
 | # | Subsistema | Papel | Depende de | Status |

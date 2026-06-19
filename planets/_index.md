@@ -1,6 +1,6 @@
 # theuniverse — Mapa dos Planetas
 
-> Atualizado: 2026-06-18 | 30 planetas mapeados
+> Atualizado: 2026-06-19 | 31 planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
 
@@ -11,6 +11,7 @@
 | 🟡 [AlgodaoAtelie](planets/AlgodaoAtelie.md) | landing-clientes | TypeScript | 0 |
 | 🟢 [bolaocopa2026](planets/bolaocopa2026.md) | entretenimento | TypeScript | 0 |
 | 🟡 [botclinop](planets/botclinop.md) | landing-clientes | - | 0 |
+| 🟢 [centroculturalsbr](planets/centroculturalsbr.md) | nao-classificado | - | 0 |
 | 🟡 [CertiSYS](planets/CertiSYS.md) | gov-publico | TypeScript | 0 |
 | 🟡 [contabilplus](planets/contabilplus.md) | produtos | - | 0 |
 | 🟡 [f1-pulse](planets/f1-pulse.md) | entretenimento | TypeScript | 0 |
@@ -34,7 +35,6 @@
 | 🟢 [SuperCartolaManagerv5-production](planets/SuperCartolaManagerv5-production.md) | entretenimento | JavaScript | 0 |
 | 🟡 [temperodemamae](planets/temperodemamae.md) | landing-clientes | HTML | 0 |
 | 🟢🔒 [the-matrix](planets/the-matrix.md) | produtos | - | 0 |
-| 🟢 [theuniverse](planets/theuniverse.md) | nao-classificado | - | 0 |
 | 🟢 [tokentown](planets/tokentown.md) | produtos | TypeScript | 1 |
 | 🟡 [vibegaminghub](planets/vibegaminghub.md) | entretenimento | JavaScript | 0 |
 
@@ -51,4 +51,3 @@
 | meta-infra | Infraestrutura transversal (skills, agentes) |
 | landing-clientes | Landing pages e projetos de clientes |
 | entretenimento | Projetos pessoais e lúdicos |
-

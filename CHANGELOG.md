@@ -2,6 +2,11 @@
 
 Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de planetas.
 
+## 2026-06-19 — Censo automático
+
+### 🆕 Planetas descobertos
+- **centroculturalsbr** — entrou no universo
+
 ## 2026-06-19
 
 ### ⭐ A Frota batizada — estrelas do universo

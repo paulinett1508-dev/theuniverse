@@ -1,0 +1,36 @@
+name: Censo do Universo
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # diário 06:00 UTC (03:00 BRT)
+  workflow_dispatch:        # permite rodar manualmente
+
+permissions:
+  contents: write
+
+jobs:
+  censo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rodar Censo
+        env:
+          GITHUB_TOKEN: ${{ secrets.UNIVERSE_PAT }}
+        run: python scripts/censo.py
+
+      - name: Commitar mudanças (se houver)
+        run: |
+          git config user.name  "guardiao-do-universo"
+          git config user.email "guardiao@theuniverse.local"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add planets/ CHANGELOG.md
+            git commit -m "censo: atualização automática do registro do universo"
+            git push
+          else
+            echo "Universo estável — nenhum planeta novo ou sumido."
+          fi
