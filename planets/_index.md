@@ -1,6 +1,6 @@
 # theuniverse — Mapa dos Planetas
 
-> Atualizado: 2026-06-18 | 31 planetas mapeados
+> Atualizado: 2026-06-18 | 30 planetas mapeados
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
 
@@ -13,7 +13,6 @@
 | 🟡 [botclinop](planets/botclinop.md) | landing-clientes | - | 0 |
 | 🟡 [CertiSYS](planets/CertiSYS.md) | gov-publico | TypeScript | 0 |
 | 🟡 [contabilplus](planets/contabilplus.md) | produtos | - | 0 |
-| 🟡 [escalaIA](planets/escalaIA.md) | gov-publico | - | 0 |
 | 🟡 [f1-pulse](planets/f1-pulse.md) | entretenimento | TypeScript | 0 |
 | 🟡 [FinanceFlow](planets/FinanceFlow.md) | produtos | TypeScript | 0 |
 | 🟡 [florianorun](planets/florianorun.md) | landing-clientes | TypeScript | 0 |
