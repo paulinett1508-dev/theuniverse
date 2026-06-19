@@ -54,7 +54,7 @@ Adicionar secret no GitHub: **Settings → Secrets and variables → Actions →
 Rigel = build/CI · Bellatrix = banco · Vega = monitoramento. Registrado em `docs/ecossistema/frota.md`. Frota 100% mapeada.
 
 ### 4. Subsistemas futuros (ordem B→C→D)
-- **B** — Sistema Nervoso: spec aprovado → `docs/ecossistema/B-sistema-nervoso-spec.md`. Roda no theuniverse (Actions, não Polaris), poll da API → Telegram. Implementável EM CASA (Guardião coda aqui!). Próximo: writing-plans. Precisa dos tokens do bot (Sol gera no deploy).
+- **B** — Sistema Nervoso: spec + **plano** aprovados → `docs/ecossistema/B-sistema-nervoso-{spec,plan}.md`. 5 tasks TDD, stdlib, roda no theuniverse (Actions). Tasks 1-4 (gh.py + sentinel.py + testes) implementáveis SEM secret; Task 5 (workflow) só ativa com os 3 secrets (`UNIVERSE_PAT`, `TELEGRAM_TOKEN`, `SOL_CHAT_ID` — Sol gera os 2 do bot). Próximo: executar (executing-plans/subagent).
 - **C** — Guardião da Galáxia (segurança): curadoria de skills + varredura local + escudos. Dívida registrada: `hermes-dashboard.service` roda inseguro em `0.0.0.0:9119`.
 - **D** — Satélites Naturais (motores IA locais por planeta). Nebuloso, precisa brainstorm próprio.
 
