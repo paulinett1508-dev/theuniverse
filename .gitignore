@@ -6,3 +6,8 @@
 
 # agnostic-core runtime
 .claude/output-mode
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
