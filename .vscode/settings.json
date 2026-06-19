@@ -1,31 +1,30 @@
 {
   "workbench.colorCustomizations": {
     // === TITLE BAR ===
-    // #BF9000 — ouro escuro, contraste branco ~4.9:1 (AA)
-    "titleBar.activeBackground": "#BF9000",
-    "titleBar.activeForeground": "#FFFFFF",
-    "titleBar.inactiveBackground": "#7A5C00",
-    "titleBar.inactiveForeground": "#D4B84A",
-    "titleBar.border": "#F5C518",
+    // #00BFFF — deep sky blue, preto intenso no nome do projeto (~9:1 AAA)
+    "titleBar.activeBackground": "#00BFFF",
+    "titleBar.activeForeground": "#0A0A0A",
+    "titleBar.inactiveBackground": "#0099CC",
+    "titleBar.inactiveForeground": "#003D5C",
+    "titleBar.border": "#0099CC",
 
     // === ACTIVITY BAR ===
-    // fundo quase-preto com tint âmbar, ícones ouro
-    "activityBar.background": "#1A1500",
-    "activityBar.foreground": "#F5C518",
-    "activityBar.inactiveForeground": "#665500",
-    "activityBar.activeBorder": "#F5C518",
-    "activityBar.activeBackground": "#2D2600",
-    "activityBar.dropBorder": "#F5C518",
-    "activityBarBadge.background": "#F5C518",
-    "activityBarBadge.foreground": "#1A1500",
+    "activityBar.background": "#002D3D",
+    "activityBar.foreground": "#00BFFF",
+    "activityBar.inactiveForeground": "#005580",
+    "activityBar.activeBorder": "#00BFFF",
+    "activityBar.activeBackground": "#004A66",
+    "activityBar.dropBorder": "#00BFFF",
+    "activityBarBadge.background": "#00BFFF",
+    "activityBarBadge.foreground": "#002D3D",
 
     // === STATUS BAR ===
-    "statusBar.background": "#BF9000",
+    "statusBar.background": "#0099CC",
     "statusBar.foreground": "#FFFFFF",
-    "statusBar.border": "#F5C518",
+    "statusBar.border": "#00BFFF",
     "statusBar.debuggingBackground": "#E06000",
     "statusBar.debuggingForeground": "#FFFFFF",
-    "statusBar.noFolderBackground": "#7A5C00",
+    "statusBar.noFolderBackground": "#007AA3",
     "statusBar.noFolderForeground": "#FFFFFF"
   }
 }
