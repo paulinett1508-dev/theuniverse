@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import sys
+from datetime import datetime
 
 import httpx
 from dotenv import load_dotenv
@@ -51,6 +52,13 @@ def _send(text: str) -> None:
 
 # ── formatters ────────────────────────────────────────────────────────────────
 
+def _parse_time(ts: str) -> str:
+    try:
+        return datetime.fromisoformat(ts).strftime("%H:%M")
+    except Exception:
+        return ""
+
+
 def _fmt_push(data: dict) -> str | None:
     ref = data.get("ref", "")
     if ref.startswith("refs/tags/"):
@@ -67,8 +75,10 @@ def _fmt_push(data: dict) -> str | None:
     if len(commits) == 1:
         msg = commits[0]["message"].split("\n")[0][:80]
         url = commits[0]["url"]
+        ts = _parse_time(commits[0].get("timestamp", ""))
+        time_part = f" · {ts}" if ts else ""
         return (
-            f"🌍 <b>{repo}</b> · <code>{branch}</code>\n"
+            f"🌍 <b>{repo}</b> · <code>{branch}</code>{time_part}\n"
             f"\n"
             f"{msg}\n"
             f"— {pusher}\n"
@@ -81,8 +91,10 @@ def _fmt_push(data: dict) -> str | None:
     )
     extra = f"\n  +{len(commits) - 4} mais" if len(commits) > 4 else ""
     url = data.get("compare", "")
+    ts = _parse_time(commits[-1].get("timestamp", ""))
+    time_part = f" · {ts}" if ts else ""
     return (
-        f"🌍 <b>{repo}</b> · <code>{branch}</code>  ({len(commits)} commits)\n"
+        f"🌍 <b>{repo}</b> · <code>{branch}</code>{time_part}  ({len(commits)} commits)\n"
         f"\n"
         f"{lines}{extra}\n"
         f"— {pusher}\n"
