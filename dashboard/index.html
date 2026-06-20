@@ -29,7 +29,7 @@ body{background:#030308;color:#c8ceff;font-family:'Courier New',monospace;height
 
 /* planets */
 .pw{position:absolute;top:0;left:0;transform:translate(calc(var(--px) - 50%), calc(var(--py) - 50%));will-change:transform;z-index:20;cursor:pointer}
-.pd{border-radius:50%;transition:transform .15s;width:calc(var(--mag,9) * 1px);height:calc(var(--mag,9) * 1px)}
+.pd{position:relative;overflow:visible;border-radius:50%;transition:transform .15s;width:calc(var(--mag,9) * 1px);height:calc(var(--mag,9) * 1px)}
 .pw:hover .pd,.pw:active .pd{transform:scale(2.2)}
 .pd.healthy{background:#00ff88;box-shadow:0 0 6px #00ff88,0 0 14px rgba(0,255,136,.4)}
 .pd.warning{background:#ffcc00;box-shadow:0 0 6px #ffcc00,0 0 14px rgba(255,204,0,.4)}
@@ -37,6 +37,63 @@ body{background:#030308;color:#c8ceff;font-family:'Courier New',monospace;height
 .pd.dormant{background:#1e1e38;box-shadow:0 0 3px #3a3a60}
 .pw.selected .pd{transform:scale(1.8);outline:2px solid rgba(255,255,255,.9);outline-offset:3px;box-shadow:0 0 0 5px rgba(255,255,255,.15),0 0 20px rgba(255,255,255,.3) !important;animation:none !important}
 @keyframes pulse-r{0%,100%{box-shadow:0 0 8px #ff4466,0 0 22px rgba(255,68,102,.6)}50%{box-shadow:0 0 16px #ff4466,0 0 44px rgba(255,68,102,.85),0 0 66px rgba(255,68,102,.3)}}
+
+/* ── live event effects ── */
+
+/* push: flash branco + anel shockwave */
+.pd.fx-push{animation:fx-push-dot 1.6s ease-out forwards !important}
+@keyframes fx-push-dot{
+  0%  {transform:scale(1);filter:brightness(1)}
+  12% {transform:scale(3);filter:brightness(7)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
+.pd.fx-push::after{
+  content:'';position:absolute;
+  top:0;left:0;width:100%;height:100%;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.9);
+  animation:fx-ripple 1.6s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes fx-ripple{
+  0%  {transform:scale(1);opacity:1}
+  100%{transform:scale(9);opacity:0}
+}
+
+/* PR: pulso laranja caloroso */
+.pd.fx-pr{animation:fx-pr 2.8s ease-in-out forwards !important}
+@keyframes fx-pr{
+  0%,100%{filter:brightness(1)}
+  30%,70%{filter:brightness(4) sepia(.6) hue-rotate(-10deg);transform:scale(2.4)}
+}
+.pd.fx-pr::after{
+  content:'';position:absolute;
+  top:0;left:0;width:100%;height:100%;
+  border-radius:50%;
+  border:2px solid rgba(255,180,0,.85);
+  animation:fx-pr-ring 2.8s ease-in-out forwards;
+  pointer-events:none;
+}
+@keyframes fx-pr-ring{
+  0%,100%{transform:scale(1);opacity:0}
+  20%    {transform:scale(1);opacity:1}
+  80%    {transform:scale(5);opacity:0}
+}
+
+/* Issue: pisco âmbar suave */
+.pd.fx-issue{animation:fx-issue 2.4s ease-in-out forwards !important}
+@keyframes fx-issue{
+  0%,100%{filter:brightness(1)}
+  25%,75%{filter:brightness(3) sepia(1);transform:scale(1.9)}
+}
+
+/* Create/tag: esverdeado */
+.pd.fx-create{animation:fx-create 1.8s ease-out forwards !important}
+@keyframes fx-create{
+  0%  {filter:brightness(1)}
+  20% {filter:brightness(5) hue-rotate(120deg);transform:scale(2.5)}
+  100%{filter:brightness(1)}
+}
 
 /* tooltip */
 #tip{position:fixed;z-index:100;background:rgba(8,8,22,.96);border:1px solid rgba(100,120,255,.25);border-radius:8px;padding:10px 14px;font-size:11.5px;pointer-events:none;opacity:0;transition:opacity .12s;max-width:210px;backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(0,0,0,.6)}
@@ -460,6 +517,7 @@ function buildOrbit(planets){
       wrapper.addEventListener('mouseleave',hideTip);
       wrapper.addEventListener('click',()=>openPanel(planet,wrapper));
 
+      wrapper.dataset.planet=planet.name;
       univ.appendChild(wrapper);
       nodes.push({el:wrapper,ri,name:planet.name});
       angles.push(savedAngles[planet.name]);
@@ -599,6 +657,46 @@ function updateStats(planets){
 }
 
 // ═══════════════════════════════════════════════════════
+// LIVE EVENTS — polling + visual effects
+// ═══════════════════════════════════════════════════════
+const seenEvents = new Set();
+
+const FX_DUR = { push:1600, pr:2800, pr_merged:2800, issue:2400, create:1800 };
+
+function triggerEffect(repoName, type){
+  const wrapper = univ.querySelector(`[data-planet="${repoName}"]`);
+  if(!wrapper) return;
+  const dot = wrapper.querySelector('.pd');
+  if(!dot) return;
+
+  const cls = type==='pr_merged'?'fx-pr': type==='issue'?'fx-issue': type==='create'?'fx-create':'fx-push';
+  // remove any existing effect first
+  dot.classList.remove('fx-push','fx-pr','fx-issue','fx-create');
+  // force reflow so animation restarts
+  void dot.offsetWidth;
+  dot.classList.add(cls);
+  const dur = FX_DUR[type] || 1600;
+  setTimeout(()=>dot.classList.remove(cls), dur);
+}
+
+async function pollEvents(){
+  try{
+    const res = await fetch('/api/events');
+    if(!res.ok) return;
+    const {events=[]} = await res.json();
+    for(const ev of events){
+      if(seenEvents.has(ev.id)) continue;
+      seenEvents.add(ev.id);
+      triggerEffect(ev.repo, ev.type);
+    }
+    // cap set size
+    if(seenEvents.size > 300){
+      [...seenEvents].slice(0, seenEvents.size-300).forEach(id=>seenEvents.delete(id));
+    }
+  }catch(_){}
+}
+
+// ═══════════════════════════════════════════════════════
 // MAIN
 // ═══════════════════════════════════════════════════════
 function loop(){stepPlanets();drawBg();requestAnimationFrame(loop)}
@@ -630,10 +728,18 @@ async function main(){
   const planets=await loadPlanets();
   if(planets.length){updateStats(planets);buildOrbit(planets);}
   loop();
+
+  // planet data refresh every 5min
   setInterval(async()=>{
     const fresh=await loadPlanets();
     if(fresh.length){updateStats(fresh);buildOrbit(fresh);}
   },5*60*1000);
+
+  // live events poll every 8s — primeira chamada após 10s para dar tempo ao buildOrbit
+  setTimeout(()=>{
+    pollEvents();
+    setInterval(pollEvents, 8_000);
+  }, 10_000);
 }
 
 window.addEventListener('resize',()=>{initStars();resizeOrbit()});
