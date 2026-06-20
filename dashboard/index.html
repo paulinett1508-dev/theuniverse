@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>theuniverse · observatório</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#030308;
+  color:#c8ceff;
+  font-family:'Courier New',monospace;
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+#stars{
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── header ── */
+#hdr{
+  position:relative;z-index:10;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 24px;
+  border-bottom:1px solid rgba(100,120,200,.15);
+  background:rgba(3,3,8,.85);
+  backdrop-filter:blur(12px);
+  flex-shrink:0;
+}
+
+#hdr h1{
+  font-size:15px;letter-spacing:4px;
+  color:#fff;text-transform:uppercase;
+}
+#hdr h1 em{color:#7b8cff;font-style:normal}
+
+#stats{display:flex;gap:20px;font-size:11px;color:#5a6090}
+.sv{font-weight:bold;color:#c8ceff}
+.sg{color:#00ff88}.sy{color:#ffcc00}.sr{color:#ff4466}
+
+/* ── universe canvas area ── */
+#wrap{
+  flex:1;position:relative;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+
+#univ{position:relative}
+
+/* ── rings ── */
+.ring{
+  position:absolute;
+  border:1px solid rgba(80,100,180,.13);
+  border-radius:50%;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+
+/* ── sun ── */
+#sun{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:36px;height:36px;
+  border-radius:50%;
+  background:radial-gradient(circle,#fff8cc 0%,#ffd700 40%,#ff8c00 75%,transparent 100%);
+  box-shadow:0 0 20px #ffd700,0 0 50px rgba(255,200,0,.35),0 0 100px rgba(255,140,0,.15);
+  animation:sun-pulse 5s ease-in-out infinite;
+  z-index:30;
+  cursor:default;
+}
+
+@keyframes sun-pulse{
+  0%,100%{box-shadow:0 0 20px #ffd700,0 0 50px rgba(255,200,0,.35),0 0 100px rgba(255,140,0,.15)}
+  50%  {box-shadow:0 0 30px #ffd700,0 0 70px rgba(255,200,0,.5), 0 0 130px rgba(255,140,0,.22)}
+}
+
+/* ── planets ── */
+.pw{
+  position:absolute;top:0;left:0;
+  transform:translate(calc(var(--px) - 50%), calc(var(--py) - 50%));
+  will-change:transform;
+  z-index:20;
+  cursor:pointer;
+}
+
+.pd{
+  width:9px;height:9px;border-radius:50%;
+  transition:transform .15s;
+}
+.pw:hover .pd{transform:scale(2.5)}
+
+.pd.healthy{background:#00ff88;box-shadow:0 0 6px #00ff88,0 0 14px rgba(0,255,136,.4)}
+.pd.warning{background:#ffcc00;box-shadow:0 0 6px #ffcc00,0 0 14px rgba(255,204,0,.4)}
+.pd.alert  {background:#ff4466;box-shadow:0 0 8px #ff4466,0 0 22px rgba(255,68,102,.6);animation:pulse-r 1.1s ease-in-out infinite}
+.pd.dormant{background:#1e1e38;box-shadow:0 0 3px #3a3a60}
+
+@keyframes pulse-r{
+  0%,100%{box-shadow:0 0 8px #ff4466,0 0 22px rgba(255,68,102,.6)}
+  50%    {box-shadow:0 0 16px #ff4466,0 0 44px rgba(255,68,102,.85),0 0 66px rgba(255,68,102,.3)}
+}
+
+/* ── tooltip ── */
+#tip{
+  position:fixed;z-index:100;
+  background:rgba(8,8,22,.96);
+  border:1px solid rgba(100,120,255,.25);
+  border-radius:8px;padding:10px 14px;
+  font-size:11.5px;
+  pointer-events:none;opacity:0;
+  transition:opacity .12s;
+  max-width:210px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 4px 24px rgba(0,0,0,.6);
+}
+#tip.on{opacity:1}
+.tn{font-size:13px;font-weight:bold;color:#fff;margin-bottom:5px}
+.tr{color:#6070a0;margin-bottom:2px}
+.tr b{color:#c8ceff;font-weight:normal}
+.th{font-size:11px;margin-bottom:4px}
+.th.healthy{color:#00ff88}
+.th.warning{color:#ffcc00}
+.th.alert  {color:#ff4466}
+.th.dormant{color:#3a3a60}
+
+/* ── bottom bar ── */
+#bar{
+  position:relative;z-index:10;
+  background:rgba(3,3,8,.85);
+  border-top:1px solid rgba(100,120,200,.12);
+  padding:7px 24px;font-size:11px;
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;gap:16px;
+  flex-shrink:0;min-height:30px;
+}
+.ai{color:#ff4466;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.45}}
+#upd{margin-left:auto;color:#3a4060}
+
+#loader{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  color:#3a4060;font-size:12px;z-index:50;
+  letter-spacing:2px;
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div id="hdr">
+  <h1>the<em>universe</em> &middot; observatório</h1>
+  <div id="stats">
+    <span>planetas&nbsp;<span class="sv" id="st">—</span></span>
+    <span>saudáveis&nbsp;<span class="sv sg" id="sh">—</span></span>
+    <span>atenção&nbsp;<span class="sv sy" id="sw">—</span></span>
+    <span>Estrela da Morte&nbsp;<span class="sv sr" id="sa">—</span></span>
+  </div>
+</div>
+
+<div id="wrap">
+  <div id="loader">carregando universo&hellip;</div>
+  <div id="univ"></div>
+</div>
+
+<div id="tip"></div>
+
+<div id="bar">
+  <span id="alerts">&#10024; Órbita estável</span>
+  <span id="upd"></span>
+</div>
+
+<script>
+// ─── starfield ────────────────────────────────────────────────────────────
+const cnv = document.getElementById('stars');
+const ctx = cnv.getContext('2d');
+let stars = [];
+
+function initStars() {
+  cnv.width = innerWidth; cnv.height = innerHeight;
+  stars = Array.from({length:220}, () => ({
+    x: Math.random()*cnv.width, y: Math.random()*cnv.height,
+    r: Math.random()*1.3,
+    a: Math.random(), da: (Math.random()-.5)*.004,
+  }));
+}
+
+function drawStars() {
+  ctx.clearRect(0,0,cnv.width,cnv.height);
+  for (const s of stars) {
+    s.a = Math.max(.08, Math.min(1, s.a + s.da));
+    if (s.a<=.08||s.a>=1) s.da*=-1;
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(200,210,255,${s.a})`;
+    ctx.fill();
+  }
+}
+
+// ─── orbital config ───────────────────────────────────────────────────────
+const RINGS = [
+  {rf:.21, spd:.26},
+  {rf:.33, spd:.165},
+  {rf:.455, spd:.105},
+  {rf:.575, spd:.067},
+];
+
+let univSz=0, nodes=[], angles=[];
+const univ=document.getElementById('univ');
+
+function getUnivSz() {
+  const w=document.getElementById('wrap');
+  return Math.min(w.clientWidth, w.clientHeight)*.93;
+}
+
+// Preserve angles across refreshes
+const savedAngles = {};
+
+function buildOrbit(planets) {
+  univ.innerHTML=''; nodes=[]; angles=[];
+
+  // Sort most-active first (inner rings)
+  const sorted=[...planets].sort((a,b)=>a.daysSincePush-b.daysSincePush);
+
+  // Distribute across rings proportionally
+  const total=sorted.length;
+  const splits=[
+    Math.round(total*.18),
+    Math.round(total*.26),
+    Math.round(total*.30),
+  ];
+  splits.push(total - splits[0] - splits[1] - splits[2]);
+
+  // Draw rings
+  for (let ri=0;ri<RINGS.length;ri++) {
+    const el=document.createElement('div');
+    el.className='ring';
+    const d=RINGS[ri].rf*2*univSz;
+    el.style.width=d+'px'; el.style.height=d+'px';
+    univ.appendChild(el);
+  }
+
+  let pi=0;
+  for (let ri=0;ri<RINGS.length;ri++) {
+    const count=splits[ri];
+    for (let j=0;j<count&&pi<sorted.length;j++,pi++) {
+      const planet=sorted[pi];
+
+      // Restore or initialize angle
+      if (savedAngles[planet.name] === undefined)
+        savedAngles[planet.name] = (j/count)*Math.PI*2;
+
+      const wrapper=document.createElement('div');
+      wrapper.className='pw';
+      wrapper.style.setProperty('--px','0px');
+      wrapper.style.setProperty('--py','0px');
+
+      const dot=document.createElement('div');
+      dot.className=`pd ${planet.health}`;
+      wrapper.appendChild(dot);
+
+      wrapper.addEventListener('mouseenter', e=>showTip(e,planet));
+      wrapper.addEventListener('mousemove',  e=>moveTip(e));
+      wrapper.addEventListener('mouseleave', hideTip);
+
+      univ.appendChild(wrapper);
+      nodes.push({el:wrapper, ri, name:planet.name});
+      angles.push(savedAngles[planet.name]);
+    }
+  }
+
+  // Sun
+  const sun=document.createElement('div');
+  sun.id='sun'; sun.title='theuniverse';
+  univ.appendChild(sun);
+}
+
+function stepPlanets() {
+  const cx=univSz/2, cy=univSz/2;
+  for (let i=0;i<nodes.length;i++) {
+    const {el,ri,name}=nodes[i];
+    angles[i]+=RINGS[ri].spd*0.0045;
+    savedAngles[name]=angles[i];
+    const r=RINGS[ri].rf*univSz;
+    const x=cx+r*Math.cos(angles[i]);
+    const y=cy+r*Math.sin(angles[i]);
+    el.style.setProperty('--px',x+'px');
+    el.style.setProperty('--py',y+'px');
+  }
+}
+
+// ─── tooltip ──────────────────────────────────────────────────────────────
+const tip=document.getElementById('tip');
+
+const healthLabel={
+  healthy:'🟢 saudável',
+  warning:'🟡 atenção',
+  alert:  '🔴 Estrela da Morte',
+  dormant:'⚫ dormente',
+};
+
+function daysStr(d) {
+  if(d===999) return 'nunca';
+  if(d===0)   return 'hoje';
+  if(d===1)   return 'ontem';
+  return `${d}d atrás`;
+}
+
+function showTip(e,p) {
+  tip.innerHTML=`
+    <div class="tn">${p.name}</div>
+    <div class="th ${p.health}">${healthLabel[p.health]||p.health}</div>
+    <div class="tr">último push: <b>${daysStr(p.daysSincePush)}</b></div>
+    <div class="tr">issues abertas: <b>${p.issues}</b></div>
+    ${p.ci?`<div class="tr">CI: <b>${p.ci}</b></div>`:''}
+  `;
+  tip.classList.add('on');
+  moveTip(e);
+}
+function moveTip(e) {
+  const x=e.clientX+16, y=e.clientY-10;
+  tip.style.left=Math.min(x,innerWidth-225)+'px';
+  tip.style.top =Math.max(4,y)+'px';
+}
+function hideTip(){tip.classList.remove('on')}
+
+// ─── stats ────────────────────────────────────────────────────────────────
+function updateStats(planets) {
+  const cnt=h=>planets.filter(p=>p.health===h).length;
+  document.getElementById('st').textContent=planets.length;
+  document.getElementById('sh').textContent=cnt('healthy');
+  document.getElementById('sw').textContent=cnt('warning');
+  document.getElementById('sa').textContent=cnt('alert');
+
+  const alerts=planets.filter(p=>p.health==='alert');
+  const alertsEl=document.getElementById('alerts');
+  if(alerts.length) {
+    alertsEl.innerHTML=alerts.map(p=>
+      `<span class="ai">💥 Estrela da Morte · ${p.name}</span>`
+    ).join(' &nbsp;·&nbsp; ');
+  } else {
+    alertsEl.innerHTML='✨ Órbita estável — sem ameaças ativas';
+    alertsEl.style.color='#2a4030';
+  }
+}
+
+// ─── main loop ────────────────────────────────────────────────────────────
+function loop() {
+  stepPlanets();
+  drawStars();
+  requestAnimationFrame(loop);
+}
+
+async function loadPlanets() {
+  try {
+    const res=await fetch('/api/planets');
+    if(!res.ok) throw new Error(res.statusText);
+    const data=await res.json();
+
+    document.getElementById('loader').style.display='none';
+
+    if(data.updatedAt) {
+      const d=new Date(data.updatedAt);
+      document.getElementById('upd').textContent=
+        `atualizado ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    }
+
+    return data.planets||[];
+  } catch(e) {
+    document.getElementById('loader').textContent='erro ao carregar — '+e.message;
+    return [];
+  }
+}
+
+async function main() {
+  initStars();
+  univSz=getUnivSz();
+  univ.style.width=univSz+'px';
+  univ.style.height=univSz+'px';
+
+  const planets=await loadPlanets();
+  if(planets.length) {
+    updateStats(planets);
+    buildOrbit(planets);
+  }
+
+  loop();
+
+  // Auto-refresh every 5 min
+  setInterval(async ()=>{
+    const fresh=await loadPlanets();
+    if(fresh.length){
+      updateStats(fresh);
+      buildOrbit(fresh);
+    }
+  }, 5*60*1000);
+}
+
+window.addEventListener('resize',()=>{
+  initStars();
+  univSz=getUnivSz();
+  univ.style.width=univSz+'px';
+  univ.style.height=univSz+'px';
+});
+
+main();
+</script>
+</body>
+</html>
