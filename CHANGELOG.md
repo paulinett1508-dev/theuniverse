@@ -4,6 +4,28 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-20 — Oráculo v2: reply contextual, multi-turn, estética Telegram
+
+### 💬 Reply contextual — Oráculo entende a notificação sendo respondida
+- `oraculo/bot.py`: `extract_reply_context()` — extrai `reply_to_message.text` do update Telegram.
+- `oraculo/brain.py`: `reply_context` injetado antes do bloco RAG. `_parse_notification()` extrai fatos estruturados (repo, branch, horário, commits). Fatos apresentados em `<dados_notificacao>` para o model não reproduzir metadados brutos.
+- Regra 4 no system prompt: usa fatos extraídos literalmente. "Q hrs foi?" → lê `horario=` e responde direto.
+
+### 🧠 Histórico multi-turn — Oráculo lembra o contexto da conversa
+- `oraculo/bot.py`: `_history = []` em `main()`. `brain_fn` guarda os últimos 5 turnos (10 mensagens) e passa para `brain.answer`.
+- `oraculo/brain.py`: `build_messages` aceita `history` — injeta como turnos anteriores antes do user message atual.
+- Follow-ups como "e o plano 1?" chegam com contexto do repo anterior no histórico.
+
+### 🎯 ctx_repo — RAG filtrado pelo repo ativo
+- `_ctx_repo` em `main()` — atualizado a cada reply_context detectado.
+- `brain.py`: quando `ctx_repo` definido e sem reply_context, filtra chunks do RAG por source. Sem chunks do repo → model responde "não tenho informação sobre [repo] no contexto atual".
+- Evita que "plano 1" recupere doc do Oráculo em vez do repo da conversa.
+
+### 🎨 Estética Telegram
+- Notificações multi-commit: strip de prefixos convencionais (`feat(scope):`, `docs:`, `fix:`). Truncação por palavra (não no meio). Bullets sem indentação.
+- Respostas do Oráculo: regra 5 — bullets curtos, máx 3-4 linhas. Respostas negativas = 1 linha sem bullet.
+- Regra 1 refinada: não dispara em commits que mencionam Zabbix/disco — só recusa perguntas diretas sobre infra.
+
 ## 2026-06-20 — Subsistema C implementado (Escudos + Secrets Scan)
 
 ### 🛡️ C1 — Escudos: porta 9120 blindada

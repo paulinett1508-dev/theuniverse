@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-20 (sessão noite)
+> Última atualização: 2026-06-20 (sessão tarde/noite — Oráculo v2)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -63,6 +63,11 @@ Gravidade = agnostic-core (submodule).
   - **Subsistema C implementado:**
     - C1 (Escudos): porta 9120 restrita aos 6 CIDRs oficiais do GitHub via UFW. Cron semanal (`.github/workflows/c1-update-ips.yml`) mantém IPs atualizados. `POLARIS_SSH_KEY` configurado nos secrets do GitHub.
     - C2 (Secrets Scan): `sentinel.py` agora verifica `secret-scanning/alerts` em cada planeta. Novo evento `secret_exposto` notifica Telegram com tipo e link direto ao painel de segurança.
+- **Oráculo v2 (sessão 2026-06-20 tarde):**
+  - Reply contextual: bot detecta `reply_to_message`, extrai fatos (repo, branch, horário, commits via `_parse_notification`), injeta como `<dados_notificacao>` no prompt.
+  - Multi-turn: histórico de 5 turnos no `brain_fn`. Follow-ups lembram o repo da conversa.
+  - `ctx_repo`: filtra chunks do RAG pelo repo ativo — evita RAG de doc errado em follow-ups.
+  - Estética: strip de prefixos convencionais nos commits, truncação por palavra, respostas negativas em 1 linha.
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
