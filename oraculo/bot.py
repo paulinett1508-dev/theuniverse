@@ -24,6 +24,13 @@ def is_authorized(chat_id, sol_chat_id):
     return chat_id == sol_chat_id
 
 
+def extract_reply_context(msg: dict) -> str | None:
+    """Se a mensagem é reply a uma notificação do bot, retorna o texto original."""
+    reply_to = msg.get("reply_to_message") or {}
+    text = (reply_to.get("text") or "").strip()
+    return text if text else None
+
+
 def handle_update(update, cfg, rag, tok, brain_fn, context_fn):
     msg = update.get("message") or {}
     chat_id = (msg.get("chat") or {}).get("id")
@@ -33,9 +40,12 @@ def handle_update(update, cfg, rag, tok, brain_fn, context_fn):
     question = (msg.get("text") or "").strip()
     if not question:
         return None
+    reply_context = extract_reply_context(msg)
+    if reply_context:
+        log.info("Reply detectado — contexto: %.60s…", reply_context.replace("\n", " "))
     context_str = context_fn(tok)
     chunks = rag.retrieve(question)
-    return brain_fn(question, context_str, chunks)
+    return brain_fn(question, context_str, chunks, reply_context)
 
 
 def _send(tg_token, chat_id, text):
@@ -56,8 +66,9 @@ def main():
             log.exception("contexto ao vivo falhou")
             return "## Estado atual do universo\n(estado ao vivo indisponível agora)"
 
-    def brain_fn(q, c, ch):
-        return brain.answer(q, c, ch, cfg.groq_api_key, cfg.groq_model)
+    def brain_fn(q, c, ch, reply_context=None):
+        return brain.answer(q, c, ch, cfg.groq_api_key, cfg.groq_model,
+                            reply_context=reply_context)
 
     offset = None
     while True:
