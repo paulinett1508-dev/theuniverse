@@ -1,5 +1,14 @@
 const OWNER = 'paulinett1508-dev';
 
+const SPECIAL_BODIES = {
+  'agnostic-core':  'station',
+  'mcp-eventos':    'satellite',
+  'botclinop':      'observatory',   // renomear para luna-base em breve
+  'bolaocopa2026':  'supernova',
+  'f1-pulse':       'supernova',
+  'vibegaminghub':  'toys',
+};
+
 const EXCLUDE = new Set([
   'the-matrix', 'matrix-core',
   'baileys-whatsapp-server', 'bitrix-buddy-chat',
@@ -88,7 +97,9 @@ module.exports = async function handler(req, res) {
         const contributors = repo.mentionableUsers?.totalCount ?? 0;
         const lastPR = repo.pullRequests?.nodes?.[0] ?? null;
 
-        planets.push({ name: repo.name, pushedAt: repo.pushedAt, daysSincePush, ci, issues, health, commits, diskKB, rawScore, lang, contributors, lastPR });
+        const bodyType = SPECIAL_BODIES[repo.name] || 'planet';
+
+        planets.push({ name: repo.name, pushedAt: repo.pushedAt, daysSincePush, ci, issues, health, commits, diskKB, rawScore, lang, contributors, lastPR, bodyType });
       }
 
       after = repos.pageInfo.hasNextPage ? repos.pageInfo.endCursor : null;

@@ -33,8 +33,23 @@ body{background:#030308;color:#c8ceff;font-family:'Courier New',monospace;height
 .pd{position:relative;overflow:visible;border-radius:50%;transition:transform .15s;width:calc(var(--mag,9) * 1px);height:calc(var(--mag,9) * 1px)}
 .pw:hover .pd,.pw:active .pd{transform:scale(2.2)}
 .pd.healthy{background:#00ff88;box-shadow:0 0 6px #00ff88,0 0 14px rgba(0,255,136,.4)}
+.pd.healthy-v1{background:#00ddaa;box-shadow:0 0 6px #00ddaa,0 0 15px rgba(0,221,170,.42)}
+.pd.healthy-v2{background:#44ff66;box-shadow:0 0 6px #44ff66,0 0 15px rgba(68,255,102,.42)}
+.pd.healthy-v3{background:#00cc88;box-shadow:0 0 6px #00cc88,0 0 15px rgba(0,204,136,.42)}
+.pd.healthy-v4{background:#77ff44;box-shadow:0 0 7px #77ff44,0 0 16px rgba(119,255,68,.42)}
+.pd.healthy-v5{background:#22ee99;box-shadow:0 0 6px #22ee99,0 0 15px rgba(34,238,153,.42)}
 .pd.warning{background:#ffcc00;box-shadow:0 0 6px #ffcc00,0 0 14px rgba(255,204,0,.4)}
+.pd.warning-v1{background:#ffaa00;box-shadow:0 0 6px #ffaa00,0 0 15px rgba(255,170,0,.42)}
+.pd.warning-v2{background:#f0dd00;box-shadow:0 0 6px #f0dd00,0 0 15px rgba(240,221,0,.42)}
+.pd.warning-v3{background:#ffbb33;box-shadow:0 0 6px #ffbb33,0 0 15px rgba(255,187,51,.42)}
+.pd.warning-v4{background:#ff9922;box-shadow:0 0 6px #ff9922,0 0 16px rgba(255,153,34,.42)}
+.pd.warning-v5{background:#eecc11;box-shadow:0 0 6px #eecc11,0 0 15px rgba(238,204,17,.42)}
 .pd.alert{background:#ff4466;box-shadow:0 0 8px #ff4466,0 0 22px rgba(255,68,102,.6);animation:pulse-r 1.1s ease-in-out infinite}
+.pd.alert-v1{background:#ff2244;box-shadow:0 0 8px #ff2244,0 0 22px rgba(255,34,68,.6);animation:pulse-r 1.1s ease-in-out infinite}
+.pd.alert-v2{background:#ff6633;box-shadow:0 0 8px #ff6633,0 0 22px rgba(255,102,51,.6);animation:pulse-r 1.1s ease-in-out infinite}
+.pd.alert-v3{background:#ff3355;box-shadow:0 0 8px #ff3355,0 0 22px rgba(255,51,85,.6);animation:pulse-r 1.1s ease-in-out infinite}
+.pd.alert-v4{background:#ee1144;box-shadow:0 0 9px #ee1144,0 0 24px rgba(238,17,68,.65);animation:pulse-r 1.1s ease-in-out infinite}
+.pd.alert-v5{background:#ff5522;box-shadow:0 0 8px #ff5522,0 0 22px rgba(255,85,34,.6);animation:pulse-r 1.1s ease-in-out infinite}
 .pd.dormant{background:#1e1e38;box-shadow:0 0 3px #3a3a60}
 .pw.selected .pd{transform:scale(1.8);outline:2px solid rgba(255,255,255,.9);outline-offset:3px;box-shadow:0 0 0 5px rgba(255,255,255,.15),0 0 20px rgba(255,255,255,.3) !important;animation:none !important}
 @keyframes pulse-r{0%,100%{box-shadow:0 0 8px #ff4466,0 0 22px rgba(255,68,102,.6)}50%{box-shadow:0 0 16px #ff4466,0 0 44px rgba(255,68,102,.85),0 0 66px rgba(255,68,102,.3)}}
@@ -160,6 +175,18 @@ body.panel-open #wrap{padding-right:270px}
   #hdr h1{letter-spacing:1px;font-size:11px}
   #stats{display:none}
 }
+
+/* ── body types ── */
+.body-station .pd{clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);border-radius:0;background:linear-gradient(135deg,#9ab2d0 0%,#4a6888 55%,#2a3e58 100%);box-shadow:0 0 8px rgba(130,170,220,.7),0 0 24px rgba(70,110,200,.35);animation:station-spin 28s linear infinite}
+@keyframes station-spin{to{rotate:1turn}}
+.pw.body-station:hover .pd,.pw.body-station.selected .pd{transform:scale(2.2)}
+.body-satellite .pd{clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);border-radius:0;background:linear-gradient(135deg,#b8c8d8 0%,#6888a0 100%);box-shadow:0 0 5px rgba(160,185,210,.5)}
+.body-supernova .pd{background:radial-gradient(circle,#fff8e0 0%,#ffa000 40%,#ff3300 80%,#660000 100%)!important;box-shadow:0 0 12px #ff8800,0 0 36px rgba(255,100,0,.7),0 0 70px rgba(255,40,0,.3)!important;animation:supernova-throb .65s ease-in-out infinite!important}
+@keyframes supernova-throb{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.6);filter:brightness(1.8)}}
+.body-toys .pd{background:linear-gradient(135deg,#ff70b8 0%,#a070ff 50%,#70b8ff 100%);box-shadow:0 0 10px #a070ff,0 0 26px rgba(160,112,255,.38);animation:toys-shift 4s ease-in-out infinite}
+@keyframes toys-shift{0%,100%{filter:hue-rotate(0deg) brightness(1)}50%{filter:hue-rotate(45deg) brightness(1.25)}}
+.body-observatory .pd{background:#c8d8f8!important;box-shadow:0 0 6px rgba(180,200,255,.7),0 0 18px rgba(140,170,255,.35)!important}
+.body-observatory .pd::before{content:'';position:absolute;width:calc(100% + 14px);height:calc(100% + 14px);border:1px dashed rgba(180,210,255,.45);border-radius:50%;top:-7px;left:-7px;pointer-events:none}
 </style>
 </head>
 <body>
@@ -329,6 +356,31 @@ const THEMES={
     bands:['#1a1a1a','#242424','#2e2e2e','#202020','#1c1c1c','#282828','#222222','#181818'],
     atm:null, glow:'#3a3a5a',
   },
+  station:{
+    base:['#1a2a40','#2e4868','#6080a8'],
+    bands:['#203050','#2a4070','#344e80','#1e3058','#2c4872','#183048','#305080','#1c2840'],
+    atm:'rgba(100,150,220,.18)', glow:'#6080a8',
+  },
+  satellite:{
+    base:['#1c2430','#384860','#607080'],
+    bands:['#1e2838','#283848','#304058','#202e40','#2a3c50','#243240','#304458','#1e2c3a'],
+    atm:null, glow:'#7090a8',
+  },
+  supernova:{
+    base:['#3a0800','#c03000','#ff8800'],
+    bands:['#400000','#8a1800','#c03000','#e06000','#ff9000','#d05000','#a02000','#6a1000'],
+    atm:'rgba(255,120,0,.45)', glow:'#ff8800',
+  },
+  toys:{
+    base:['#2a0a40','#6020c0','#c060ff'],
+    bands:['#3a1060','#8030e0','#6020c0','#a040f0','#4a1880','#9038d8','#5018a0','#7828c8'],
+    atm:'rgba(180,100,255,.25)', glow:'#c060ff',
+  },
+  observatory:{
+    base:['#0a1428','#1e3060','#4070c0'],
+    bands:['#102040','#1a3070','#2050a0','#163468','#1c3878','#122848','#1e4090','#183060'],
+    atm:'rgba(100,150,255,.3)', glow:'#6090e0',
+  },
 };
 
 function hashStr(s){
@@ -375,7 +427,9 @@ function drawPlanet(pc,W,H,planet,seed,rot,hasRings){
   pc.clearRect(0,0,W,H);
   const cx=W/2, cy=H/2;
   const R=Math.min(W,H)*(hasRings?.30:.38);
-  const th=THEMES[planet.health]||THEMES.dormant;
+  const bt=planet.bodyType||'planet';
+  const thKey=bt==='station'?'station':bt==='satellite'?'satellite':bt==='supernova'?'supernova':bt==='toys'?'toys':bt==='observatory'?'observatory':planet.health;
+  const th=THEMES[thKey]||THEMES.dormant;
 
   // ── atmosphere glow ──
   if(th.atm){
@@ -472,6 +526,7 @@ const RINGS=[{rf:.21,spd:.26},{rf:.33,spd:.165},{rf:.455,spd:.105},{rf:.575,spd:
 let univSz=0, nodes=[], angles=[];
 const univ=document.getElementById('univ');
 const savedAngles={};
+let stationWrapper=null;
 
 function isMobile(){return innerWidth<=600}
 function getUnivSz(){
@@ -479,9 +534,38 @@ function getUnivSz(){
   return Math.min(w.clientWidth,w.clientHeight)*.92;
 }
 
+function _mkWrapper(planet){
+  const wrapper=document.createElement('div');
+  const bt=planet.bodyType||'planet';
+  wrapper.className='pw'+(bt!=='planet'?' body-'+bt:'');
+  wrapper.dataset.planet=planet.name;
+  const dot=document.createElement('div');
+  const baseHealth=bt==='supernova'?'alert':bt==='observatory'?'healthy':planet.health;
+  const vIdx=hashStr(planet.name)%6;
+  const vClass=vIdx>0&&baseHealth!=='dormant'?` ${baseHealth}-v${vIdx}`:'';
+  dot.className=`pd ${baseHealth}${vClass}`;
+  const px=8+(((planet.magnitude||3)-1)/4)*18; // 8–26px range
+  dot.style.setProperty('--mag',px.toFixed(1));
+  wrapper.appendChild(dot);
+  wrapper.addEventListener('mouseenter',e=>{if(!panelOpen&&!isMobile())showTip(e,planet)});
+  wrapper.addEventListener('mousemove',e=>{if(!panelOpen&&!isMobile())moveTip(e)});
+  wrapper.addEventListener('mouseleave',hideTip);
+  wrapper.addEventListener('click',()=>openPanel(planet,wrapper));
+  return wrapper;
+}
+
 function buildOrbit(planets){
-  univ.innerHTML=''; nodes=[]; angles=[];
-  const sorted=[...planets].sort((a,b)=>a.daysSincePush-b.daysSincePush);
+  univ.innerHTML=''; nodes=[]; angles=[]; stationWrapper=null;
+
+  // station is fixed near the sun — removed from orbital rings
+  const station=planets.find(p=>p.bodyType==='station');
+  const orbital=planets.filter(p=>p.bodyType!=='station');
+
+  const sorted=[...orbital].sort((a,b)=>a.daysSincePush-b.daysSincePush);
+  // force satellite to innermost ring (ring 0)
+  const satIdx=sorted.findIndex(p=>p.bodyType==='satellite');
+  if(satIdx>0){const[s]=sorted.splice(satIdx,1);sorted.unshift(s);}
+
   const total=sorted.length;
   const splits=[Math.round(total*.18),Math.round(total*.26),Math.round(total*.30)];
   splits.push(total-splits[0]-splits[1]-splits[2]);
@@ -502,28 +586,26 @@ function buildOrbit(planets){
       if(savedAngles[planet.name]===undefined)
         savedAngles[planet.name]=(j/count)*Math.PI*2;
 
-      const wrapper=document.createElement('div');
-      wrapper.className='pw';
+      const wrapper=_mkWrapper(planet);
       wrapper.style.setProperty('--px','0px');
       wrapper.style.setProperty('--py','0px');
 
-      const dot=document.createElement('div');
-      dot.className=`pd ${planet.health}`;
-      const px=6+(((planet.magnitude||3)-1)/4)*12;
-      dot.style.setProperty('--mag',px.toFixed(1));
-      wrapper.appendChild(dot);
-
-      wrapper.addEventListener('mouseenter',e=>{if(!panelOpen&&!isMobile())showTip(e,planet)});
-      wrapper.addEventListener('mousemove', e=>{if(!panelOpen&&!isMobile())moveTip(e)});
-      wrapper.addEventListener('mouseleave',hideTip);
-      wrapper.addEventListener('click',()=>openPanel(planet,wrapper));
-
-      wrapper.dataset.planet=planet.name;
       univ.appendChild(wrapper);
       nodes.push({el:wrapper,ri,name:planet.name});
       angles.push(savedAngles[planet.name]);
     }
   }
+
+  // station: fixed hexagonal body near sun
+  if(station){
+    const sw=_mkWrapper(station);
+    sw.style.setProperty('--px','0px');
+    sw.style.setProperty('--py','0px');
+    univ.appendChild(sw);
+    stationWrapper=sw;
+    _placeStation();
+  }
+
   const sun=document.createElement('div');
   sun.id='sun'; univ.appendChild(sun);
 }
@@ -542,9 +624,17 @@ function stepPlanets(){
   }
 }
 
+function _placeStation(){
+  if(!stationWrapper||!univSz) return;
+  const dist=univSz*.095, angle=Math.PI*.28;
+  stationWrapper.style.setProperty('--px',(univSz/2+dist*Math.cos(angle))+'px');
+  stationWrapper.style.setProperty('--py',(univSz/2+dist*Math.sin(angle))+'px');
+}
+
 function resizeOrbit(){
   univSz=getUnivSz();
   univ.style.width=univSz+'px'; univ.style.height=univSz+'px';
+  _placeStation();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -552,13 +642,16 @@ function resizeOrbit(){
 // ═══════════════════════════════════════════════════════
 const tip=document.getElementById('tip');
 const healthLabel={healthy:'🟢 saudável',warning:'🟡 atenção',alert:'🔴 Estrela da Morte',dormant:'⚫ dormente'};
+const bodyTypeLabel={'station':'🛸 estação espacial','satellite':'🛰 satélite artificial','observatory':'🌙 observatório lunar','supernova':'💥 supernova iminente','toys':'🎮 planeta toys'};
 function daysStr(d){
   if(d===999)return'nunca'; if(d===0)return'hoje'; if(d===1)return'ontem'; return`${d}d atrás`;
 }
 function showTip(e,p){
   const mag='★'.repeat(p.magnitude||1)+'☆'.repeat(5-(p.magnitude||1));
+  const btLabel=bodyTypeLabel[p.bodyType]||'';
   tip.innerHTML=`
-    <div class="tn">${p.name}</div>
+    <div class="tn">${esc(p.name)}</div>
+    ${btLabel?`<div class="tr" style="color:#8890b0;font-size:10px;margin-bottom:3px">${btLabel}</div>`:''}
     <div class="th ${p.health}">${healthLabel[p.health]||p.health}</div>
     <div class="tr">magnitude: <b>${mag}</b></div>
     <div class="tr">commits: <b>${(p.commits||0).toLocaleString()}</b></div>
@@ -612,9 +705,11 @@ function openPanel(p,wrapper){
     prRow=`<div class="pn-row" style="align-items:flex-start"><span class="pn-label">último PR</span><span class="pn-val" style="max-width:155px;text-align:right"><span style="color:${stateColor};font-size:10px;margin-right:3px">●${stateLabel}</span><br><span style="font-size:10.5px;opacity:.8">${prTitle}</span><br><span style="font-size:10px;color:#4a5888">${prDateStr}</span></span></div>`;
   }
 
+  const btLabel=bodyTypeLabel[p.bodyType]||'';
   panelBody.innerHTML=`
     <div class="pn-info">
       <div class="pn-name">${esc(p.name)}</div>
+      ${btLabel?`<div style="font-size:10px;color:#6870a8;margin-bottom:4px;letter-spacing:.5px">${btLabel}</div>`:''}
       <div class="pn-health ${p.health}">${healthLabel[p.health]||p.health}</div>
       <hr class="pn-sep">
       <div class="pn-row"><span class="pn-label">magnitude</span><span class="pn-val pn-stars">${mag}</span></div>
