@@ -1,4 +1,5 @@
 """Cérebro do Oráculo: monta prompt com guardrails e chama o Groq."""
+import re
 import httpx
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
@@ -23,14 +24,28 @@ SYSTEM_PROMPT = (
 )
 
 
+def _parse_notification(text: str) -> dict:
+    facts = {}
+    m = re.search(r'🌍\s+(\S+)\s+·\s+(\S+)\s+·\s+(\d{2}:\d{2})', text)
+    if m:
+        facts["repo"], facts["branch"], facts["horario"] = m.group(1), m.group(2), m.group(3)
+    m2 = re.search(r'—\s+(\S+)', text)
+    if m2:
+        facts["autor"] = m2.group(1)
+    return facts
+
+
 def build_messages(question, context_str, chunks, reply_context=None):
     rag_block = "\n\n---\n\n".join(f"[{c['source']}]\n{c['text']}" for c in chunks) or "(nada recuperado)"
-    reply_section = (
-        f"## Notificação em contexto\n"
-        f"(TheGod está respondendo a esta mensagem — extraia os fatos dela diretamente)\n"
-        f"{reply_context}\n\n"
-        if reply_context else ""
-    )
+    reply_section = ""
+    if reply_context:
+        facts = _parse_notification(reply_context)
+        facts_line = ("Fatos extraídos: " + ", ".join(f"{k}={v}" for k, v in facts.items()) + "\n") if facts else ""
+        reply_section = (
+            f"## Notificação em contexto\n"
+            f"{reply_context}\n"
+            f"{facts_line}\n"
+        )
     user = (f"{context_str}\n\n"
             f"{reply_section}"
             f"## Conhecimento recuperado (RAG)\n{rag_block}\n\n"
