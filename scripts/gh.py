@@ -12,6 +12,8 @@ from pathlib import Path
 API = "https://api.github.com"
 ROOT = Path(__file__).resolve().parent.parent
 SELF = "theuniverse"  # o observatório não é planeta
+# owners cujos repos entram no universo
+UNIVERSE_OWNERS = {"paulinett1508-dev", "Lab-Sobral-Dev"}
 
 
 def token():
@@ -42,9 +44,17 @@ def list_repos(tok, _api=None):
     _api = _api or api
     repos, page = [], 1
     while True:
-        batch, _ = _api(f"/user/repos?per_page=100&page={page}&affiliation=owner", tok)
+        batch, _ = _api(f"/user/repos?per_page=100&page={page}", tok)
         if not batch:
             break
         repos.extend(batch)
         page += 1
-    return [r for r in repos if r["name"] != SELF]
+    seen = set()
+    result = []
+    for r in repos:
+        owner = r["full_name"].split("/")[0]
+        key = r["full_name"]
+        if r["name"] != SELF and owner in UNIVERSE_OWNERS and key not in seen:
+            seen.add(key)
+            result.append(r)
+    return result

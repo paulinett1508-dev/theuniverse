@@ -2,6 +2,12 @@
 
 Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de planetas.
 
+
+## 2026-06-20 — Censo automático
+
+### 💥 Planetas sumidos
+- **matrix-core** — não consta mais no GitHub (ficha arquivada)
+- **the-matrix** — não consta mais no GitHub (ficha arquivada)
 ## 2026-06-19 — Subsistema A implementado (Hermes-Oráculo, receita SHELDON)
 
 ### 🔮 O Oráculo que pensa — código vivo

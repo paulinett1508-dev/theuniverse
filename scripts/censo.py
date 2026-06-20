@@ -20,13 +20,17 @@ from gh import API, ROOT, SELF, token, api, list_repos
 PLANETS = ROOT / "planets"
 CHANGELOG = ROOT / "CHANGELOG.md"
 
+# Repos excluídos do universo (decisão do Sol)
+EXCLUDE = {"the-matrix", "matrix-core", "baileys-whatsapp-server", "bitrix-buddy-chat"}
+
 CLUSTERS = {
     "sbrgestao": "sobral-core", "sbrchecks": "sobral-core", "agnvendas-painelsbr": "sobral-core",
     "pedidomobile": "sobral-core", "sigmed": "sobral-core", "nexus-labsobral": "sobral-core",
+    "SBR-ocomon-5.0": "sobral-core", "SbrTask": "sobral-core", "centroculturalsbr": "sobral-core",
     "sicefsus-sistema": "gov-publico", "CertiSYS": "gov-publico",
-    "matrix-core": "produtos", "tokentown": "produtos", "hqplus": "produtos",
+    "tokentown": "produtos", "hqplus": "produtos",
     "flowdigitalstudio": "produtos", "contabilplus": "produtos", "FinanceFlow": "produtos",
-    "the-matrix": "produtos", "mcp-eventos": "mcp-ia", "agnostic-core": "meta-infra",
+    "mcp-eventos": "mcp-ia", "agnostic-core": "meta-infra",
     "SuperCartolaManagerv5-production": "entretenimento", "bolaocopa2026": "entretenimento",
     "f1-pulse": "entretenimento", "vibegaminghub": "entretenimento",
     "lpjaraujoinfo": "landing-clientes", "temperodemamae": "landing-clientes",
@@ -74,17 +78,19 @@ def status_of(days):
 
 def write_ficha(r, tok):
     name = r["name"]
+    owner = r["full_name"].split("/")[0]
     days = days_idle(r["pushed_at"])
     cluster = CLUSTERS.get(name, "nao-classificado")
     vis = "privado" if r["private"] else "publico"
     struct = root_struct(r["full_name"], tok)
     excerpt = readme_excerpt(r["full_name"], tok)
+    owner_line = f"| owner         | {owner} |\n" if owner != "paulinett1508-dev" else ""
     md = f"""# {name}
 
 | campo         | valor |
 |---|---|
 | url           | {r['html_url']} |
-| visibilidade  | {vis} |
+{owner_line}| visibilidade  | {vis} |
 | cluster       | {cluster} |
 | status        | **{status_of(days)}** ({days} dias sem commit) |
 | linguagem     | {r.get('language') or '-'} |
@@ -177,7 +183,7 @@ def main():
     args = ap.parse_args()
 
     tok = token()
-    repos = list_repos(tok)
+    repos = [r for r in list_repos(tok) if r["name"] not in EXCLUDE]
     current = {r["name"] for r in repos}
     fichas = {p.stem for p in PLANETS.glob("*.md") if p.stem not in ("_index", SELF)}
 
