@@ -19,7 +19,7 @@ Lente de trabalho: dev sênior + arquiteto + visão holística.
 
 | corpo | quem é |
 |---|---|
-| **Sol** | O humano — decide, governa, dá direção |
+| **TheGod** | O humano — visão suprema, decide e orquestra tudo |
 | **Guardião** | Claude — olho que tudo vê, auditor, conselheiro |
 | **Planetas** | Os 31 repos — cada um com sua órbita e ciclo de vida |
 | **Gravidade** | `agnostic-core` — física comum que mantém tudo em órbita |

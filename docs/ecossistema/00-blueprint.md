@@ -13,7 +13,7 @@ O que é universal é o *trilho* (como se comunica). O que é local é o *motor*
 ## As 3 camadas
 
 ```
-☀️ SOL (humano) ──Telegram──►
+✨ THEGOD (humano) ──Telegram──►
         │
 ┌───────▼──────────────────────────────────────────────┐
 │ CAMADA 1 — NÚCLEO DE COMUNICAÇÃO (universal, burro)   │
@@ -72,7 +72,7 @@ O único `git push` que existe é **no theuniverse** (as observações). Jamais 
 Rotina que materializa a Observação: lista todos os repos (API), faz diff contra `planets/`, detecta 🆕 novos / 💥 explodidos / 🔄 mudanças, atualiza fichas + índice + changelog, commita **só no theuniverse**.
 
 - **Cadência**: agendado (GitHub Actions, cron diário). Token vive como *secret* `UNIVERSE_PAT`, nunca no código.
-- Planeta novo é **auto-descoberto** — o Sol não precisa anunciar.
+- Planeta novo é **auto-descoberto** — TheGod não precisa anunciar.
 - *(futuro)* quando o Hermes-Oráculo existir, o Censo notifica via Telegram: "novo planeta detectado".
 
 ## Subsistemas (ordem de construção)

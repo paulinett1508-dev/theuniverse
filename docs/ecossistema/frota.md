@@ -7,7 +7,7 @@
 
 No cosmos, **servidor = estrela**: a fornalha que emite energia e sustenta a vida ao redor — exatamente o que uma máquina faz com os planetas (apps) que hospeda em deploy.
 
-- ☀️ **Sol** = o humano (estrela central da consciência, decide)
+- ✨ **TheGod** = o humano (acima do sistema — visão suprema, cria e orquestra)
 - ⭐ **Estrelas** = VPS e servers (sustentam os planetas em produção)
 - 🪐 **Planetas** = repos
 - 🛰️ **Satélites** = motores de IA locais (dentro dos planetas)

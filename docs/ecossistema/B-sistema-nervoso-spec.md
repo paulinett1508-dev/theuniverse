@@ -1,12 +1,12 @@
 # Spec — Subsistema B: Sistema Nervoso (notificações sensoriais)
 
-> Status: **design aprovado pelo Sol** (2026-06-19). Falta: plano de implementação + execução.
+> Status: **design aprovado pelo TheGod** (2026-06-19). Falta: plano de implementação + execução.
 > Parte do [Blueprint do Ecossistema](00-blueprint.md). Segundo dos 4 subsistemas (A→B→C→D).
 > Depende de **A** ([Hermes-Oráculo](A-hermes-oraculo-spec.md)): reusa o bot do Telegram como trilho de saída.
 
 ## Objetivo
 
-Dar ao universo um **sistema nervoso sensorial**: o observatório sente o que já enxerga via API e empurra os eventos de sinal alto pro Telegram do Sol. Fluxo **outbound** (universo → Sol), complementar ao A (inbound: Sol pergunta, Oráculo responde). Os dois dividem o mesmo bot — o *trilho* universal do blueprint.
+Dar ao universo um **sistema nervoso sensorial**: o observatório sente o que já enxerga via API e empurra os eventos de sinal alto pro Telegram do TheGod. Fluxo **outbound** (universo → TheGod), complementar ao A (inbound: TheGod pergunta, Oráculo responde). Os dois dividem o mesmo bot — o *trilho* universal do blueprint.
 
 ## Decisões travadas
 
@@ -65,18 +65,18 @@ Tudo dentro do theuniverse. Sem servidor, sem porta exposta, sem SSH.
 ## Segurança
 
 - `UNIVERSE_PAT`, `TELEGRAM_TOKEN`, `SOL_CHAT_ID` como **secrets do Actions** — nunca no código.
-- `UNIVERSE_PAT` é o mesmo do Censo (já pendente de cadastro pelo Sol).
+- `UNIVERSE_PAT` é o mesmo do Censo (já pendente de cadastro pelo TheGod).
 - Token de leitura apenas; o único `git push` é do estado, no próprio theuniverse.
 
 ## Dependência de A
 
-B precisa apenas que o **bot exista** (token do BotFather + `SOL_CHAT_ID` conhecido) — **não** precisa do código do A rodando. Logo B pode ser implementado já e ativado assim que o Sol gerar os dois tokens (ele confirmou que gera ambos no momento do deploy).
+B precisa apenas que o **bot exista** (token do BotFather + `SOL_CHAT_ID` conhecido) — **não** precisa do código do A rodando. Logo B pode ser implementado já e ativado assim que o TheGod gerar os dois tokens (ele confirmou que gera ambos no momento do deploy).
 
-## Credenciais necessárias (Sol fornece no deploy)
+## Credenciais necessárias (TheGod fornece no deploy)
 
 1. **`UNIVERSE_PAT`** — secret no Actions (mesmo token do Censo, do `.vault`).
-2. **`TELEGRAM_TOKEN`** — do BotFather (mesmo bot do A). *Sol gera.*
-3. **`SOL_CHAT_ID`** — chat_id do Sol. *Sol gera.*
+2. **`TELEGRAM_TOKEN`** — do BotFather (mesmo bot do A). *TheGod gera.*
+3. **`SOL_CHAT_ID`** — chat_id do TheGod. *TheGod gera.*
 
 ## Fora do MVP (YAGNI)
 
@@ -84,7 +84,7 @@ Webhooks · eventos de runtime/deploy · roteamento por canal/tópico · digest/
 
 ## Self-review
 
-- **Placeholders:** nenhum. Credenciais externas marcadas como "Sol gera" são fronteira correta, não buraco.
+- **Placeholders:** nenhum. Credenciais externas marcadas como "TheGod gera" são fronteira correta, não buraco.
 - **Consistência:** estado `{known_repos, last_run_id, last_issue_number}` citado igual na arquitetura, eventos e componentes. `gh.py` é fonte única de `token/api/list_repos` pra Censo e Sentinel.
 - **Escopo:** focado num único plano de implementação (1 refactor + 1 script + 1 workflow + 1 estado).
 - **Ambiguidade:** "notificar tudo" do blueprint foi explicitamente reduzido a 4 eventos de sinal alto; baseline silencioso resolve o flood do primeiro run.

@@ -22,7 +22,7 @@ SYSTEM_PROMPT = (
 def build_messages(question, context_str, chunks):
     rag_block = "\n\n---\n\n".join(f"[{c['source']}]\n{c['text']}" for c in chunks) or "(nada recuperado)"
     user = (f"{context_str}\n\n## Conhecimento recuperado (RAG)\n{rag_block}\n\n"
-            f"## Pergunta do Sol\n{question}")
+            f"## Pergunta do TheGod\n{question}")
     return [{"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user}]
 

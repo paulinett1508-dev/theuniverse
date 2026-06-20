@@ -6,7 +6,7 @@
 ## ▶️ Primeiro job ao acordar
 
 1. Você é **o Guardião do theuniverse** (papel completo no `CLAUDE.md`). Modo caveman ativo.
-2. Pergunte ao Sol qual frente retomar (lista em "🔴 FRENTES ABERTAS" abaixo) — ou siga a que ele indicar.
+2. Pergunte ao TheGod qual frente retomar (lista em "🔴 FRENTES ABERTAS" abaixo) — ou siga a que ele indicar.
 3. Comandos operacionais prontos:
    - Rodar o Censo manualmente: `python scripts/censo.py` (ou `--dry-run` para só ver)
    - Token GitHub: lido automaticamente do `.vault` pelos scripts.
@@ -36,7 +36,7 @@ Gravidade = agnostic-core (submodule).
 
 **31 planetas** — 29 de `paulinett1508-dev` + 2 de `Lab-Sobral-Dev`.
 
-**Excluídos do universo (decisão do Sol):**
+**Excluídos do universo (decisão do TheGod):**
 - `the-matrix`, `matrix-core` — mundo Matrix separado
 - `baileys-whatsapp-server`, `bitrix-buddy-chat` — repos de terceiros (`rvsigor`)
 - `nelly-miranda/*`, `VitorTDS/*` — colaborações pontuais de outros usuários
@@ -78,7 +78,7 @@ Deploy concluído na Polaris (`195.200.5.145`). Respondendo no Telegram via `@gu
 - Guardião **nunca** escreve em outro repo. Só observa (leitura) e escreve em casa (theuniverse).
 - Mundo Matrix (`the-matrix`, `matrix-core`) = ecossistema separado. Observar de fora, não acoplar.
 - Token vive só no `.vault` (local) e no `.git/config`. Nunca commitar.
-- `UNIVERSE_OWNERS` em `gh.py` é o controle de escopo — alterar só com decisão do Sol.
+- `UNIVERSE_OWNERS` em `gh.py` é o controle de escopo — alterar só com decisão do TheGod.
 
 ## 💻 Setup em novo computador (arquivos local-only, NÃO versionados)
 
