@@ -32,7 +32,7 @@ def extract_reply_context(msg: dict) -> str | None:
     return text if text else None
 
 
-def handle_update(update, cfg, rag, tok, brain_fn, context_fn, rag_query_fn=None):
+def handle_update(update, cfg, rag, tok, brain_fn, context_fn):
     msg = update.get("message") or {}
     chat_id = (msg.get("chat") or {}).get("id")
     if not is_authorized(chat_id, cfg.sol_chat_id):
@@ -45,8 +45,7 @@ def handle_update(update, cfg, rag, tok, brain_fn, context_fn, rag_query_fn=None
     if reply_context:
         log.info("Reply detectado — contexto: %.60s…", reply_context.replace("\n", " "))
     context_str = context_fn(tok)
-    rag_query = rag_query_fn(question) if rag_query_fn else question
-    chunks = rag.retrieve(rag_query)
+    chunks = rag.retrieve(question)
     return brain_fn(question, context_str, chunks, reply_context)
 
 
@@ -62,7 +61,7 @@ def main():
     log.info("Oráculo online. Indexados %d chunks. Long-polling iniciado.", len(rag.chunks))
 
     _history = []
-    _ctx_repo = [None]  # lista mutável para closure sem nonlocal
+    _ctx_repo = [None]  # repo ativo na conversa (extraído do reply_context)
 
     def context_fn(t):
         try:
@@ -71,10 +70,6 @@ def main():
             log.exception("contexto ao vivo falhou")
             return "## Estado atual do universo\n(estado ao vivo indisponível agora)"
 
-    def rag_query_fn(question):
-        repo = _ctx_repo[0]
-        return f"{question} {repo}" if repo else question
-
     def brain_fn(q, c, ch, reply_context=None):
         if reply_context:
             facts = brain._parse_notification(reply_context)
@@ -82,7 +77,8 @@ def main():
                 _ctx_repo[0] = facts["repo"]
         result = brain.answer(q, c, ch, cfg.groq_api_key, cfg.groq_model,
                               reply_context=reply_context,
-                              history=list(_history))
+                              history=list(_history),
+                              ctx_repo=_ctx_repo[0])
         _history.append({"role": "user", "content": q})
         _history.append({"role": "assistant", "content": result})
         while len(_history) > 10:
@@ -97,7 +93,7 @@ def main():
             for upd in resp.json().get("result", []):
                 offset = upd["update_id"] + 1
                 try:
-                    reply = handle_update(upd, cfg, rag, tok, brain_fn, context_fn, rag_query_fn)
+                    reply = handle_update(upd, cfg, rag, tok, brain_fn, context_fn)
                 except Exception:
                     log.exception("falha ao responder")
                     reply = "Oráculo indisponível, tenta de novo."

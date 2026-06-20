@@ -66,7 +66,7 @@ def _facts_block(facts: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def build_messages(question, context_str, chunks, reply_context=None, history=None):
+def build_messages(question, context_str, chunks, reply_context=None, history=None, ctx_repo=None):
     rag_block = "\n\n---\n\n".join(f"[{c['source']}]\n{c['text']}" for c in chunks) or "(nada recuperado)"
     reply_section = ""
     if reply_context:
@@ -76,8 +76,10 @@ def build_messages(question, context_str, chunks, reply_context=None, history=No
             f"{reply_context}\n"
             f"{_facts_block(facts)}\n"
         )
+    repo_anchor = f"## Repo em foco nesta conversa\n{ctx_repo}\n\n" if ctx_repo else ""
     current_user = (f"{context_str}\n\n"
                     f"{reply_section}"
+                    f"{repo_anchor}"
                     f"## Conhecimento recuperado (RAG)\n{rag_block}\n\n"
                     f"## Pergunta do TheGod\n{question}")
 
@@ -88,13 +90,13 @@ def build_messages(question, context_str, chunks, reply_context=None, history=No
     return messages
 
 
-def answer(question, context_str, chunks, api_key, model, client=None, reply_context=None, history=None):
+def answer(question, context_str, chunks, api_key, model, client=None, reply_context=None, history=None, ctx_repo=None):
     client = client or httpx
     resp = client.post(
         GROQ_URL,
         headers={"Authorization": f"Bearer {api_key}"},
         json={"model": model,
-              "messages": build_messages(question, context_str, chunks, reply_context, history),
+              "messages": build_messages(question, context_str, chunks, reply_context, history, ctx_repo),
               "temperature": 0.2},
         timeout=60,
     )
