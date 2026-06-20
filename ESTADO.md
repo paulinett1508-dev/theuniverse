@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-20
+> Última atualização: 2026-06-20 (sessão tarde)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -53,6 +53,8 @@ Gravidade = agnostic-core (submodule).
   - `gh.py` atualizado: `UNIVERSE_OWNERS` filtra por owner (sem affiliation fixo)
   - `censo.py` atualizado: `EXCLUDE` list + clusters novos
   - Censo rodado e pushado — 31 planetas, índice limpo
+  - **Skill Sol criada** em `.agnostic-core/skills/automacao/sol-aquece-planetas.md` — 5 passos idempotentes: gravidade + CLAUDE.md + .gitignore + CI + HANDOFF.md. Invocável com `/sol` de dentro do repo do planeta.
+  - **Teste real em `botclinop`** (repo vazio, 70d dormante): Sol executado com sucesso. Bug encontrado e corrigido: token não deve ser embutido na URL do `git submodule add` (contamina `.gitmodules` → GitHub Push Protection bloqueia). Fix na skill e repush.
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
