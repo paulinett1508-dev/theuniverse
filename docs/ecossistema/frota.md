@@ -18,7 +18,7 @@ Resolve o conflito planeta↔servidor: planeta é a *obra* (repo); estrela é a 
 
 | estrela | designação anterior | papel | hospeda |
 |---|---|---|---|
-| **Polaris** ⭐ | Oráculo (nexus-vps01) | a estrela-guia / vidente | motor Hermes (RAG, MCP, oráculo) |
+| **Polaris** ⭐ | vps-universo | a estrela-guia / vidente | Hermes-Oráculo do universo (IP: 195.200.5.145) |
 | **Antares** ⭐ | Zion (sbr-vps-zion) | o coração — refúgio de produção | sistemas Sobral em prod |
 | **Sirius** ⭐ | VPS Hostinger | a mais brilhante (face pública) | SuperCartola (scm-prod) |
 

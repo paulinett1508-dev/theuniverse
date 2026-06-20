@@ -56,25 +56,17 @@ Gravidade = agnostic-core (submodule).
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
-### 1. Hermes-Oráculo (subsistema A) — deploy na Polaris bloqueado por 2 itens
+### 1. Hermes-Oráculo (subsistema A) — ✅ NO AR (2026-06-20)
 
-Código 100% implementado e testado (26 testes). Só falta o deploy.
+Deploy concluído na Polaris (`195.200.5.145`). Respondendo no Telegram via `@guardiao_universo_bot`. 227 chunks indexados. Long-polling ativo como serviço systemd.
 
-**Bloqueio 1 — SSH da Polaris inacessível nesta máquina:**
-- IP desta máquina (`45.226.61.199`) não está na whitelist do firewall da Polaris
-- Ação: hPanel Hostinger → VPS → Firewall → adicionar TCP porta 49222 source `45.226.61.199`
-- Chave `~/.ssh/id_ed25519_nexus_vps01` não existe aqui (não foi copiada da máquina anterior)
-- Após liberar firewall: testar com `id_ed25519` genérica; se não funcionar, gerar nova + `ssh-copy-id`
+**Infra da Polaris (nosso universo — NÃO confundir com Matrix):**
+- IP: `195.200.5.145` · SSH porta 22 · chave `~/.ssh/vscode_key`
+- Serviço: `systemctl status oraculo` · logs: `journalctl -u oraculo -f`
+- Clone: `/opt/theuniverse` · venv: `/opt/oraculo/venv` · env: `/opt/oraculo/.env`
+- Para atualizar: `git pull` em `/opt/theuniverse` + `systemctl restart oraculo`
 
-**Bloqueio 2 — decisão de token GitHub para a Polaris:**
-- **(a) recomendado:** PAT fine-grained read-only (`Contents: read`) — Sol gera e passa
-- **(b) rápido:** usar o `ghp_` clássico do `.vault` — sobe já, mas token amplo na VPS
-
-**Passos do deploy (após resolver bloqueios):**
-1. Gravar token na Polaris: `git config --global credential.helper store` + `/root/.git-credentials` (chmod 600)
-2. Criar `/opt/oraculo/.env` (chmod 600): `TELEGRAM_TOKEN`, `SOL_CHAT_ID=1030157568`, `GROQ_API_KEY`, `GROQ_MODEL=llama-3.3-70b-versatile`, `GITHUB_TOKEN`
-3. Rodar `oraculo/deploy.sh`
-4. Validar: `journalctl -u oraculo -f` + perguntar no Telegram "qual repo >30 dias sem commit?"
+**Para re-deploy do zero:** `bash oraculo/deploy.sh` (de dentro deste repo, na máquina local)
 
 ### 2. Subsistemas futuros (ordem C→D)
 
@@ -93,6 +85,6 @@ Código 100% implementado e testado (26 testes). Só falta o deploy.
 Ao clonar o theuniverse noutra máquina, estes itens **não vêm pelo git** e precisam ser recriados:
 
 1. **`.vault`** (raiz do repo, gitignorado) — `GITHUB_TOKEN=` e `GROQ_API_KEY=`. Sem ele, Censo/Sentinel/Oráculo não autenticam.
-2. **Chave SSH `~/.ssh/id_ed25519_nexus_vps01`** — necessária pro deploy na Polaris (porta 49222, root@2.25.163.125). Copiar da máquina anterior ou gerar nova + cadastrar na Polaris.
+2. **Chave SSH `~/.ssh/vscode_key`** — cadastrada na Polaris via extensão Hostinger do VS Code. Porta 22, `root@195.200.5.145`.
 3. **Submodule** — clonar com `git clone --recurse-submodules` (ou `git submodule update --init`).
 4. **Credencial git de push** — configurar token no `.git/config` para conseguir `git push`.

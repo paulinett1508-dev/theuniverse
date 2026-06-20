@@ -2,8 +2,8 @@
 # Deploy do Oráculo do Universo na Polaris
 set -euo pipefail
 
-POLARIS="root@2.25.163.125"
-SSH_OPTS="-i ~/.ssh/id_ed25519_nexus_vps01 -p 49222"
+POLARIS="root@195.200.5.145"
+SSH_OPTS="-i ~/.ssh/vscode_key -p 22"
 
 echo "=== Espelhando theuniverse em /opt/theuniverse ==="
 # [PENDENTE SOL] requer credencial de leitura do repo privado na Polaris
