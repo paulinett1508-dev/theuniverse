@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-20 (sessão noite — Dashboard NOC + Oráculo v3.1)
+> Última atualização: 2026-06-20 (sessão noite/madrugada — Dashboard NOC v2 + cosmologia planetária)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -46,6 +46,8 @@ Gravidade = agnostic-core (submodule).
 - `Lab-Sobral-Dev/*` — org fora de escopo; `SBR-ocomon-5.0` fadado ao arquivamento; `SbrTask` será migrado para `paulinett1508-dev/SbrTask` (futuro — censo captura automaticamente quando criado)
 
 **Issues abertas a monitorar:** `agnostic-core`×3 · `tokentown`×1 · `GessoExpress`×1
+**CI com falha:** `sbrgestao` — `agnvendas-unit-tests failure` (Estrela da Morte ativa no dashboard)
+**Supernovas iminentes:** `bolaocopa2026` · `f1-pulse` — arquivar/excluir quando TheGod decidir
 
 ## ✅ Concluído nesta jornada
 
@@ -73,13 +75,25 @@ Gravidade = agnostic-core (submodule).
   - Digitando: `sendChatAction typing` imediato ao receber mensagem.
   - `sendSticker` nos momentos de órbita: 🚀 proposta, 🌌 confirmada, 👋 negada. Packs espaciais provisórios; pack customizado planejado (Star Wars, Severance).
   - **Vocabulário vivo** no system prompt: Pluribus (o próprio Oráculo), Estrela da Morte, Lado Sombrio, A Força, Supernova, Órbita estável.
-- **Dashboard NOC (sessão 2026-06-20 noite):**
+- **Dashboard NOC v1 (sessão 2026-06-20 noite):**
   - URL: `theuniverse-lake.vercel.app`
   - Mapa orbital animado: 4 anéis, 27 planetas, starfield + cometas + bólidos.
   - Magnitude por grandeza (commits + diskKB, escala 1–5).
   - Card lateral: click fixa painel, planeta 3D com atmosfera + anéis.
   - Responsivo: desktop=painel lateral, mobile=bottom sheet.
   - Efeitos ao vivo: push→shockwave, PR→laranja, issue→âmbar. Poll 8s via `api/events.js`.
+- **Dashboard NOC v2 + cosmologia (sessão 2026-06-20 madrugada):**
+  - **Re-classificação planetária** (TheGod): 5 tipos de corpos celestes além de "planeta":
+    - `agnostic-core` → 🛸 Estação Espacial — hexágono fixo entre sol e anel 1, não orbita, gira lento
+    - `mcp-eventos` → 🛰 Satélite Artificial — diamante, forçado ao anel mais interno (órbita mais rápida)
+    - `luna-base` → 🌙 Observatório Lunar — planeta branco-azulado com anel pontilhado de lua (era `botclinop`, renomeado no GitHub via API)
+    - `bolaocopa2026` / `f1-pulse` → 💥 Supernova Iminente — pulso vermelho-laranja (serão arquivados/excluídos em breve)
+    - `vibegaminghub` → 🎮 Planeta Toys — gradiente rosa↔roxo↔azul animado
+  - **Paleta cromática**: 6 tonalidades determinísticas por nome para verde (healthy), amarelo (warning) e vermelho (alert) — nenhum planeta igual ao outro visualmente
+  - **Tamanhos aumentados**: range 8–26px (era 6–18px) — diferença de magnitude mais visível
+  - **Métricas novas no card**: linguagem principal (dot colorido), contribuidores, último PR (badge estado + título + data)
+  - **XSS fix**: `esc()` + `safeHex()` em todos os campos da API interpolados em innerHTML
+  - **`sbrgestao`** está como Estrela da Morte: `agnvendas-unit-tests failure` no CI — monitorar, não suprimir
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
@@ -106,11 +120,18 @@ Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após c
 - **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. `POLARIS_SSH_KEY` configurado — cron totalmente autônomo.
 - **C2 (Secrets Scan):** sentinel detecta secrets expostos em qualquer planeta e notifica Telegram.
 
-### 4. Dashboard NOC — ✅ NO AR
+### 4. Dashboard NOC — ✅ NO AR | v2
 
 URL: `theuniverse-lake.vercel.app` (Vercel, deploy automático no push).
 Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_TOKEN` no painel Vercel.
-Próximas evoluções: domínio customizado · pack de stickers do universo · mais métricas no card.
+
+**Corpos celestes especiais** (hardcoded em `api/planets.js → SPECIAL_BODIES`):
+- station: `agnostic-core` · satellite: `mcp-eventos` · observatory: `luna-base`
+- supernova: `bolaocopa2026`, `f1-pulse` · toys: `vibegaminghub`
+
+Quando `luna-base` for excluído ou outro repo ganhar tipo especial: atualizar `SPECIAL_BODIES`.
+
+Próximas evoluções: domínio customizado · pack de stickers · `sbrgestao` CI fix.
 
 ### 5. Subsistema D — DESCARTADO
 
