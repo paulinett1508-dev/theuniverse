@@ -68,10 +68,12 @@ def _fmt_push(data: dict) -> str | None:
         msg = commits[0]["message"].split("\n")[0][:80]
         url = commits[0]["url"]
         return (
-            f"🚀 <b>{repo}</b>  ·  <code>{branch}</code>\n"
-            f"👤 {pusher}\n"
-            f"📝 {msg}\n"
-            f'<a href="{url}">ver commit</a>'
+            f"🌍 <b>{repo}</b> · <code>{branch}</code>\n"
+            f"\n"
+            f"{msg}\n"
+            f"— {pusher}\n"
+            f"\n"
+            f'<a href="{url}">↗ ver commit</a>'
         )
 
     lines = "\n".join(
@@ -80,10 +82,12 @@ def _fmt_push(data: dict) -> str | None:
     extra = f"\n  +{len(commits) - 4} mais" if len(commits) > 4 else ""
     url = data.get("compare", "")
     return (
-        f"🚀 <b>{repo}</b>  ·  <code>{branch}</code>  ({len(commits)} commits)\n"
-        f"👤 {pusher}\n"
+        f"🌍 <b>{repo}</b> · <code>{branch}</code>  ({len(commits)} commits)\n"
+        f"\n"
         f"{lines}{extra}\n"
-        f'<a href="{url}">ver diff</a>'
+        f"— {pusher}\n"
+        f"\n"
+        f'<a href="{url}">↗ ver diff</a>'
     )
 
 
@@ -100,29 +104,40 @@ def _fmt_pr(data: dict) -> str | None:
         base = pr["base"]["ref"]
         head = pr["head"]["ref"]
         return (
-            f"🔀 <b>{repo}</b>  PR #{number} aberto\n"
-            f"👤 {user}:  {title}\n"
+            f"🔀 <b>{repo}</b> · PR #{number}\n"
+            f"\n"
+            f"{title}\n"
             f"<code>{head}</code> → <code>{base}</code>\n"
-            f'<a href="{url}">ver PR</a>'
+            f"— {user}\n"
+            f"\n"
+            f'<a href="{url}">↗ ver PR</a>'
         )
     if action == "closed":
         if pr.get("merged"):
             merger = (pr.get("merged_by") or {}).get("login", "?")
             return (
-                f"✅ <b>{repo}</b>  PR #{number} mergeado por {merger}\n"
+                f"✅ <b>{repo}</b> · PR #{number}\n"
+                f"\n"
                 f"{title}\n"
-                f'<a href="{url}">ver PR</a>'
+                f"— mergeado por {merger}\n"
+                f"\n"
+                f'<a href="{url}">↗ ver PR</a>'
             )
         return (
-            f"❌ <b>{repo}</b>  PR #{number} fechado sem merge\n"
+            f"❌ <b>{repo}</b> · PR #{number}\n"
+            f"\n"
             f"{title}\n"
-            f'<a href="{url}">ver PR</a>'
+            f"— fechado sem merge\n"
+            f"\n"
+            f'<a href="{url}">↗ ver PR</a>'
         )
     if action == "reopened":
         return (
-            f"🔄 <b>{repo}</b>  PR #{number} reaberto\n"
+            f"🔄 <b>{repo}</b> · PR #{number}\n"
+            f"\n"
             f"{title}\n"
-            f'<a href="{url}">ver PR</a>'
+            f"\n"
+            f'<a href="{url}">↗ ver PR</a>'
         )
     return None
 

@@ -111,21 +111,57 @@ def apply_event(state, event, snapshot):
     return s
 
 
+_GH = "https://github.com/paulinett1508-dev"
+
+
 def format_event(event):
-    emoji = _EMOJI[event["kind"]]
+    kind = event["kind"]
     repo = event["repo"]
-    if event["kind"] == "novo_planeta":
-        return f"{emoji} Novo planeta detectado: *{repo}*"
-    if event["kind"] == "planeta_sumido":
-        return f"{emoji} Planeta sumiu do GitHub: *{repo}*"
-    if event["kind"] == "ci_falhou":
-        return f"{emoji} CI falhou em *{repo}* (run {event['run_id']})"
-    if event["kind"] == "issue_nova":
-        return f"{emoji} Issue nova em *{repo}* #{event['number']}: {event['detail']}"
-    if event["kind"] == "secret_exposto":
-        url = f"https://github.com/paulinett1508-dev/{repo}/security/secret-scanning"
-        return (f"{emoji} Secret exposto em *{repo}* (alerta #{event['number']})\n"
-                f"Tipo: `{event['detail']}`\n{url}")
+    emoji = _EMOJI[kind]
+
+    if kind == "novo_planeta":
+        return (
+            f"{emoji} <b>{repo}</b> · novo planeta\n"
+            f"\n"
+            f"entrou no universo observável\n"
+            f"\n"
+            f'<a href="{_GH}/{repo}">↗ ver repo</a>'
+        )
+    if kind == "planeta_sumido":
+        return (
+            f"💫 <b>{repo}</b> · planeta sumiu\n"
+            f"\n"
+            f"não consta mais no GitHub"
+        )
+    if kind == "ci_falhou":
+        run_url = f"{_GH}/{repo}/actions/runs/{event['run_id']}"
+        detail = event.get("detail", "")
+        body = f"workflow: <i>{detail}</i>\n" if detail else ""
+        return (
+            f"{emoji} <b>{repo}</b> · CI falhou\n"
+            f"\n"
+            f"{body}"
+            f"\n"
+            f'<a href="{run_url}">↗ ver run</a>'
+        )
+    if kind == "issue_nova":
+        issue_url = f"{_GH}/{repo}/issues/{event['number']}"
+        return (
+            f"{emoji} <b>{repo}</b> · issue #{event['number']}\n"
+            f"\n"
+            f"{event['detail']}\n"
+            f"\n"
+            f'<a href="{issue_url}">↗ ver issue</a>'
+        )
+    if kind == "secret_exposto":
+        sec_url = f"{_GH}/{repo}/security/secret-scanning"
+        return (
+            f"{emoji} <b>{repo}</b> · SECRET EXPOSTO\n"
+            f"\n"
+            f"tipo: <code>{event['detail']}</code>\n"
+            f"\n"
+            f'<a href="{sec_url}">↗ painel de segurança</a>'
+        )
     return f"Evento em {repo}"
 
 
@@ -146,7 +182,8 @@ def send_telegram(text):
     tg_token = os.environ["TELEGRAM_TOKEN"]
     chat_id = os.environ["SOL_CHAT_ID"]
     payload = urllib.parse.urlencode({
-        "chat_id": chat_id, "text": text, "parse_mode": "Markdown",
+        "chat_id": chat_id, "text": text, "parse_mode": "HTML",
+        "disable_web_page_preview": "true",
     }).encode()
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{tg_token}/sendMessage",
