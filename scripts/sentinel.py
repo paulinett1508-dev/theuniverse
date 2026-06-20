@@ -21,6 +21,7 @@ _EMOJI = {
     "planeta_sumido": "💥",
     "ci_falhou": "🔴",
     "issue_nova": "🚨",
+    "secret_exposto": "🔑",
 }
 
 
@@ -41,10 +42,15 @@ def seed_state(snapshot):
     for r, issues in snapshot["issues"].items():
         if issues:
             last_issue[r] = max(i["number"] for i in issues)
+    last_secret = {}
+    for r, alerts in snapshot["secrets"].items():
+        if alerts:
+            last_secret[r] = max(a["number"] for a in alerts)
     return {
         "known_repos": list(snapshot["repos"]),
         "last_run_id": last_run_id,
         "last_issue_number": last_issue,
+        "last_secret_alert_number": last_secret,
     }
 
 
@@ -69,6 +75,11 @@ def compute_events(state, snapshot):
             if issue["number"] > baseline:
                 events.append({"kind": "issue_nova", "repo": r,
                                "number": issue["number"], "detail": issue["title"]})
+        secret_baseline = state.get("last_secret_alert_number", {}).get(r, 0)
+        for alert in sorted(snapshot["secrets"].get(r, []), key=lambda a: a["number"]):
+            if alert["number"] > secret_baseline:
+                events.append({"kind": "secret_exposto", "repo": r,
+                               "number": alert["number"], "detail": alert["secret_type"]})
     return events
 
 
@@ -91,6 +102,12 @@ def apply_event(state, event, snapshot):
         s["last_run_id"][repo] = event["run_id"]
     elif kind == "issue_nova":
         s["last_issue_number"][repo] = max(s["last_issue_number"].get(repo, 0), event["number"])
+    elif kind == "secret_exposto":
+        if "last_secret_alert_number" not in s:
+            s["last_secret_alert_number"] = {}
+        s["last_secret_alert_number"][repo] = max(
+            s["last_secret_alert_number"].get(repo, 0), event["number"]
+        )
     return s
 
 
@@ -105,6 +122,10 @@ def format_event(event):
         return f"{emoji} CI falhou em *{repo}* (run {event['run_id']})"
     if event["kind"] == "issue_nova":
         return f"{emoji} Issue nova em *{repo}* #{event['number']}: {event['detail']}"
+    if event["kind"] == "secret_exposto":
+        url = f"https://github.com/paulinett1508-dev/{repo}/security/secret-scanning"
+        return (f"{emoji} Secret exposto em *{repo}* (alerta #{event['number']})\n"
+                f"Tipo: `{event['detail']}`\n{url}")
     return f"Evento em {repo}"
 
 
@@ -140,7 +161,7 @@ def build_snapshot(tok):
     repo_objs = list_repos(tok)
     repos = [r["name"] for r in repo_objs]
     full = {r["name"]: r["full_name"] for r in repo_objs}
-    latest_run, issues = {}, {}
+    latest_run, issues, secrets = {}, {}, {}
     for name in repos:
         fn = full[name]
         try:
@@ -161,7 +182,15 @@ def build_snapshot(tok):
         except Exception as e:
             print(f"  issues falhou em {fn}: {e}", file=sys.stderr)
             issues[name] = []
-    return {"repos": repos, "latest_run": latest_run, "issues": issues}
+        try:
+            raw, headers = api(
+                f"/repos/{fn}/secret-scanning/alerts?state=open&per_page=100", tok
+            )
+            secrets[name] = [{"number": a["number"], "secret_type": a.get("secret_type", "?")}
+                             for a in raw] if isinstance(raw, list) else []
+        except Exception:
+            secrets[name] = []  # feature não habilitada ou sem permissão — ignorar
+    return {"repos": repos, "latest_run": latest_run, "issues": issues, "secrets": secrets}
 
 
 def main():

@@ -1,0 +1,24 @@
+name: C1 — Atualiza IPs do GitHub na Polaris
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"   # toda segunda-feira às 04:00 UTC
+  workflow_dispatch:        # manual também
+
+jobs:
+  update-ips:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instala chave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.POLARIS_SSH_KEY }}" > ~/.ssh/polaris_key
+          chmod 600 ~/.ssh/polaris_key
+          ssh-keyscan -p 22 195.200.5.145 >> ~/.ssh/known_hosts
+
+      - name: Atualiza IPs do GitHub no UFW
+        run: |
+          ssh -i ~/.ssh/polaris_key -p 22 root@195.200.5.145 \
+            "cd /opt/theuniverse && git pull --ff-only && python3 scripts/c1-update-github-ips.py"
