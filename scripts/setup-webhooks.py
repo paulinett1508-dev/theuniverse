@@ -9,9 +9,13 @@ import urllib.request
 WEBHOOK_URL = "http://195.200.5.145:9120/webhook"
 EVENTS = ["push", "pull_request"]
 
-UNIVERSE_OWNERS = {"paulinett1508-dev", "Lab-Sobral-Dev"}
-EXCLUDE = {"the-matrix", "matrix-core", "baileys-whatsapp-server", "bitrix-buddy-chat",
-           "theuniverse"}
+UNIVERSE_OWNERS = {"paulinett1508-dev"}
+EXCLUDE = {
+    "the-matrix", "matrix-core", "baileys-whatsapp-server", "bitrix-buddy-chat",
+    "theuniverse",
+    "agnvendas-painelsbr",  # arquivado
+    "pedidomobile",         # arquivado
+}
 
 # ── vault ─────────────────────────────────────────────────────────────────────
 

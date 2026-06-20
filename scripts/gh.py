@@ -13,7 +13,7 @@ API = "https://api.github.com"
 ROOT = Path(__file__).resolve().parent.parent
 SELF = "theuniverse"  # o observatório não é planeta
 # owners cujos repos entram no universo
-UNIVERSE_OWNERS = {"paulinett1508-dev", "Lab-Sobral-Dev"}
+UNIVERSE_OWNERS = {"paulinett1508-dev"}
 
 
 def token():

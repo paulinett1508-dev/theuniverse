@@ -3,6 +3,12 @@
 Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de planetas.
 
 
+
+## 2026-06-20 — Censo automático
+
+### 💥 Planetas sumidos
+- **agnvendas-painelsbr** — não consta mais no GitHub (ficha arquivada)
+- **pedidomobile** — não consta mais no GitHub (ficha arquivada)
 ## 2026-06-20 — Subsistema A no ar (Hermes-Oráculo, deploy na Polaris)
 
 ### 🔮 Oráculo respondendo no Telegram

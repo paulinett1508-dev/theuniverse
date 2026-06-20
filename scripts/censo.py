@@ -21,7 +21,11 @@ PLANETS = ROOT / "planets"
 CHANGELOG = ROOT / "CHANGELOG.md"
 
 # Repos excluídos do universo (decisão do Sol)
-EXCLUDE = {"the-matrix", "matrix-core", "baileys-whatsapp-server", "bitrix-buddy-chat"}
+EXCLUDE = {
+    "the-matrix", "matrix-core", "baileys-whatsapp-server", "bitrix-buddy-chat",
+    "agnvendas-painelsbr",  # arquivado — funcionalidade absorvida pelo sbrgestao
+    "pedidomobile",         # arquivado
+}
 
 CLUSTERS = {
     "sbrgestao": "sobral-core", "sbrchecks": "sobral-core", "agnvendas-painelsbr": "sobral-core",
