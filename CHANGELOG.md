@@ -3,6 +3,16 @@
 Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de planetas.
 
 
+## 2026-06-20 — Subsistema A no ar (Hermes-Oráculo, deploy na Polaris)
+
+### 🔮 Oráculo respondendo no Telegram
+- Deploy concluído na **Polaris** (`195.200.5.145`, porta 22) — VPS do universo (não confundir com o Oráculo da Matrix `2.25.163.125`).
+- Serviço systemd `oraculo.service` ativo, restart automático, 227 chunks BM25 indexados.
+- Chave de acesso: `~/.ssh/vscode_key` (cadastrada via extensão Hostinger do VS Code).
+- Token GitHub fine-grained read-only (`Contents: read`) — se vazar, só lê o theuniverse.
+- Validado ao vivo: Sol perguntou no Telegram, Oráculo respondeu com contexto real da API.
+- Universo remapeado nesta sessão: `Lab-Sobral-Dev` incluído, `the-matrix`/`matrix-core` excluídos. 31 planetas.
+
 ## 2026-06-20 — Censo automático
 
 ### 💥 Planetas sumidos
