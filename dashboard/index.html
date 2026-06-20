@@ -581,6 +581,9 @@ const panel=document.getElementById('panel');
 const panelBody=document.getElementById('panel-body');
 let panelOpen=false, selectedWrapper=null;
 
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeHex=c=>/^#[0-9a-fA-F]{3,8}$/.test(c)?c:'#8b949e';
+
 function openPanel(p,wrapper){
   hideTip();
   if(selectedWrapper)selectedWrapper.classList.remove('selected');
@@ -588,21 +591,22 @@ function openPanel(p,wrapper){
 
   const mag='★'.repeat(p.magnitude||1)+'☆'.repeat(5-(p.magnitude||1));
   const diskMB=p.diskKB>1024?(p.diskKB/1024).toFixed(1)+' MB':(p.diskKB||0)+' KB';
-  const ghUrl=`https://github.com/paulinett1508-dev/${p.name}`;
+  const ghUrl=`https://github.com/paulinett1508-dev/${esc(p.name)}`;
 
   const langRow=p.lang
-    ?`<div class="pn-row"><span class="pn-label">linguagem</span><span class="pn-val"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.lang.color};margin-right:5px;vertical-align:middle"></span>${p.lang.name}</span></div>`
+    ?`<div class="pn-row"><span class="pn-label">linguagem</span><span class="pn-val"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${safeHex(p.lang.color)};margin-right:5px;vertical-align:middle"></span>${esc(p.lang.name)}</span></div>`
     :'';
   const contrRow=p.contributors>0
-    ?`<div class="pn-row"><span class="pn-label">contribuidores</span><span class="pn-val">${p.contributors}</span></div>`
+    ?`<div class="pn-row"><span class="pn-label">contribuidores</span><span class="pn-val">${p.contributors|0}</span></div>`
     :'';
   let prRow='';
   if(p.lastPR){
     const pr=p.lastPR;
-    const prTitle=pr.title.length>30?pr.title.slice(0,28)+'…':pr.title;
+    const prTitle=esc(pr.title.length>30?pr.title.slice(0,28)+'…':pr.title);
     const prDate=new Date(pr.mergedAt||pr.createdAt);
     const prAgo=Math.floor((Date.now()-prDate.getTime())/86400000);
     const prDateStr=prAgo===0?'hoje':prAgo===1?'ontem':`${prAgo}d atrás`;
+    // stateColor is hardcoded, not from API — safe to interpolate directly
     const stateColor=pr.state==='MERGED'?'#a371f7':pr.state==='OPEN'?'#3fb950':'#f85149';
     const stateLabel=pr.state==='MERGED'?'merged':pr.state==='OPEN'?'aberto':'fechado';
     prRow=`<div class="pn-row" style="align-items:flex-start"><span class="pn-label">último PR</span><span class="pn-val" style="max-width:155px;text-align:right"><span style="color:${stateColor};font-size:10px;margin-right:3px">●${stateLabel}</span><br><span style="font-size:10.5px;opacity:.8">${prTitle}</span><br><span style="font-size:10px;color:#4a5888">${prDateStr}</span></span></div>`;
@@ -610,7 +614,7 @@ function openPanel(p,wrapper){
 
   panelBody.innerHTML=`
     <div class="pn-info">
-      <div class="pn-name">${p.name}</div>
+      <div class="pn-name">${esc(p.name)}</div>
       <div class="pn-health ${p.health}">${healthLabel[p.health]||p.health}</div>
       <hr class="pn-sep">
       <div class="pn-row"><span class="pn-label">magnitude</span><span class="pn-val pn-stars">${mag}</span></div>
