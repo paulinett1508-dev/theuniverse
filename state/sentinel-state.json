@@ -30,7 +30,9 @@
     "temperodemamae",
     "the-matrix",
     "tokentown",
-    "vibegaminghub"
+    "vibegaminghub",
+    "SBR-ocomon-5.0",
+    "SbrTask"
   ],
   "last_run_id": {
     "agnostic-core": 27538762728,
@@ -42,11 +44,12 @@
     "hqplus": 25411579822,
     "mcp-eventos": 27564286266,
     "pedidomobile": 24175958490,
-    "sbrgestao": 27864354276,
+    "sbrgestao": 27874564272,
     "sicefsus-sistema": 27864068321,
     "SuperCartolaManagerv5-production": 27812757389
   },
   "last_issue_number": {
-    "agnostic-core": 29
+    "agnostic-core": 29,
+    "SbrTask": 6
   }
 }
