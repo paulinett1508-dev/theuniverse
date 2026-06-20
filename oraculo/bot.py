@@ -26,6 +26,14 @@ SOVEREIGN_PLANETS = {"the-matrix", "matrix-core"}
 _CONFIRM = {"sim", "s", "pode", "entra", "vai", "yes", "y", "ok", "bora", "confirma"}
 _DENY    = {"não", "nao", "n", "cancela", "cancel", "voltar", "no", "deixa"}
 
+# Stickers provisórios — substituir pelo pack customizado do universo quando criado
+STICKERS = {
+    "orbit_proposed":  "CAACAgUAAxUAAWo3FT1cf6siBgI6z0vs1NpTOdNiAAIHAAOGQWgf8vF2xj6PSUI8BA",  # 🚀
+    "orbit_confirmed": "CAACAgEAAxUAAWo3FTrOHoaS0ToFU3rEghpW8PgaAAJmAgACBBMFAAHn4iwXiWyJJjwE",  # 🌌
+    "orbit_denied":    "CAACAgIAAxUAAWo3FTxRJCoLc1h77sy2r3kjy4-IAALYEAAC123oSWmTENRWGDqGPAQ",  # 👋
+    "no_info":         "CAACAgUAAxUAAWo3FT1Xw1MO9lJ6ysf-yZqaZUy1AAIDAAOGQWgfvKagv4ZFaKE8BA",  # 😐
+}
+
 
 def is_authorized(chat_id, sol_chat_id):
     return chat_id == sol_chat_id
@@ -74,6 +82,17 @@ def _typing(tg_token, chat_id):
     try:
         httpx.post(f"https://api.telegram.org/bot{tg_token}/sendChatAction",
                    json={"chat_id": chat_id, "action": "typing"}, timeout=5)
+    except Exception:
+        pass
+
+
+def _send_sticker(tg_token, chat_id, key: str):
+    file_id = STICKERS.get(key)
+    if not file_id:
+        return
+    try:
+        httpx.post(f"https://api.telegram.org/bot{tg_token}/sendSticker",
+                   json={"chat_id": chat_id, "sticker": file_id}, timeout=10)
     except Exception:
         pass
 
@@ -146,10 +165,12 @@ def main():
                             _pending[0] = None
                             _ctx_repo[0] = p["repo"]
                             log.info("Órbita confirmada: %s", p["repo"])
+                            _send_sticker(cfg.telegram_token, cfg.sol_chat_id, "orbit_confirmed")
                             reply = brain_fn(p["question"], p["context_str"], p["chunks"],
                                              orbit_repo=p["repo"])
                         elif word in _DENY:
                             _pending[0] = None
+                            _send_sticker(cfg.telegram_token, cfg.sol_chat_id, "orbit_denied")
                             reply = "Entendido — respondendo do vão do universo."
                         else:
                             # nova pergunta enquanto há pendência — cancela e processa normal
@@ -176,6 +197,7 @@ def main():
                         _pending[0] = {"repo": detected, "question": question,
                                        "context_str": context_str, "chunks": chunks}
                         log.info("Órbita proposta: %s", detected)
+                        _send_sticker(cfg.telegram_token, cfg.sol_chat_id, "orbit_proposed")
                         _send(cfg.telegram_token, cfg.sol_chat_id, orbit_prompt(detected))
                         continue
 
