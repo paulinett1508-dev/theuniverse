@@ -4,6 +4,23 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-20 — Subsistema B2 no ar (Webhook Notifier)
+
+### ⚡ Notificações em tempo real — push e PRs chegam no Telegram
+- `webhook/receiver.py` — FastAPI + HMAC-SHA256, porta 9120 na Polaris. Valida assinatura GitHub antes de processar.
+- `scripts/setup-webhooks.py` — registra webhook nos repos via GitHub API. Idempotente (cria ou atualiza).
+- 27/27 repos com webhook ativo. Notifica: push (qualquer branch) e pull_request (opened/merged/closed).
+- PAT renovado: `theuniverse-master-key` com scopes `repo` + `admin:repo_hook` + `admin:org_hook`.
+- Testado ao vivo: push em `botclinop` → notificação chegou no Telegram em tempo real.
+
+### 🗺️ Universo finalizado em 27 planetas
+- `Lab-Sobral-Dev` removido de `UNIVERSE_OWNERS` — `SBR-ocomon-5.0` fadado ao arquivamento; `SbrTask` será migrado para `paulinett1508-dev/SbrTask` (censo captura automaticamente).
+- `agnvendas-painelsbr` e `pedidomobile` adicionados ao `EXCLUDE` — arquivados, read-only.
+
+### ☀️ Skill Sol criada e testada
+- `.agnostic-core/skills/automacao/sol-aquece-planetas.md` — 5 passos idempotentes: agnostic-core + CLAUDE.md + .gitignore + CI + HANDOFF.md.
+- Testada em `botclinop` (repo vazio). Bug encontrado e corrigido: token não deve ser embutido na URL do `git submodule add`.
+
 ## 2026-06-20 — Censo automático
 
 ### 💥 Planetas sumidos
