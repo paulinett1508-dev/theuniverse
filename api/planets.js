@@ -3,7 +3,7 @@ const OWNER = 'paulinett1508-dev';
 const SPECIAL_BODIES = {
   'agnostic-core':  'station',
   'mcp-eventos':    'satellite',
-  'botclinop':      'observatory',   // renomear para luna-base em breve
+  'luna-base':      'observatory',
   'bolaocopa2026':  'supernova',
   'f1-pulse':       'supernova',
   'vibegaminghub':  'toys',
