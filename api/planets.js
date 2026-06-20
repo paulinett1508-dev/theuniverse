@@ -16,10 +16,12 @@ query($login: String!, $after: String) {
         name
         pushedAt
         isArchived
+        diskUsage
         openIssues: issues(states: OPEN) { totalCount }
         defaultBranchRef {
           target {
             ... on Commit {
+              history { totalCount }
               statusCheckRollup { state }
             }
           }
@@ -64,17 +66,31 @@ module.exports = async function handler(req, res) {
 
         const ci = repo.defaultBranchRef?.target?.statusCheckRollup?.state ?? null;
         const issues = repo.openIssues?.totalCount ?? 0;
+        const commits = repo.defaultBranchRef?.target?.history?.totalCount ?? 0;
+        const diskKB = repo.diskUsage ?? 0;
 
         let health = 'healthy';
         if (repo.isArchived || daysSincePush > 120) health = 'dormant';
         else if (ci === 'FAILURE' || ci === 'ERROR') health = 'alert';
         else if (daysSincePush > 30 || issues > 3) health = 'warning';
 
-        planets.push({ name: repo.name, pushedAt: repo.pushedAt, daysSincePush, ci, issues, health });
+        // raw magnitude score (log scale — commit counts vary wildly)
+        const rawScore = Math.log10(1 + commits) * 0.65 + Math.log10(1 + diskKB) * 0.35;
+
+        planets.push({ name: repo.name, pushedAt: repo.pushedAt, daysSincePush, ci, issues, health, commits, diskKB, rawScore });
       }
 
       after = repos.pageInfo.hasNextPage ? repos.pageInfo.endCursor : null;
     } while (after);
+
+    // Normalize rawScore → magnitude 1–5
+    const scores = planets.map(p => p.rawScore);
+    const minS = Math.min(...scores), maxS = Math.max(...scores);
+    const range = maxS - minS || 1;
+    for (const p of planets) {
+      p.magnitude = Math.round(1 + ((p.rawScore - minS) / range) * 4); // 1–5
+      delete p.rawScore;
+    }
 
     res.status(200).json({ planets, updatedAt: new Date().toISOString() });
   } catch (e) {

@@ -91,10 +91,13 @@ body{
 }
 
 .pd{
-  width:9px;height:9px;border-radius:50%;
+  border-radius:50%;
   transition:transform .15s;
+  /* size driven by --mag CSS var set per planet */
+  width:calc(var(--mag,9) * 1px);
+  height:calc(var(--mag,9) * 1px);
 }
-.pw:hover .pd{transform:scale(2.5)}
+.pw:hover .pd{transform:scale(2.2)}
 
 .pd.healthy{background:#00ff88;box-shadow:0 0 6px #00ff88,0 0 14px rgba(0,255,136,.4)}
 .pd.warning{background:#ffcc00;box-shadow:0 0 6px #ffcc00,0 0 14px rgba(255,204,0,.4)}
@@ -264,6 +267,9 @@ function buildOrbit(planets) {
 
       const dot=document.createElement('div');
       dot.className=`pd ${planet.health}`;
+      // magnitude 1–5 → pixel size 6–18px
+      const px = 6 + (((planet.magnitude||3) - 1) / 4) * 12;
+      dot.style.setProperty('--mag', px.toFixed(1));
       wrapper.appendChild(dot);
 
       wrapper.addEventListener('mouseenter', e=>showTip(e,planet));
@@ -314,9 +320,12 @@ function daysStr(d) {
 }
 
 function showTip(e,p) {
+  const magStars = '★'.repeat(p.magnitude||1) + '☆'.repeat(5-(p.magnitude||1));
   tip.innerHTML=`
     <div class="tn">${p.name}</div>
     <div class="th ${p.health}">${healthLabel[p.health]||p.health}</div>
+    <div class="tr">magnitude: <b>${magStars}</b></div>
+    <div class="tr">commits: <b>${(p.commits||0).toLocaleString()}</b></div>
     <div class="tr">último push: <b>${daysStr(p.daysSincePush)}</b></div>
     <div class="tr">issues abertas: <b>${p.issues}</b></div>
     ${p.ci?`<div class="tr">CI: <b>${p.ci}</b></div>`:''}
