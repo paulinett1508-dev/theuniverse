@@ -6,257 +6,99 @@
 <title>theuniverse · observatório</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-
-body{
-  background:#030308;
-  color:#c8ceff;
-  font-family:'Courier New',monospace;
-  height:100vh;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-}
-
+body{background:#030308;color:#c8ceff;font-family:'Courier New',monospace;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 #stars{position:fixed;inset:0;pointer-events:none;z-index:0}
 
-/* ── header ── */
-#hdr{
-  position:relative;z-index:10;
-  display:flex;justify-content:space-between;align-items:center;
-  padding:10px 20px;
-  border-bottom:1px solid rgba(100,120,200,.15);
-  background:rgba(3,3,8,.88);
-  backdrop-filter:blur(12px);
-  flex-shrink:0;gap:12px;
-}
+/* header */
+#hdr{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid rgba(100,120,200,.15);background:rgba(3,3,8,.88);backdrop-filter:blur(12px);flex-shrink:0;gap:12px}
 #hdr h1{font-size:14px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap}
 #hdr h1 em{color:#7b8cff;font-style:normal}
 #stats{display:flex;gap:14px;font-size:11px;color:#5a6090;flex-wrap:wrap;justify-content:flex-end}
 .sv{font-weight:bold;color:#c8ceff}
 .sg{color:#00ff88}.sy{color:#ffcc00}.sr{color:#ff4466}
-/* hide less critical stats on small screens */
 .stat-hide-sm{display:inline}
 
-/* ── main area ── */
-#wrap{
-  flex:1;position:relative;z-index:5;
-  display:flex;align-items:center;justify-content:center;
-  overflow:hidden;
-  transition:padding .3s cubic-bezier(.22,1,.36,1);
-}
+/* orbit area */
+#wrap{flex:1;position:relative;z-index:5;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:padding .32s cubic-bezier(.22,1,.36,1)}
 #univ{position:relative}
+.ring{position:absolute;border:1px solid rgba(80,100,180,.13);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
 
-/* ── rings ── */
-.ring{
-  position:absolute;
-  border:1px solid rgba(80,100,180,.13);
-  border-radius:50%;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  pointer-events:none;
-}
+/* sun */
+#sun{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#fff8cc 0%,#ffd700 40%,#ff8c00 75%,transparent 100%);box-shadow:0 0 20px #ffd700,0 0 50px rgba(255,200,0,.35),0 0 100px rgba(255,140,0,.15);animation:sun-pulse 5s ease-in-out infinite;z-index:30;cursor:default}
+@keyframes sun-pulse{0%,100%{box-shadow:0 0 20px #ffd700,0 0 50px rgba(255,200,0,.35),0 0 100px rgba(255,140,0,.15)}50%{box-shadow:0 0 30px #ffd700,0 0 70px rgba(255,200,0,.5),0 0 130px rgba(255,140,0,.22)}}
 
-/* ── sun ── */
-#sun{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:34px;height:34px;border-radius:50%;
-  background:radial-gradient(circle,#fff8cc 0%,#ffd700 40%,#ff8c00 75%,transparent 100%);
-  box-shadow:0 0 20px #ffd700,0 0 50px rgba(255,200,0,.35),0 0 100px rgba(255,140,0,.15);
-  animation:sun-pulse 5s ease-in-out infinite;
-  z-index:30;cursor:default;
-}
-@keyframes sun-pulse{
-  0%,100%{box-shadow:0 0 20px #ffd700,0 0 50px rgba(255,200,0,.35),0 0 100px rgba(255,140,0,.15)}
-  50%    {box-shadow:0 0 30px #ffd700,0 0 70px rgba(255,200,0,.5), 0 0 130px rgba(255,140,0,.22)}
-}
-
-/* ── planets ── */
-.pw{
-  position:absolute;top:0;left:0;
-  transform:translate(calc(var(--px) - 50%), calc(var(--py) - 50%));
-  will-change:transform;z-index:20;cursor:pointer;
-}
-.pd{
-  border-radius:50%;transition:transform .15s;
-  width:calc(var(--mag,9) * 1px);
-  height:calc(var(--mag,9) * 1px);
-}
+/* planets */
+.pw{position:absolute;top:0;left:0;transform:translate(calc(var(--px) - 50%), calc(var(--py) - 50%));will-change:transform;z-index:20;cursor:pointer}
+.pd{border-radius:50%;transition:transform .15s;width:calc(var(--mag,9) * 1px);height:calc(var(--mag,9) * 1px)}
 .pw:hover .pd,.pw:active .pd{transform:scale(2.2)}
-
 .pd.healthy{background:#00ff88;box-shadow:0 0 6px #00ff88,0 0 14px rgba(0,255,136,.4)}
 .pd.warning{background:#ffcc00;box-shadow:0 0 6px #ffcc00,0 0 14px rgba(255,204,0,.4)}
-.pd.alert  {background:#ff4466;box-shadow:0 0 8px #ff4466,0 0 22px rgba(255,68,102,.6);animation:pulse-r 1.1s ease-in-out infinite}
+.pd.alert{background:#ff4466;box-shadow:0 0 8px #ff4466,0 0 22px rgba(255,68,102,.6);animation:pulse-r 1.1s ease-in-out infinite}
 .pd.dormant{background:#1e1e38;box-shadow:0 0 3px #3a3a60}
+.pw.selected .pd{transform:scale(1.8);outline:2px solid rgba(255,255,255,.9);outline-offset:3px;box-shadow:0 0 0 5px rgba(255,255,255,.15),0 0 20px rgba(255,255,255,.3) !important;animation:none !important}
+@keyframes pulse-r{0%,100%{box-shadow:0 0 8px #ff4466,0 0 22px rgba(255,68,102,.6)}50%{box-shadow:0 0 16px #ff4466,0 0 44px rgba(255,68,102,.85),0 0 66px rgba(255,68,102,.3)}}
 
-.pw.selected .pd{
-  transform:scale(1.8);
-  outline:2px solid rgba(255,255,255,.9);
-  outline-offset:3px;
-  box-shadow:0 0 0 5px rgba(255,255,255,.15),0 0 20px rgba(255,255,255,.3) !important;
-  animation:none !important;
-}
-@keyframes pulse-r{
-  0%,100%{box-shadow:0 0 8px #ff4466,0 0 22px rgba(255,68,102,.6)}
-  50%    {box-shadow:0 0 16px #ff4466,0 0 44px rgba(255,68,102,.85),0 0 66px rgba(255,68,102,.3)}
-}
-
-/* ── tooltip (desktop only) ── */
-#tip{
-  position:fixed;z-index:100;
-  background:rgba(8,8,22,.96);
-  border:1px solid rgba(100,120,255,.25);
-  border-radius:8px;padding:10px 14px;font-size:11.5px;
-  pointer-events:none;opacity:0;transition:opacity .12s;
-  max-width:210px;backdrop-filter:blur(12px);
-  box-shadow:0 4px 24px rgba(0,0,0,.6);
-}
+/* tooltip */
+#tip{position:fixed;z-index:100;background:rgba(8,8,22,.96);border:1px solid rgba(100,120,255,.25);border-radius:8px;padding:10px 14px;font-size:11.5px;pointer-events:none;opacity:0;transition:opacity .12s;max-width:210px;backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(0,0,0,.6)}
 #tip.on{opacity:1}
 .tn{font-size:13px;font-weight:bold;color:#fff;margin-bottom:5px}
-.tr{color:#6070a0;margin-bottom:2px}
-.tr b{color:#c8ceff;font-weight:normal}
+.tr{color:#6070a0;margin-bottom:2px}.tr b{color:#c8ceff;font-weight:normal}
 .th{font-size:11px;margin-bottom:4px}
-.th.healthy{color:#00ff88}.th.warning{color:#ffcc00}
-.th.alert{color:#ff4466}.th.dormant{color:#3a3a60}
+.th.healthy{color:#00ff88}.th.warning{color:#ffcc00}.th.alert{color:#ff4466}.th.dormant{color:#3a3a60}
 
-/* ── side panel (desktop) ── */
-#panel{
-  position:fixed;top:0;right:0;
-  width:270px;height:100%;
-  z-index:200;
-  background:rgba(6,6,18,.94);
-  border-left:1px solid rgba(100,120,255,.18);
-  backdrop-filter:blur(18px);
-  box-shadow:-12px 0 40px rgba(0,0,0,.6);
-  transform:translateX(110%);
-  transition:transform .32s cubic-bezier(.22,1,.36,1);
-  display:flex;flex-direction:column;overflow:hidden;
-}
+/* side panel */
+#panel{position:fixed;top:0;right:0;width:270px;height:100%;z-index:200;background:rgba(5,5,16,.96);border-left:1px solid rgba(100,120,255,.18);backdrop-filter:blur(18px);box-shadow:-12px 0 40px rgba(0,0,0,.7);transform:translateX(110%);transition:transform .32s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;overflow:hidden}
 #panel.open{transform:translateX(0)}
 body.panel-open #wrap{padding-right:270px}
-
-/* drag handle (mobile only, hidden on desktop) */
 #panel-handle{display:none}
-
-#panel-close{
-  position:absolute;top:14px;right:16px;
-  background:none;border:none;
-  color:#4a5080;font-size:18px;cursor:pointer;line-height:1;
-  transition:color .15s;z-index:5;
-}
+#panel-close{position:absolute;top:14px;right:16px;background:none;border:none;color:#4a5080;font-size:18px;cursor:pointer;line-height:1;transition:color .15s;z-index:5}
 #panel-close:hover{color:#c8ceff}
-
-#panel-body{padding:40px 22px 22px;flex:1;overflow-y:auto}
+#panel-body{flex:1;overflow-y:auto;padding:0 0 24px}
 #panel-body::-webkit-scrollbar{width:4px}
 #panel-body::-webkit-scrollbar-thumb{background:rgba(100,120,200,.25);border-radius:2px}
 
-.pn-name{font-size:16px;font-weight:bold;color:#fff;letter-spacing:1px;margin-bottom:6px;word-break:break-all}
-.pn-health{font-size:12px;margin-bottom:16px}
-.pn-health.healthy{color:#00ff88}.pn-health.warning{color:#ffcc00}
-.pn-health.alert{color:#ff4466}.pn-health.dormant{color:#3a3a60}
-.pn-sep{border:none;border-top:1px solid rgba(100,120,200,.1);margin:14px 0}
-.pn-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;font-size:12px}
-.pn-label{color:#4a5888}
-.pn-val{color:#c8ceff;text-align:right}
+/* planet canvas in panel */
+#planet-wrap{position:relative;width:100%;background:#000008;overflow:hidden;flex-shrink:0}
+#planet-wrap canvas{display:block;width:100%;height:auto}
+
+/* panel text */
+.pn-info{padding:16px 22px}
+.pn-name{font-size:15px;font-weight:bold;color:#fff;letter-spacing:1px;margin-bottom:5px;word-break:break-all}
+.pn-health{font-size:11px;margin-bottom:14px}
+.pn-health.healthy{color:#00ff88}.pn-health.warning{color:#ffcc00}.pn-health.alert{color:#ff4466}.pn-health.dormant{color:#3a3a60}
+.pn-sep{border:none;border-top:1px solid rgba(100,120,200,.1);margin:12px 0}
+.pn-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;font-size:12px}
+.pn-label{color:#4a5888}.pn-val{color:#c8ceff;text-align:right}
 .pn-stars{color:#7b8cff;letter-spacing:1px}
-.pn-gh{
-  display:block;margin-top:20px;text-align:center;
-  padding:9px;border:1px solid rgba(100,120,255,.25);border-radius:6px;
-  color:#7b8cff;font-size:11px;text-decoration:none;
-  transition:background .15s,color .15s;letter-spacing:1px;
-}
+.pn-gh{display:block;margin-top:16px;text-align:center;padding:9px;border:1px solid rgba(100,120,255,.25);border-radius:6px;color:#7b8cff;font-size:11px;text-decoration:none;transition:background .15s,color .15s;letter-spacing:1px}
 .pn-gh:hover{background:rgba(100,120,255,.12);color:#c8ceff}
 
-/* ── bottom bar ── */
-#bar{
-  position:relative;z-index:10;
-  background:rgba(3,3,8,.88);
-  border-top:1px solid rgba(100,120,200,.12);
-  padding:7px 20px;font-size:11px;
-  backdrop-filter:blur(12px);
-  display:flex;align-items:center;gap:12px;
-  flex-shrink:0;min-height:30px;
-  transition:padding-bottom .32s cubic-bezier(.22,1,.36,1);
-}
+/* bottom bar */
+#bar{position:relative;z-index:10;background:rgba(3,3,8,.88);border-top:1px solid rgba(100,120,200,.12);padding:7px 20px;font-size:11px;backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px;flex-shrink:0;min-height:30px}
 .ai{color:#ff4466;animation:blink 2s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.45}}
 #upd{margin-left:auto;color:#3a4060;white-space:nowrap}
+#loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#3a4060;font-size:12px;z-index:50;letter-spacing:2px}
 
-#loader{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  color:#3a4060;font-size:12px;z-index:50;letter-spacing:2px;
-}
-
-/* ════════════════════════════════════════════
-   RESPONSIVE — tablet / mobile
-   ════════════════════════════════════════════ */
-
-/* tablet: narrower panel */
-@media (max-width:900px) and (min-width:601px){
+/* ── responsive ── */
+@media(max-width:900px) and (min-width:601px){
   #panel{width:230px}
   body.panel-open #wrap{padding-right:230px}
 }
-
-/* mobile: bottom sheet */
-@media (max-width:600px){
-  /* stats: keep only total + deaths */
+@media(max-width:600px){
   .stat-hide-sm{display:none}
-
   #hdr h1{font-size:12px;letter-spacing:2px}
   #stats{gap:10px;font-size:10px}
-
-  /* panel becomes bottom sheet */
-  #panel{
-    width:100%;
-    height:58vh;
-    top:auto;bottom:0;right:0;
-    border-left:none;
-    border-top:1px solid rgba(100,120,255,.2);
-    box-shadow:0 -8px 32px rgba(0,0,0,.7);
-    transform:translateY(110%);
-    border-radius:14px 14px 0 0;
-  }
+  #panel{width:100%;height:60vh;top:auto;bottom:0;right:0;border-left:none;border-top:1px solid rgba(100,120,255,.2);box-shadow:0 -8px 32px rgba(0,0,0,.7);transform:translateY(110%);border-radius:14px 14px 0 0}
   #panel.open{transform:translateY(0)}
-
-  /* orbit shrinks upward instead of rightward */
-  body.panel-open #wrap{
-    padding-right:0 !important;
-    padding-bottom:58vh;
-  }
-
-  /* drag handle */
-  #panel-handle{
-    display:block;
-    width:36px;height:4px;
-    background:rgba(100,120,200,.3);
-    border-radius:2px;
-    margin:10px auto 0;
-    flex-shrink:0;
-  }
-
-  #panel-body{padding:16px 20px 32px}
-
-  .pn-name{font-size:15px}
-
-  /* grid layout for rows on mobile */
-  .pn-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px 4px;
-  }
-  .pn-row{margin-bottom:0}
-
-  #panel-close{top:10px;right:14px}
-
-  /* tooltip disabled on touch */
+  body.panel-open #wrap{padding-right:0 !important;padding-bottom:60vh}
+  #panel-handle{display:block;width:36px;height:4px;background:rgba(100,120,200,.3);border-radius:2px;margin:10px auto 4px;flex-shrink:0}
+  #panel-body{padding:0 0 24px}
+  .pn-info{padding:12px 18px}
   #tip{display:none}
-
-  /* bar stays visible below sheet */
   #bar{font-size:10px;padding:5px 14px}
 }
-
-/* very small screens */
-@media (max-width:380px){
+@media(max-width:380px){
   #hdr h1{letter-spacing:1px;font-size:11px}
   #stats{display:none}
 }
@@ -284,6 +126,7 @@ body.panel-open #wrap{padding-right:270px}
 <div id="panel">
   <div id="panel-handle"></div>
   <button id="panel-close" title="fechar (ESC)">✕</button>
+  <div id="planet-wrap"></div>
   <div id="panel-body"></div>
 </div>
 
@@ -295,9 +138,13 @@ body.panel-open #wrap{padding-right:270px}
 </div>
 
 <script>
-// ─── starfield ────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// CANVAS — starfield + comets + meteors
+// ═══════════════════════════════════════════════════════
 const cnv=document.getElementById('stars'), ctx=cnv.getContext('2d');
-let stars=[];
+let stars=[], comets=[], meteors=[];
+let cometCd=0, meteorCd=0;
+
 function initStars(){
   cnv.width=innerWidth; cnv.height=innerHeight;
   stars=Array.from({length:220},()=>({
@@ -305,8 +152,93 @@ function initStars(){
     r:Math.random()*1.3, a:Math.random(), da:(Math.random()-.5)*.004,
   }));
 }
-function drawStars(){
+
+// ── Comet ──
+function mkComet(){
+  // spawn from top/left edges, travel diagonally
+  const fromTop=Math.random()>.4;
+  const x=fromTop ? Math.random()*cnv.width*1.2-cnv.width*.1 : -20;
+  const y=fromTop ? -20 : Math.random()*cnv.height*.6;
+  const angle=Math.PI*.18+Math.random()*Math.PI*.22; // ~10–50° from horizontal
+  const spd=1.2+Math.random()*2;
+  return{
+    x, y,
+    vx: Math.cos(angle)*spd, vy: Math.sin(angle)*spd,
+    len: 120+Math.random()*180,
+    w: 1.2+Math.random()*.8,
+    life:0, maxLife: Math.max(cnv.width,cnv.height)*1.8/spd,
+    warm: Math.random()>.5,  // warm=gold, cool=blue-white
+  };
+}
+
+function drawComet(c){
+  c.life++;
+  const prog=c.life/c.maxLife;
+  const alpha=Math.sin(prog*Math.PI)*0.75;
+  if(alpha<.02) return false;
+  const tx=c.x-c.vx*(c.len/Math.hypot(c.vx,c.vy));
+  const ty=c.y-c.vy*(c.len/Math.hypot(c.vx,c.vy));
+  const g=ctx.createLinearGradient(tx,ty,c.x,c.y);
+  const col=c.warm?'255,230,160':'200,215,255';
+  g.addColorStop(0,`rgba(${col},0)`);
+  g.addColorStop(.7,`rgba(${col},${alpha*.35})`);
+  g.addColorStop(1,`rgba(${col},${alpha})`);
+  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(c.x,c.y);
+  ctx.strokeStyle=g; ctx.lineWidth=c.w; ctx.stroke();
+  // nucleus glow
+  const ng=ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.w*4);
+  ng.addColorStop(0,`rgba(${col},${alpha})`);
+  ng.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ng;
+  ctx.beginPath(); ctx.arc(c.x,c.y,c.w*4,0,Math.PI*2); ctx.fill();
+  c.x+=c.vx; c.y+=c.vy;
+  return c.x<cnv.width+50 && c.y<cnv.height+50 && c.life<c.maxLife;
+}
+
+// ── Meteor / bolide ──
+function mkMeteor(){
+  const x=Math.random()*cnv.width*1.3-cnv.width*.15;
+  const y=Math.random()*cnv.height*.55;
+  const spd=10+Math.random()*14;
+  const angle=Math.PI*.08+Math.random()*Math.PI*.18;
+  return{
+    x, y,
+    vx: Math.cos(angle)*spd, vy: Math.sin(angle)*spd,
+    life:0, maxLife: 12+Math.random()*16,
+  };
+}
+
+function drawMeteor(m){
+  m.life++;
+  const prog=m.life/m.maxLife;
+  const alpha=Math.sin(prog*Math.PI);
+  if(alpha<.02) return false;
+  const steps=5;
+  const tx=m.x-m.vx*steps; const ty=m.y-m.vy*steps;
+  const g=ctx.createLinearGradient(tx,ty,m.x,m.y);
+  g.addColorStop(0,'rgba(255,255,255,0)');
+  g.addColorStop(.6,`rgba(220,230,255,${alpha*.5})`);
+  g.addColorStop(1,`rgba(255,255,255,${alpha})`);
+  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(m.x,m.y);
+  ctx.strokeStyle=g; ctx.lineWidth=1.5; ctx.stroke();
+  m.x+=m.vx; m.y+=m.vy;
+  return m.life<m.maxLife;
+}
+
+function drawBg(){
   ctx.clearRect(0,0,cnv.width,cnv.height);
+
+  // spawn
+  if(--cometCd<=0){ comets.push(mkComet()); cometCd=420+Math.random()*480; }
+  if(--meteorCd<=0){
+    const n=1+(Math.random()>.65?1:0)+(Math.random()>.85?1:0);
+    for(let i=0;i<n;i++) meteors.push(mkMeteor());
+    meteorCd=200+Math.random()*320;
+  }
+  comets=comets.filter(c=>drawComet(c));
+  meteors=meteors.filter(m=>drawMeteor(m));
+
+  // stars
   for(const s of stars){
     s.a=Math.max(.08,Math.min(1,s.a+s.da));
     if(s.a<=.08||s.a>=1)s.da*=-1;
@@ -315,14 +247,175 @@ function drawStars(){
   }
 }
 
-// ─── orbital ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// PLANET RENDERING
+// ═══════════════════════════════════════════════════════
+const THEMES={
+  healthy:{
+    base:['#0a3d2b','#1e8060','#4ecb8e'],
+    bands:['#0c5040','#12806a','#0a3d7a','#1460b8','#12a870','#0d4f3c','#186090','#0e6044'],
+    atm:'rgba(80,200,255,.22)', glow:'#00ff88',
+  },
+  warning:{
+    base:['#6b3300','#c46200','#f0a040'],
+    bands:['#7a3d00','#b86010','#d48020','#e89838','#d47a10','#a85000','#c07030','#8a4400'],
+    atm:'rgba(255,160,50,.22)', glow:'#ffcc00',
+  },
+  alert:{
+    base:['#4a0000','#991100','#cc3300'],
+    bands:['#5a0000','#8b0800','#b82000','#d43000','#b01800','#7a0000','#a01000','#600000'],
+    atm:'rgba(255,50,20,.28)', glow:'#ff4466',
+  },
+  dormant:{
+    base:['#141414','#282828','#3c3c3c'],
+    bands:['#1a1a1a','#242424','#2e2e2e','#202020','#1c1c1c','#282828','#222222','#181818'],
+    atm:null, glow:'#3a3a5a',
+  },
+};
+
+function hashStr(s){
+  let h=0;
+  for(let i=0;i<s.length;i++) h=(Math.imul(31,h)+s.charCodeAt(i))|0;
+  return Math.abs(h);
+}
+
+function hex2rgb(hex){
+  const r=parseInt(hex.slice(1,3),16);
+  const g=parseInt(hex.slice(3,5),16);
+  const b=parseInt(hex.slice(5,7),16);
+  return [r,g,b];
+}
+
+let planetRaf=null, planetRot=0;
+
+function stopPlanetAnim(){
+  if(planetRaf){cancelAnimationFrame(planetRaf);planetRaf=null;}
+}
+
+function startPlanetAnim(planet){
+  stopPlanetAnim();
+  const wrap=document.getElementById('planet-wrap');
+  wrap.innerHTML='';
+  const W=wrap.clientWidth||260;
+  const H=Math.round(W*.72);
+  const cv=document.createElement('canvas');
+  cv.width=W; cv.height=H;
+  wrap.appendChild(cv);
+  const pc=cv.getContext('2d');
+  const seed=hashStr(planet.name);
+  const hasRings=(planet.magnitude>=4)&&(seed%3===0);
+  planetRot=0;
+  function frame(){
+    drawPlanet(pc,W,H,planet,seed,planetRot,hasRings);
+    planetRot+=0.006;
+    planetRaf=requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function drawPlanet(pc,W,H,planet,seed,rot,hasRings){
+  pc.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2;
+  const R=Math.min(W,H)*(hasRings?.30:.38);
+  const th=THEMES[planet.health]||THEMES.dormant;
+
+  // ── atmosphere glow ──
+  if(th.atm){
+    const ag=pc.createRadialGradient(cx,cy,R*.8,cx,cy,R*1.55);
+    ag.addColorStop(0,th.atm);
+    ag.addColorStop(1,'rgba(0,0,0,0)');
+    pc.fillStyle=ag;
+    pc.beginPath(); pc.arc(cx,cy,R*1.55,0,Math.PI*2); pc.fill();
+  }
+
+  // ── rings back half (drawn before planet) ──
+  if(hasRings) _drawRings(pc,cx,cy,R,th,true);
+
+  // ── planet sphere (clipped) ──
+  pc.save();
+  pc.beginPath(); pc.arc(cx,cy,R,0,Math.PI*2); pc.clip();
+
+  // base gradient (3D lighting: bright top-left, dark bottom-right)
+  const [br,bg,bb]=hex2rgb(th.base[2]);
+  const [mr,mg,mb]=hex2rgb(th.base[1]);
+  const [dr,dg,db]=hex2rgb(th.base[0]);
+  const base=pc.createRadialGradient(cx-R*.35,cy-R*.38,R*.05,cx+R*.2,cy+R*.25,R*1.1);
+  base.addColorStop(0,`rgb(${br},${bg},${bb})`);
+  base.addColorStop(.45,`rgb(${mr},${mg},${mb})`);
+  base.addColorStop(1,`rgb(${dr},${dg},${db})`);
+  pc.fillStyle=base; pc.fillRect(0,0,W,H);
+
+  // surface bands (latitude strips, shift with rotation)
+  const nBands=th.bands.length;
+  for(let i=0;i<nBands;i++){
+    const t=(i+.5)/nBands;
+    const bandY=cy-R+t*R*2;
+    const chord=Math.sqrt(Math.max(0,R*R-(bandY-cy)*(bandY-cy)));
+    const xShift=Math.sin(rot*1.2+i*0.8+(seed%100)*.063)*chord*.3;
+    const bh=R*.22+Math.sin(seed*0.07+i)*R*.06;
+    const op=.12+.13*Math.abs(Math.sin(seed*.11+i*1.3));
+    const [cr,cg,cb]=hex2rgb(th.bands[i]);
+    pc.globalAlpha=op;
+    pc.fillStyle=`rgb(${cr},${cg},${cb})`;
+    pc.beginPath();
+    pc.ellipse(cx+xShift,bandY,chord*.88,bh,0,0,Math.PI*2);
+    pc.fill();
+  }
+  pc.globalAlpha=1;
+
+  // specular highlight (top-left)
+  const spec=pc.createRadialGradient(cx-R*.38,cy-R*.4,0,cx-R*.38,cy-R*.4,R*.85);
+  spec.addColorStop(0,'rgba(255,255,255,.22)');
+  spec.addColorStop(.5,'rgba(255,255,255,.06)');
+  spec.addColorStop(1,'rgba(255,255,255,0)');
+  pc.fillStyle=spec; pc.fillRect(0,0,W,H);
+
+  // terminator shadow (bottom-right)
+  const shadow=pc.createRadialGradient(cx+R*.3,cy+R*.35,R*.3,cx+R*.2,cy+R*.2,R*1.05);
+  shadow.addColorStop(0,'rgba(0,0,0,0)');
+  shadow.addColorStop(.6,'rgba(0,0,0,.25)');
+  shadow.addColorStop(1,'rgba(0,0,0,.75)');
+  pc.fillStyle=shadow; pc.fillRect(0,0,W,H);
+
+  pc.restore();
+
+  // ── rings front half (drawn after planet) ──
+  if(hasRings) _drawRings(pc,cx,cy,R,th,false);
+
+  // subtle vignette label
+  const [gr,gg,gb]=hex2rgb(th.glow);
+  pc.font='10px Courier New';
+  pc.fillStyle=`rgba(${gr},${gg},${gb},.55)`;
+  pc.textAlign='right';
+  pc.fillText(planet.name,W-10,H-8);
+}
+
+function _drawRings(pc,cx,cy,R,th,backHalf){
+  const rin=R*1.28, rout=R*2.05, ry=R*.14;
+  const [gr,gg,gb]=hex2rgb(th.base[1]);
+  const startA=backHalf?Math.PI:0;
+  const endA=backHalf?Math.PI*2:Math.PI;
+  for(let r=rout;r>=rin;r-=3){
+    const t=(r-rin)/(rout-rin);
+    const alpha=.5*Math.sin(t*Math.PI);
+    if(alpha<.04) continue;
+    pc.beginPath();
+    pc.ellipse(cx,cy,r,ry,0,startA,endA);
+    pc.strokeStyle=`rgba(${gr},${gg},${gb},${alpha*.8})`;
+    pc.lineWidth=2;
+    pc.stroke();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// ORBITAL SYSTEM
+// ═══════════════════════════════════════════════════════
 const RINGS=[{rf:.21,spd:.26},{rf:.33,spd:.165},{rf:.455,spd:.105},{rf:.575,spd:.067}];
 let univSz=0, nodes=[], angles=[];
 const univ=document.getElementById('univ');
 const savedAngles={};
 
 function isMobile(){return innerWidth<=600}
-
 function getUnivSz(){
   const w=document.getElementById('wrap');
   return Math.min(w.clientWidth,w.clientHeight)*.92;
@@ -362,11 +455,9 @@ function buildOrbit(planets){
       dot.style.setProperty('--mag',px.toFixed(1));
       wrapper.appendChild(dot);
 
-      // hover tooltip (non-touch)
       wrapper.addEventListener('mouseenter',e=>{if(!panelOpen&&!isMobile())showTip(e,planet)});
       wrapper.addEventListener('mousemove', e=>{if(!panelOpen&&!isMobile())moveTip(e)});
       wrapper.addEventListener('mouseleave',hideTip);
-      // click / tap → panel
       wrapper.addEventListener('click',()=>openPanel(planet,wrapper));
 
       univ.appendChild(wrapper);
@@ -374,10 +465,8 @@ function buildOrbit(planets){
       angles.push(savedAngles[planet.name]);
     }
   }
-
   const sun=document.createElement('div');
-  sun.id='sun'; sun.title='theuniverse';
-  univ.appendChild(sun);
+  sun.id='sun'; univ.appendChild(sun);
 }
 
 function stepPlanets(){
@@ -399,7 +488,9 @@ function resizeOrbit(){
   univ.style.width=univSz+'px'; univ.style.height=univSz+'px';
 }
 
-// ─── tooltip ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════════════════════
 const tip=document.getElementById('tip');
 const healthLabel={healthy:'🟢 saudável',warning:'🟡 atenção',alert:'🔴 Estrela da Morte',dormant:'⚫ dormente'};
 function daysStr(d){
@@ -424,7 +515,9 @@ function moveTip(e){
 }
 function hideTip(){tip.classList.remove('on')}
 
-// ─── side / bottom panel ──────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// SIDE / BOTTOM PANEL
+// ═══════════════════════════════════════════════════════
 const panel=document.getElementById('panel');
 const panelBody=document.getElementById('panel-body');
 let panelOpen=false, selectedWrapper=null;
@@ -432,35 +525,14 @@ let panelOpen=false, selectedWrapper=null;
 function openPanel(p,wrapper){
   hideTip();
   if(selectedWrapper)selectedWrapper.classList.remove('selected');
-  selectedWrapper=wrapper;
-  wrapper.classList.add('selected');
+  selectedWrapper=wrapper; wrapper.classList.add('selected');
 
   const mag='★'.repeat(p.magnitude||1)+'☆'.repeat(5-(p.magnitude||1));
   const diskMB=p.diskKB>1024?(p.diskKB/1024).toFixed(1)+' MB':(p.diskKB||0)+' KB';
   const ghUrl=`https://github.com/paulinett1508-dev/${p.name}`;
 
-  if(isMobile()){
-    // compact grid layout for bottom sheet
-    panelBody.innerHTML=`
-      <div class="pn-name">${p.name}</div>
-      <div class="pn-health ${p.health}">${healthLabel[p.health]||p.health}</div>
-      <hr class="pn-sep">
-      <div class="pn-grid">
-        <div class="pn-row"><span class="pn-label">magnitude</span></div>
-        <div class="pn-row"><span class="pn-val pn-stars">${mag}</span></div>
-        <div class="pn-row"><span class="pn-label">commits</span></div>
-        <div class="pn-row"><span class="pn-val">${(p.commits||0).toLocaleString()}</span></div>
-        <div class="pn-row"><span class="pn-label">tamanho</span></div>
-        <div class="pn-row"><span class="pn-val">${diskMB}</span></div>
-        <div class="pn-row"><span class="pn-label">último push</span></div>
-        <div class="pn-row"><span class="pn-val">${daysStr(p.daysSincePush)}</span></div>
-        <div class="pn-row"><span class="pn-label">issues</span></div>
-        <div class="pn-row"><span class="pn-val">${p.issues}</span></div>
-        ${p.ci?`<div class="pn-row"><span class="pn-label">CI</span></div><div class="pn-row"><span class="pn-val">${p.ci}</span></div>`:''}
-      </div>
-      <a class="pn-gh" href="${ghUrl}" target="_blank" rel="noopener">↗ abrir no GitHub</a>`;
-  } else {
-    panelBody.innerHTML=`
+  panelBody.innerHTML=`
+    <div class="pn-info">
       <div class="pn-name">${p.name}</div>
       <div class="pn-health ${p.health}">${healthLabel[p.health]||p.health}</div>
       <hr class="pn-sep">
@@ -471,23 +543,28 @@ function openPanel(p,wrapper){
       <div class="pn-row"><span class="pn-label">último push</span><span class="pn-val">${daysStr(p.daysSincePush)}</span></div>
       <div class="pn-row"><span class="pn-label">issues abertas</span><span class="pn-val">${p.issues}</span></div>
       ${p.ci?`<div class="pn-row"><span class="pn-label">CI</span><span class="pn-val">${p.ci}</span></div>`:''}
-      <a class="pn-gh" href="${ghUrl}" target="_blank" rel="noopener">↗ abrir no GitHub</a>`;
-  }
+      <a class="pn-gh" href="${ghUrl}" target="_blank" rel="noopener">↗ abrir no GitHub</a>
+    </div>`;
 
   panel.classList.add('open');
   document.body.classList.add('panel-open');
   panelOpen=true;
 
-  // orbit must recompute after CSS transition (~320ms)
-  setTimeout(()=>{resizeOrbit()},340);
+  // start planet animation after transition completes
+  setTimeout(()=>{
+    resizeOrbit();
+    startPlanetAnim(p);
+  },340);
 }
 
 function closePanel(){
+  stopPlanetAnim();
+  document.getElementById('planet-wrap').innerHTML='';
   panel.classList.remove('open');
   document.body.classList.remove('panel-open');
   panelOpen=false;
   if(selectedWrapper){selectedWrapper.classList.remove('selected');selectedWrapper=null;}
-  setTimeout(()=>{resizeOrbit()},340);
+  setTimeout(resizeOrbit,340);
 }
 
 document.getElementById('panel-close').addEventListener('click',closePanel);
@@ -496,14 +573,15 @@ document.getElementById('wrap').addEventListener('click',e=>{
   if(panelOpen&&!e.target.closest('.pw'))closePanel();
 });
 
-// swipe down to close on mobile
 let touchStartY=0;
 panel.addEventListener('touchstart',e=>{touchStartY=e.touches[0].clientY},{passive:true});
 panel.addEventListener('touchend',e=>{
   if(e.changedTouches[0].clientY-touchStartY>60)closePanel();
 },{passive:true});
 
-// ─── stats ────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// STATS BAR
+// ═══════════════════════════════════════════════════════
 function updateStats(planets){
   const cnt=h=>planets.filter(p=>p.health===h).length;
   document.getElementById('st').textContent=planets.length;
@@ -520,8 +598,10 @@ function updateStats(planets){
   }
 }
 
-// ─── main ─────────────────────────────────────────────────────────────────
-function loop(){stepPlanets();drawStars();requestAnimationFrame(loop)}
+// ═══════════════════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════════════════
+function loop(){stepPlanets();drawBg();requestAnimationFrame(loop)}
 
 async function loadPlanets(){
   try{
@@ -543,6 +623,9 @@ async function loadPlanets(){
 
 async function main(){
   initStars();
+  // stagger first comet/meteor
+  cometCd=200+Math.floor(Math.random()*300);
+  meteorCd=80+Math.floor(Math.random()*120);
   resizeOrbit();
   const planets=await loadPlanets();
   if(planets.length){updateStats(planets);buildOrbit(planets);}
@@ -553,11 +636,7 @@ async function main(){
   },5*60*1000);
 }
 
-window.addEventListener('resize',()=>{
-  initStars();
-  resizeOrbit();
-});
-
+window.addEventListener('resize',()=>{initStars();resizeOrbit()});
 main();
 </script>
 </body>
