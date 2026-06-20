@@ -4,6 +4,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import sys
 from datetime import datetime
 
@@ -52,6 +53,18 @@ def _send(text: str) -> None:
 
 # ── formatters ────────────────────────────────────────────────────────────────
 
+def _clean_commit(msg: str) -> str:
+    """Remove prefixo de commit convencional: feat(scope): → mensagem."""
+    return re.sub(r'^[a-z]+(\([^)]+\))?!?:\s*', '', msg, flags=re.IGNORECASE).strip()
+
+
+def _trunc(msg: str, n: int) -> str:
+    """Trunca por limite de palavra, não no meio."""
+    if len(msg) <= n:
+        return msg
+    return msg[:n].rsplit(' ', 1)[0] + '…'
+
+
 def _parse_time(ts: str) -> str:
     try:
         return datetime.fromisoformat(ts).strftime("%H:%M")
@@ -73,7 +86,7 @@ def _fmt_push(data: dict) -> str | None:
     pusher = data.get("pusher", {}).get("name", "?")
 
     if len(commits) == 1:
-        msg = commits[0]["message"].split("\n")[0][:80]
+        msg = _trunc(_clean_commit(commits[0]["message"].split("\n")[0]), 80)
         url = commits[0]["url"]
         ts = _parse_time(commits[0].get("timestamp", ""))
         time_part = f" · {ts}" if ts else ""
@@ -86,15 +99,16 @@ def _fmt_push(data: dict) -> str | None:
             f'<a href="{url}">↗ ver commit</a>'
         )
 
+    shown = commits[:4]
     lines = "\n".join(
-        f"  · {c['message'].split(chr(10))[0][:60]}" for c in commits[:4]
+        f"· {_trunc(_clean_commit(c['message'].split(chr(10))[0]), 55)}" for c in shown
     )
     extra = f"\n  +{len(commits) - 4} mais" if len(commits) > 4 else ""
     url = data.get("compare", "")
     ts = _parse_time(commits[-1].get("timestamp", ""))
     time_part = f" · {ts}" if ts else ""
     return (
-        f"🌍 <b>{repo}</b> · <code>{branch}</code>{time_part}  ({len(commits)} commits)\n"
+        f"🌍 <b>{repo}</b> · <code>{branch}</code>{time_part}\n"
         f"\n"
         f"{lines}{extra}\n"
         f"— {pusher}\n"
