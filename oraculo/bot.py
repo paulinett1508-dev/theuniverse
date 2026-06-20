@@ -59,6 +59,8 @@ def main():
     rag = Rag.from_paths(KNOWLEDGE_PATHS)
     log.info("Oráculo online. Indexados %d chunks. Long-polling iniciado.", len(rag.chunks))
 
+    _history = []
+
     def context_fn(t):
         try:
             return context.gather(t)
@@ -67,8 +69,14 @@ def main():
             return "## Estado atual do universo\n(estado ao vivo indisponível agora)"
 
     def brain_fn(q, c, ch, reply_context=None):
-        return brain.answer(q, c, ch, cfg.groq_api_key, cfg.groq_model,
-                            reply_context=reply_context)
+        result = brain.answer(q, c, ch, cfg.groq_api_key, cfg.groq_model,
+                              reply_context=reply_context,
+                              history=list(_history))
+        _history.append({"role": "user", "content": q})
+        _history.append({"role": "assistant", "content": result})
+        while len(_history) > 10:
+            _history.pop(0)
+        return result
 
     offset = None
     while True:

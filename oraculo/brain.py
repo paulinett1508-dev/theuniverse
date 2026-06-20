@@ -20,6 +20,9 @@ SYSTEM_PROMPT = (
     "4. REPLY: quando uma notificação estiver em contexto, extraia os fatos DIRETAMENTE dela. "
     "Horário, repo, branch, autor, mensagem do commit — tudo está na notificação. "
     "Ex: 'Q hrs foi?' → leia o horário da notificação e responda direto.\n"
+    "5. FORMATO: você está num chat de mensageria — seja conciso e visual. "
+    "Use bullets (·) para listas, nunca parágrafos longos. "
+    "Máx 3-4 linhas por resposta. Prefira listas curtas a prosa corrida.\n"
     "Você só observa — nunca executa mudanças."
 )
 
@@ -35,7 +38,7 @@ def _parse_notification(text: str) -> dict:
     return facts
 
 
-def build_messages(question, context_str, chunks, reply_context=None):
+def build_messages(question, context_str, chunks, reply_context=None, history=None):
     rag_block = "\n\n---\n\n".join(f"[{c['source']}]\n{c['text']}" for c in chunks) or "(nada recuperado)"
     reply_section = ""
     if reply_context:
@@ -46,21 +49,25 @@ def build_messages(question, context_str, chunks, reply_context=None):
             f"{reply_context}\n"
             f"{facts_line}\n"
         )
-    user = (f"{context_str}\n\n"
-            f"{reply_section}"
-            f"## Conhecimento recuperado (RAG)\n{rag_block}\n\n"
-            f"## Pergunta do TheGod\n{question}")
-    return [{"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user}]
+    current_user = (f"{context_str}\n\n"
+                    f"{reply_section}"
+                    f"## Conhecimento recuperado (RAG)\n{rag_block}\n\n"
+                    f"## Pergunta do TheGod\n{question}")
+
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for turn in (history or []):
+        messages.append(turn)
+    messages.append({"role": "user", "content": current_user})
+    return messages
 
 
-def answer(question, context_str, chunks, api_key, model, client=None, reply_context=None):
+def answer(question, context_str, chunks, api_key, model, client=None, reply_context=None, history=None):
     client = client or httpx
     resp = client.post(
         GROQ_URL,
         headers={"Authorization": f"Bearer {api_key}"},
         json={"model": model,
-              "messages": build_messages(question, context_str, chunks, reply_context),
+              "messages": build_messages(question, context_str, chunks, reply_context, history),
               "temperature": 0.2},
         timeout=60,
     )
