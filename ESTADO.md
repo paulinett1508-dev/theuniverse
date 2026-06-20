@@ -61,7 +61,7 @@ Gravidade = agnostic-core (submodule).
   - **PAT renovado** (`theuniverse-master-key`) com scopes `repo` + `admin:repo_hook` + `admin:org_hook`
   - **Universo finalizado em 27 planetas**: Lab-Sobral-Dev removido de UNIVERSE_OWNERS; `agnvendas-painelsbr` e `pedidomobile` adicionados ao EXCLUDE
   - **Subsistema C implementado:**
-    - C1 (Escudos): porta 9120 restrita aos 6 CIDRs oficiais do GitHub via UFW. Cron semanal (`.github/workflows/c1-update-ips.yml`) mantém IPs atualizados. **Pendente:** adicionar `POLARIS_SSH_KEY` nos secrets do GitHub Actions.
+    - C1 (Escudos): porta 9120 restrita aos 6 CIDRs oficiais do GitHub via UFW. Cron semanal (`.github/workflows/c1-update-ips.yml`) mantém IPs atualizados. `POLARIS_SSH_KEY` configurado nos secrets do GitHub.
     - C2 (Secrets Scan): `sentinel.py` agora verifica `secret-scanning/alerts` em cada planeta. Novo evento `secret_exposto` notifica Telegram com tipo e link direto ao painel de segurança.
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
@@ -86,7 +86,7 @@ Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após c
 
 ### 3. Subsistema C — ✅ IMPLEMENTADO (2026-06-20)
 
-- **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. **Pendente:** `POLARIS_SSH_KEY` nos secrets do GitHub para cron funcionar autônomo.
+- **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. `POLARIS_SSH_KEY` configurado — cron totalmente autônomo.
 - **C2 (Secrets Scan):** sentinel detecta secrets expostos em qualquer planeta e notifica Telegram.
 
 ### 4. Subsistema D — DESCARTADO
