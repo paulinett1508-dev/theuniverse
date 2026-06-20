@@ -4,6 +4,61 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-20 — Dashboard NOC: observatório visual do universo
+
+### 🌌 Orbital map — 27 planetas em órbita animada
+- `dashboard/index.html` + `vercel.json` — SPA deployada em `theuniverse-lake.vercel.app`.
+- 4 anéis orbitais com velocidades diferentes (paralaxe). Planetas distribuídos por atividade: mais ativos no anel interno.
+- Starfield com estrelas piscando + **cometas** lentos com núcleo e cauda gradiente (quente/frio) + **bólidos** rápidos em rajadas de 1-3. Tudo no loop do canvas.
+- Sol dourado pulsante no centro.
+
+### 🪐 Magnitude dos planetas
+- `api/planets.js`: GraphQL GitHub — `diskUsage` + `history.totalCount`. Score log scale (commits×0.65 + diskKB×0.35), normalizado → magnitude 1–5.
+- Tamanho do ponto no mapa: 6–18px por magnitude.
+- Tooltip mostra `★★★☆☆` + contagem de commits.
+
+### 🎨 Cores por saúde
+- 🟢 `healthy`: push <30d, CI ok → verde neon.
+- 🟡 `warning`: push >30d ou issues >3 → amarelo.
+- 🔴 `alert` (Estrela da Morte): CI FAILURE → vermelho pulsante.
+- ⚫ `dormant`: >120d ou arquivado → cinza escuro.
+
+### 📋 Card lateral ao clicar
+- Click no planeta → painel desliza (desktop: lateral 270px; mobile: bottom sheet 58vh).
+- Planeta selecionado ganha halo branco e continua orbitando.
+- Fechar: botão ✕, ESC ou click fora. Mobile: swipe down.
+- **Planeta 3D no card**: canvas com esfera real — tema por saúde (azul-verde, laranja, vermelho vulcânico, cinza morto), bandas de superfície em rotação, highlight especular, sombra terminadora, atmosfera com glow. Anéis para magnitude ≥4 (por hash do nome), renderizados em 2 passes (atrás/frente do globo).
+
+### ⚡ Efeitos visuais em tempo real
+- `api/events.js`: Vercel function — GitHub `/users/events`, janela 90s. Retorna `{id, repo, type, ts}`.
+- Dashboard poll a cada 8s. Por evento novo:
+  - push: flash branco + anel shockwave expansivo
+  - PR: pulso laranja + anel de onda
+  - issue: pisco âmbar suave
+  - create/tag: flash esverdeado
+- `seenEvents` Set evita re-disparar.
+
+### 🤖 Totalmente responsivo
+- Desktop (>900px): painel lateral 270px.
+- Tablet (600-900px): painel lateral 230px.
+- Mobile (≤600px): bottom sheet 58vh com drag handle e swipe-down para fechar. Tooltip desabilitado (touch). Stats colapsados.
+
+### 🔭 Favicon inline SVG — sem 404.
+
+## 2026-06-20 — Oráculo v3: fluxo de órbita + digitando
+
+### 🪐 Fluxo de órbita — TheGod pede permissão antes de entrar
+- `bot.py`: `detect_planet()` — detecta nome de planeta na mensagem (match direto + parcial por segmento).
+- Mensagem solta com planeta detectado → Oráculo propõe: "🌍 Identifico relação com **nexus-labsobral**. Entro na órbita para investigar?"
+- `SOVEREIGN_PLANETS` (ex: `the-matrix`) → aviso especial: "tem governança própria. Adentro como observador externo?"
+- Confirmações: `sim / s / pode / entra / vai / ok / bora`. Negações: `não / nao / n / cancela / voltar`.
+- Reply em notificação → entra na órbita direto (gesto já é o consentimento).
+- `_pending[]` guarda pergunta + chunks enquanto aguarda confirmação. Nova pergunta durante pendência cancela o fluxo.
+
+### ⌨️ Indicador "digitando..."
+- `_typing()` — chama `sendChatAction` com `action=typing` imediatamente ao receber mensagem, antes de processar.
+- `_send()` atualizado para HTML parse_mode (alinhado com webhook/sentinel).
+
 ## 2026-06-20 — Oráculo v2: reply contextual, multi-turn, estética Telegram
 
 ### 💬 Reply contextual — Oráculo entende a notificação sendo respondida

@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-20 (sessão tarde/noite — Oráculo v2)
+> Última atualização: 2026-06-20 (sessão noite — Dashboard NOC + Oráculo v3.1)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -68,10 +68,22 @@ Gravidade = agnostic-core (submodule).
   - Multi-turn: histórico de 5 turnos no `brain_fn`. Follow-ups lembram o repo da conversa.
   - `ctx_repo`: filtra chunks do RAG pelo repo ativo — evita RAG de doc errado em follow-ups.
   - Estética: strip de prefixos convencionais nos commits, truncação por palavra, respostas negativas em 1 linha.
+- **Oráculo v3.1 (sessão 2026-06-20 noite):**
+  - Fluxo de órbita: mensagem solta com planeta detectado → bot pergunta confirmação antes de entrar. Reply em notificação = consentimento implícito (entra direto). `SOVEREIGN_PLANETS` com aviso especial.
+  - Digitando: `sendChatAction typing` imediato ao receber mensagem.
+  - `sendSticker` nos momentos de órbita: 🚀 proposta, 🌌 confirmada, 👋 negada. Packs espaciais provisórios; pack customizado planejado (Star Wars, Severance).
+  - **Vocabulário vivo** no system prompt: Pluribus (o próprio Oráculo), Estrela da Morte, Lado Sombrio, A Força, Supernova, Órbita estável.
+- **Dashboard NOC (sessão 2026-06-20 noite):**
+  - URL: `theuniverse-lake.vercel.app`
+  - Mapa orbital animado: 4 anéis, 27 planetas, starfield + cometas + bólidos.
+  - Magnitude por grandeza (commits + diskKB, escala 1–5).
+  - Card lateral: click fixa painel, planeta 3D com atmosfera + anéis.
+  - Responsivo: desktop=painel lateral, mobile=bottom sheet.
+  - Efeitos ao vivo: push→shockwave, PR→laranja, issue→âmbar. Poll 8s via `api/events.js`.
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
-### 1. Hermes-Oráculo (subsistema A) — ✅ NO AR
+### 1. Hermes-Oráculo (subsistema A) — ✅ NO AR | v3.1
 
 Deploy: Polaris `195.200.5.145`. Telegram: `@guardiao_universo_bot`. 227 chunks indexados.
 
@@ -94,7 +106,13 @@ Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após c
 - **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. `POLARIS_SSH_KEY` configurado — cron totalmente autônomo.
 - **C2 (Secrets Scan):** sentinel detecta secrets expostos em qualquer planeta e notifica Telegram.
 
-### 4. Subsistema D — DESCARTADO
+### 4. Dashboard NOC — ✅ NO AR
+
+URL: `theuniverse-lake.vercel.app` (Vercel, deploy automático no push).
+Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_TOKEN` no painel Vercel.
+Próximas evoluções: domínio customizado · pack de stickers do universo · mais métricas no card.
+
+### 5. Subsistema D — DESCARTADO
 
 Cada planeta decide sua própria IA se precisar. Não é responsabilidade do observatório.
 
