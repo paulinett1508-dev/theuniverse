@@ -590,6 +590,24 @@ function openPanel(p,wrapper){
   const diskMB=p.diskKB>1024?(p.diskKB/1024).toFixed(1)+' MB':(p.diskKB||0)+' KB';
   const ghUrl=`https://github.com/paulinett1508-dev/${p.name}`;
 
+  const langRow=p.lang
+    ?`<div class="pn-row"><span class="pn-label">linguagem</span><span class="pn-val"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.lang.color};margin-right:5px;vertical-align:middle"></span>${p.lang.name}</span></div>`
+    :'';
+  const contrRow=p.contributors>0
+    ?`<div class="pn-row"><span class="pn-label">contribuidores</span><span class="pn-val">${p.contributors}</span></div>`
+    :'';
+  let prRow='';
+  if(p.lastPR){
+    const pr=p.lastPR;
+    const prTitle=pr.title.length>30?pr.title.slice(0,28)+'…':pr.title;
+    const prDate=new Date(pr.mergedAt||pr.createdAt);
+    const prAgo=Math.floor((Date.now()-prDate.getTime())/86400000);
+    const prDateStr=prAgo===0?'hoje':prAgo===1?'ontem':`${prAgo}d atrás`;
+    const stateColor=pr.state==='MERGED'?'#a371f7':pr.state==='OPEN'?'#3fb950':'#f85149';
+    const stateLabel=pr.state==='MERGED'?'merged':pr.state==='OPEN'?'aberto':'fechado';
+    prRow=`<div class="pn-row" style="align-items:flex-start"><span class="pn-label">último PR</span><span class="pn-val" style="max-width:155px;text-align:right"><span style="color:${stateColor};font-size:10px;margin-right:3px">●${stateLabel}</span><br><span style="font-size:10.5px;opacity:.8">${prTitle}</span><br><span style="font-size:10px;color:#4a5888">${prDateStr}</span></span></div>`;
+  }
+
   panelBody.innerHTML=`
     <div class="pn-info">
       <div class="pn-name">${p.name}</div>
@@ -598,10 +616,12 @@ function openPanel(p,wrapper){
       <div class="pn-row"><span class="pn-label">magnitude</span><span class="pn-val pn-stars">${mag}</span></div>
       <div class="pn-row"><span class="pn-label">commits</span><span class="pn-val">${(p.commits||0).toLocaleString()}</span></div>
       <div class="pn-row"><span class="pn-label">tamanho</span><span class="pn-val">${diskMB}</span></div>
+      ${langRow}${contrRow}
       <hr class="pn-sep">
       <div class="pn-row"><span class="pn-label">último push</span><span class="pn-val">${daysStr(p.daysSincePush)}</span></div>
       <div class="pn-row"><span class="pn-label">issues abertas</span><span class="pn-val">${p.issues}</span></div>
       ${p.ci?`<div class="pn-row"><span class="pn-label">CI</span><span class="pn-val">${p.ci}</span></div>`:''}
+      ${prRow}
       <a class="pn-gh" href="${ghUrl}" target="_blank" rel="noopener">↗ abrir no GitHub</a>
     </div>`;
 

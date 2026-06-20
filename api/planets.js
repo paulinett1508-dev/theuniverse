@@ -17,7 +17,12 @@ query($login: String!, $after: String) {
         pushedAt
         isArchived
         diskUsage
+        primaryLanguage { name color }
+        mentionableUsers(first: 0) { totalCount }
         openIssues: issues(states: OPEN) { totalCount }
+        pullRequests(first: 1, orderBy: {field: CREATED_AT, direction: DESC}) {
+          nodes { title state mergedAt createdAt }
+        }
         defaultBranchRef {
           target {
             ... on Commit {
@@ -77,7 +82,13 @@ module.exports = async function handler(req, res) {
         // raw magnitude score (log scale — commit counts vary wildly)
         const rawScore = Math.log10(1 + commits) * 0.65 + Math.log10(1 + diskKB) * 0.35;
 
-        planets.push({ name: repo.name, pushedAt: repo.pushedAt, daysSincePush, ci, issues, health, commits, diskKB, rawScore });
+        const lang = repo.primaryLanguage
+          ? { name: repo.primaryLanguage.name, color: repo.primaryLanguage.color || '#8b949e' }
+          : null;
+        const contributors = repo.mentionableUsers?.totalCount ?? 0;
+        const lastPR = repo.pullRequests?.nodes?.[0] ?? null;
+
+        planets.push({ name: repo.name, pushedAt: repo.pushedAt, daysSincePush, ci, issues, health, commits, diskKB, rawScore, lang, contributors, lastPR });
       }
 
       after = repos.pageInfo.hasNextPage ? repos.pageInfo.endCursor : null;
