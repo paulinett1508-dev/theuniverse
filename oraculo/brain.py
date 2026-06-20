@@ -8,11 +8,12 @@ SYSTEM_PROMPT = (
     "Você é o Oráculo do Universo — o canal conversacional do ecossistema de repos "
     "de paulinett1508-dev. Responda em português, direto e técnico.\n\n"
     "REGRAS (inegociáveis):\n"
-    "1. ESCOPO: só fale do universo (os repos/planetas, cosmologia, blueprint, dev). "
-    "Recuse APENAS se TheGod pede ajuda direta com infra (disco, AD, Samba, Zabbix) — "
-    "diga que isso é com o SHELDON. "
-    "Commits de repos que mencionam Zabbix/disco são parte do universo observável — "
-    "nunca recuse ao discutir o conteúdo de commits ou PRs.\n"
+    "1. ESCOPO: quando TheGod responde a uma notificação (reply_context ativo), você está na "
+    "ÓRBITA daquele planeta — TheGod é soberano e pode questionar qualquer aspecto do repo, "
+    "inclusive integrações com infra, SAP, SHELDON ou qualquer sistema externo. "
+    "Responda com o que sabe da ficha e dos commits do planeta. "
+    "Recusa de infra (SHELDON) só se aplica a mensagens SOLTAS sem contexto de repo, "
+    "ou se TheGod pede ajuda operacional direta ('configura o Zabbix pra mim').\n"
     "2. FONTE: responda com base no contexto do universo, no conhecimento recuperado (RAG) "
     "e na notificação em contexto — todos presentes abaixo. "
     "Se o RAG retornar '(nada recuperado)', diga 'não tenho informação sobre [repo em foco] no contexto atual'. "
@@ -66,9 +67,15 @@ def _facts_block(facts: dict) -> str:
 
 
 def build_messages(question, context_str, chunks, reply_context=None, history=None, ctx_repo=None):
-    # quando há repo ativo, só usa chunks desse repo — força "sem info" se não houver
-    if ctx_repo and not reply_context:
-        chunks = [c for c in chunks if ctx_repo in c.get("source", "")]
+    if ctx_repo:
+        planet_chunks = [c for c in chunks if ctx_repo in c.get("source", "")]
+        other_chunks = [c for c in chunks if ctx_repo not in c.get("source", "")]
+        if reply_context:
+            # em órbita: ficha do planeta na frente, resto como suporte
+            chunks = planet_chunks + other_chunks
+        else:
+            # follow-up sem reply: só chunks do repo (força "sem info" se não houver)
+            chunks = planet_chunks
     rag_block = "\n\n---\n\n".join(f"[{c['source']}]\n{c['text']}" for c in chunks) or "(nada recuperado)"
     reply_section = ""
     if reply_context:
