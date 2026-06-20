@@ -26,66 +26,73 @@
 
 ## Cosmologia (resumo — detalhe no CLAUDE.md)
 
-☀️ Sol = humano (decide) · 🪐 Planetas = repos · ⭐ Estrelas = servidores · 🛰️ Satélites = motores IA locais · Gravidade = agnostic-core. Guardião = Claude (lê tudo, escreve só em casa).
+O theuniverse é um **observatório pessoal** — olho omnisciente sobre TODOS os repos da conta `paulinett1508-dev` (e org `Lab-Sobral-Dev`). Observa, diagnostica, organiza. Nunca executa em outros repos.
+
+O mundo **Matrix** (repo `the-matrix`) é um ecossistema separado do Laboratório Sobral com cosmologia própria (SHELDON, THEO, Hermes). Theuniverse observa seus repos de fora como qualquer outro planeta — sem acoplamento temático.
+
+Gravidade = agnostic-core (submodule).
+
+## Universo observável (2026-06-20)
+
+**31 planetas** — 29 de `paulinett1508-dev` + 2 de `Lab-Sobral-Dev`.
+
+**Excluídos do universo (decisão do Sol):**
+- `the-matrix`, `matrix-core` — mundo Matrix separado
+- `baileys-whatsapp-server`, `bitrix-buddy-chat` — repos de terceiros (`rvsigor`)
+- `nelly-miranda/*`, `VitorTDS/*` — colaborações pontuais de outros usuários
+
+**Issues abertas a monitorar:** `SbrTask`×4 · `agnostic-core`×3 · `tokentown`×1 · `GessoExpress`×1
 
 ## ✅ Concluído nesta jornada
 
-- **Sessão 2026-06-19/20:** Frota 100% mapeada · **Subsistema B (Sistema Nervoso) implementado E NO AR** (Actions cron `*/15`, baseline semeado, secrets cadastrados) · **Subsistema A (Hermes-Oráculo) implementado** (26 testes, falta só deploy na Polaris — ver Frente 2) · plano A redesenhado v1→v2 (receita SHELDON) · `.gitignore` reforçado.
-- Universo no GitHub: `github.com/paulinett1508-dev/theuniverse` (privado, push via token Classic no `.git/config`)
-- agnostic-core instalado como submodule (`.agnostic-core/`)
-- 31 planetas mapeados + auto-descoberta funcionando (Censo achou `centroculturalsbr` ao vivo)
-- Faxina: `escalaIA` explodido. 4 cascas vazias preservadas (incubação): `botclinop`, `lp-restauranteflutuante`, `lp-ellenpedrosa`, `contabilplus`
-- Identidade visual VS Code (azul celeste, title bar preto)
-- Blueprint do ecossistema de comunicação (3 camadas, federação não anexação)
-- Frota batizada (estrelas)
+- **Sessão 2026-06-19/20 (máquina anterior):** Frota 100% mapeada · Subsistema B no ar · Subsistema A implementado (26 testes) · deploy travado em 1 decisão de token.
+- **Sessão 2026-06-20 (esta máquina):**
+  - `.vault` existia e funcionando (`GITHUB_TOKEN` + `GROQ_API_KEY`)
+  - Universo remapeado: contexto Matrix separado, `Lab-Sobral-Dev` incluído, exclusões definidas
+  - Fichas criadas: `SBR-ocomon-5.0`, `SbrTask`; removidas: `matrix-core`, `the-matrix`
+  - `gh.py` atualizado: `UNIVERSE_OWNERS` filtra por owner (sem affiliation fixo)
+  - `censo.py` atualizado: `EXCLUDE` list + clusters novos
+  - Censo rodado e pushado — 31 planetas, índice limpo
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
-### 1. Censo automático — ✅ RESOLVIDO
-Secrets `UNIVERSE_PAT`, `TELEGRAM_TOKEN`, `SOL_CHAT_ID` cadastrados no Actions. O sentinel (B) rodou green com eles → cron do Censo também autentica. Frente fechada.
+### 1. Hermes-Oráculo (subsistema A) — deploy na Polaris bloqueado por 2 itens
 
-### 2. Hermes-Oráculo (subsistema A) — ✅ IMPLEMENTADO, parado no deploy por 1 DECISÃO do Sol
-- **Receita SHELDON** (Groq Llama 70B + RAG BM25 + contexto ao vivo). Código em `theuniverse/oraculo/` (config/rag/context/brain/bot + systemd + deploy.sh). 6/6 tasks, **26 testes passando** (B+A). Tudo commitado e pushado.
-- Responde: "qual repo >30 dias?" (contexto vivo via gh.py) + "repo X roda em qual banco?" (RAG sobre fichas). Infra de lab → federa com SHELDON.
-- Spec: `A-hermes-oraculo-spec.md` · Plano: `A-hermes-oraculo-plan-v2.md` (v1 OBSOLETO).
+Código 100% implementado e testado (26 testes). Só falta o deploy.
 
-**Inspeção da Polaris já feita (2026-06-20):** host `nexus-vps01` ✓, python3 3.12.3 ✓, `/opt/theuniverse` ausente (vai clonar), `/root/.git-credentials` NÃO existe, serviço oraculo inativo. SSH a partir do Windows: usar `ssh -n` (sem `-n` trava segurando stdin).
+**Bloqueio 1 — SSH da Polaris inacessível nesta máquina:**
+- IP desta máquina (`45.226.61.199`) não está na whitelist do firewall da Polaris
+- Ação: hPanel Hostinger → VPS → Firewall → adicionar TCP porta 49222 source `45.226.61.199`
+- Chave `~/.ssh/id_ed25519_nexus_vps01` não existe aqui (não foi copiada da máquina anterior)
+- Após liberar firewall: testar com `id_ed25519` genérica; se não funcionar, gerar nova + `ssh-copy-id`
 
-**🚦 DECISÃO ABERTA (retomar AQUI) — qual token GitHub gravar na Polaris:**
-O deploy precisa de um token na Polaris pra (1) `git clone` do repo privado e (2) contexto ao vivo. O Sol precisa escolher:
-- **(a) recomendado:** gerar PAT **fine-grained read-only** (`Contents: read`) — se vazar da VPS, só lê. Sol gera e passa.
-- **(b)** usar o `ghp_` clássico amplo do `.vault` — sobe já, mas token poderoso na VPS.
-Sol AUTORIZOU rodar o deploy daqui (letra B do "como rodar"), mas faltou responder esta escolha de token.
+**Bloqueio 2 — decisão de token GitHub para a Polaris:**
+- **(a) recomendado:** PAT fine-grained read-only (`Contents: read`) — Sol gera e passa
+- **(b) rápido:** usar o `ghp_` clássico do `.vault` — sobe já, mas token amplo na VPS
 
-**Passos do deploy (depois da decisão):**
-  1. Gravar token na Polaris: `git config --global credential.helper store` + `/root/.git-credentials` (`https://<token>@github.com`, chmod 600).
-  2. Criar `/opt/oraculo/.env` (chmod 600): TELEGRAM_TOKEN (bot do B), SOL_CHAT_ID=1030157568, GROQ_API_KEY (do `.vault`), GROQ_MODEL=llama-3.3-70b-versatile, GITHUB_TOKEN=(o token escolhido).
-  3. Rodar `oraculo/deploy.sh` (clone /opt/theuniverse + venv + systemd).
-  4. Validar: `journalctl -u oraculo -f`; perguntar no Telegram "qual repo >30 dias sem commit?".
+**Passos do deploy (após resolver bloqueios):**
+1. Gravar token na Polaris: `git config --global credential.helper store` + `/root/.git-credentials` (chmod 600)
+2. Criar `/opt/oraculo/.env` (chmod 600): `TELEGRAM_TOKEN`, `SOL_CHAT_ID=1030157568`, `GROQ_API_KEY`, `GROQ_MODEL=llama-3.3-70b-versatile`, `GITHUB_TOKEN`
+3. Rodar `oraculo/deploy.sh`
+4. Validar: `journalctl -u oraculo -f` + perguntar no Telegram "qual repo >30 dias sem commit?"
 
-### 3. Frota — ✅ FECHADA (2026-06-19)
-Rigel = build/CI · Bellatrix = banco · Vega = monitoramento. Registrado em `docs/ecossistema/frota.md`. Frota 100% mapeada.
+### 2. Subsistemas futuros (ordem C→D)
 
-### 4. Subsistemas futuros (ordem B→C→D)
-- **B** — Sistema Nervoso: ✅ **IMPLEMENTADO** (5/5 tasks, 13 testes passando). `scripts/gh.py` + `scripts/sentinel.py` + `.github/workflows/sentinel.yml`. Censo refatorado pra usar `gh.py` (smoke OK). **Falta só ativar:**
-  1. Cadastrar 3 secrets no GitHub Actions: `UNIVERSE_PAT` (=Censo), `TELEGRAM_TOKEN` + `SOL_CHAT_ID` (Sol gera os 2 do bot).
-  2. `workflow_dispatch` manual → 1ª run semeia `state/sentinel-state.json` em silêncio (baseline). 2ª run em diante notifica.
-  - **PUSH pendente:** commits locais no master ainda não foram pra origin (workflow só roda após push).
-- **C** — Guardião da Galáxia (segurança): curadoria de skills + varredura local + escudos. Dívida registrada: `hermes-dashboard.service` roda inseguro em `0.0.0.0:9119`.
+- **C** — Guardião da Galáxia (segurança): curadoria de skills + varredura local + escudos. Dívida: `hermes-dashboard.service` roda inseguro em `0.0.0.0:9119`.
 - **D** — Satélites Naturais (motores IA locais por planeta). Nebuloso, precisa brainstorm próprio.
 
 ## Regras de ouro (não violar)
 
 - Guardião **nunca** escreve em outro repo. Só observa (leitura) e escreve em casa (theuniverse).
-- Satélite orbita **um** planeta — instância isolada. Mas **receita** validada é compartilhada via gravidade.
-- Não ler inventários de infra sensíveis (IPs/vault) sem pedido explícito.
+- Mundo Matrix (`the-matrix`, `matrix-core`) = ecossistema separado. Observar de fora, não acoplar.
 - Token vive só no `.vault` (local) e no `.git/config`. Nunca commitar.
+- `UNIVERSE_OWNERS` em `gh.py` é o controle de escopo — alterar só com decisão do Sol.
 
 ## 💻 Setup em novo computador (arquivos local-only, NÃO versionados)
 
-Ao clonar o theuniverse noutra máquina, estes itens **não vêm pelo git** e precisam ser recriados no disco local:
+Ao clonar o theuniverse noutra máquina, estes itens **não vêm pelo git** e precisam ser recriados:
 
-1. **`.vault`** (raiz do repo, gitignorado) — contém `GITHUB_TOKEN=` e `GROQ_API_KEY=`. Sem ele, Censo/Sentinel locais e o deploy do Oráculo não autenticam. Valores foram passados ao Sol no chat do handoff (não ficam aqui por segurança).
-2. **Chave SSH `~/.ssh/id_ed25519_nexus_vps01`** — necessária pro deploy na Polaris (porta 49222, root@2.25.163.125). É privada; copiar manualmente da máquina antiga (não há cópia no repo).
-3. **Submodule** — clonar com `git clone --recurse-submodules` (ou `git submodule update --init`) pra trazer `.agnostic-core/`.
-4. **Credencial git de push** — o `.git/config` local guarda o token de push do theuniverse; num clone novo, configurar credencial pra conseguir `git push`.
+1. **`.vault`** (raiz do repo, gitignorado) — `GITHUB_TOKEN=` e `GROQ_API_KEY=`. Sem ele, Censo/Sentinel/Oráculo não autenticam.
+2. **Chave SSH `~/.ssh/id_ed25519_nexus_vps01`** — necessária pro deploy na Polaris (porta 49222, root@2.25.163.125). Copiar da máquina anterior ou gerar nova + cadastrar na Polaris.
+3. **Submodule** — clonar com `git clone --recurse-submodules` (ou `git submodule update --init`).
+4. **Credencial git de push** — configurar token no `.git/config` para conseguir `git push`.
