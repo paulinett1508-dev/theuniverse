@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-20 (sessão tarde)
+> Última atualização: 2026-06-20 (sessão noite)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -20,6 +20,7 @@
 | Frota (servidores = estrelas) | `docs/ecossistema/frota.md` |
 | Spec Hermes-Oráculo (subsistema A) | `docs/ecossistema/A-hermes-oraculo-spec.md` |
 | Spec Webhook Notifier (subsistema B2) | `docs/ecossistema/B2-webhook-notifier-spec.md` |
+| Script escudos (C1) | `scripts/c1-update-github-ips.py` |
 | Fichas dos planetas | `planets/*.md` + `planets/_index.md` |
 | Diário de bordo | `CHANGELOG.md` |
 | Censo (auto-descoberta) | `scripts/censo.py` + `.github/workflows/censo.yml` |
@@ -59,6 +60,9 @@ Gravidade = agnostic-core (submodule).
     - 27/27 repos com webhook ativo → notificações Telegram em tempo real (push + PR)
   - **PAT renovado** (`theuniverse-master-key`) com scopes `repo` + `admin:repo_hook` + `admin:org_hook`
   - **Universo finalizado em 27 planetas**: Lab-Sobral-Dev removido de UNIVERSE_OWNERS; `agnvendas-painelsbr` e `pedidomobile` adicionados ao EXCLUDE
+  - **Subsistema C implementado:**
+    - C1 (Escudos): porta 9120 restrita aos 6 CIDRs oficiais do GitHub via UFW. Cron semanal (`.github/workflows/c1-update-ips.yml`) mantém IPs atualizados. **Pendente:** adicionar `POLARIS_SSH_KEY` nos secrets do GitHub Actions.
+    - C2 (Secrets Scan): `sentinel.py` agora verifica `secret-scanning/alerts` em cada planeta. Novo evento `secret_exposto` notifica Telegram com tipo e link direto ao painel de segurança.
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
@@ -80,10 +84,14 @@ Deploy: Polaris `195.200.5.145`. Telegram: `@guardiao_universo_bot`. 227 chunks 
 27 repos monitorados. Notifica push e PRs em tempo real via Telegram.
 Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após criar o repo.
 
-### 3. Subsistemas futuros (ordem C→D)
+### 3. Subsistema C — ✅ IMPLEMENTADO (2026-06-20)
 
-- **C** — Guardião da Galáxia (segurança): curadoria de skills + varredura local + escudos. Dívida: porta 9120 aberta sem restrição de IP (só GitHub IPs deveriam alcançar).
-- **D** — Satélites Naturais (motores IA locais por planeta). Nebuloso, precisa brainstorm próprio.
+- **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. **Pendente:** `POLARIS_SSH_KEY` nos secrets do GitHub para cron funcionar autônomo.
+- **C2 (Secrets Scan):** sentinel detecta secrets expostos em qualquer planeta e notifica Telegram.
+
+### 4. Subsistema D — DESCARTADO
+
+Cada planeta decide sua própria IA se precisar. Não é responsabilidade do observatório.
 
 ## Regras de ouro (não violar)
 

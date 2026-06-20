@@ -4,6 +4,21 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-20 — Subsistema C implementado (Escudos + Secrets Scan)
+
+### 🛡️ C1 — Escudos: porta 9120 blindada
+- `scripts/c1-update-github-ips.py` — busca os CIDRs oficiais do GitHub em `api.github.com/meta`, limpa regras UFW antigas e recria por CIDR. Localhost também permitido.
+- Aplicado na Polaris: 6 CIDRs ativos (`192.30.252.0/22`, `185.199.108.0/22`, `140.82.112.0/20`, `143.55.64.0/20`, `2a0a:a440::/29`, `2606:50c0::/32`) + `127.0.0.1`.
+- `.github/workflows/c1-update-ips.yml` — cron toda segunda 04h UTC. Pendente: secret `POLARIS_SSH_KEY` no GitHub para execução autônoma.
+
+### 🔑 C2 — Secrets Scan integrado ao sentinel
+- `sentinel.py` agora coleta `secret-scanning/alerts` abertos em cada um dos 27 planetas.
+- Novo evento `secret_exposto`: notifica Telegram com número do alerta, tipo do secret e link direto ao painel de segurança do repo.
+- Graceful fallback: repos sem secret scanning habilitado são ignorados silenciosamente.
+
+### 🗺️ Subsistema D descartado
+- Cada planeta decide sua própria IA se necessitar. Não é responsabilidade do observatório.
+
 ## 2026-06-20 — Subsistema B2 no ar (Webhook Notifier)
 
 ### ⚡ Notificações em tempo real — push e PRs chegam no Telegram
