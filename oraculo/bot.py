@@ -1,4 +1,5 @@
 """Oráculo do Universo — bot Telegram conversacional (long-polling) na Polaris."""
+import re
 import sys
 import time
 import logging
@@ -31,7 +32,7 @@ def extract_reply_context(msg: dict) -> str | None:
     return text if text else None
 
 
-def handle_update(update, cfg, rag, tok, brain_fn, context_fn):
+def handle_update(update, cfg, rag, tok, brain_fn, context_fn, rag_query_fn=None):
     msg = update.get("message") or {}
     chat_id = (msg.get("chat") or {}).get("id")
     if not is_authorized(chat_id, cfg.sol_chat_id):
@@ -44,7 +45,8 @@ def handle_update(update, cfg, rag, tok, brain_fn, context_fn):
     if reply_context:
         log.info("Reply detectado — contexto: %.60s…", reply_context.replace("\n", " "))
     context_str = context_fn(tok)
-    chunks = rag.retrieve(question)
+    rag_query = rag_query_fn(question) if rag_query_fn else question
+    chunks = rag.retrieve(rag_query)
     return brain_fn(question, context_str, chunks, reply_context)
 
 
@@ -60,6 +62,7 @@ def main():
     log.info("Oráculo online. Indexados %d chunks. Long-polling iniciado.", len(rag.chunks))
 
     _history = []
+    _ctx_repo = [None]  # lista mutável para closure sem nonlocal
 
     def context_fn(t):
         try:
@@ -68,7 +71,15 @@ def main():
             log.exception("contexto ao vivo falhou")
             return "## Estado atual do universo\n(estado ao vivo indisponível agora)"
 
+    def rag_query_fn(question):
+        repo = _ctx_repo[0]
+        return f"{question} {repo}" if repo else question
+
     def brain_fn(q, c, ch, reply_context=None):
+        if reply_context:
+            facts = brain._parse_notification(reply_context)
+            if facts.get("repo"):
+                _ctx_repo[0] = facts["repo"]
         result = brain.answer(q, c, ch, cfg.groq_api_key, cfg.groq_model,
                               reply_context=reply_context,
                               history=list(_history))
@@ -86,7 +97,7 @@ def main():
             for upd in resp.json().get("result", []):
                 offset = upd["update_id"] + 1
                 try:
-                    reply = handle_update(upd, cfg, rag, tok, brain_fn, context_fn)
+                    reply = handle_update(upd, cfg, rag, tok, brain_fn, context_fn, rag_query_fn)
                 except Exception:
                     log.exception("falha ao responder")
                     reply = "Oráculo indisponível, tenta de novo."
