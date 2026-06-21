@@ -825,8 +825,8 @@ function _initThree(){
   renderer.setClearColor(0x000000,0);
 
   const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,1,8000);
-  camera.position.set(0,360,920); // 21° elevação — perspectiva clara sem achatar
+  const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,1,8000);
+  camera.position.set(0,252,644); // 21° elevação — 30% mais perto para preencher o monitor
   camera.lookAt(0,0,0);
 
   scene.add(new THREE.PointLight(0xffeebb,3.5,2800,1.5));
