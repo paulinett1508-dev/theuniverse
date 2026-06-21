@@ -48,9 +48,34 @@
     "luna-base": 27888139181
   },
   "last_issue_number": {
-    "agnostic-core": 29,
+    "agnostic-core": 33,
     "SbrTask": 6,
-    "sbrgestao": 7,
-    "sicefsus-sistema": 15
+    "sbrgestao": 8,
+    "sicefsus-sistema": 16,
+    "AlgodaoAtelie": 1,
+    "CertiSYS": 1,
+    "FinanceFlow": 1,
+    "GessoExpress": 5,
+    "SuperCartolaManagerv5-production": 98,
+    "bolaocopa2026": 1,
+    "centroculturalsbr": 1,
+    "contabilplus": 1,
+    "f1-pulse": 40,
+    "florianorun": 4,
+    "flowdigitalstudio": 2,
+    "imersaobitrix24": 10,
+    "lp-ellenpedrosa": 1,
+    "lp-restauranteflutuante": 1,
+    "lpjaraujoinfo": 1,
+    "luna-base": 1,
+    "matrix-core": 1,
+    "mcp-eventos": 1,
+    "nexus-labsobral": 24,
+    "sbrchecks": 1,
+    "sigmed": 1,
+    "temperodemamae": 4,
+    "the-matrix": 1,
+    "tokentown": 2,
+    "vibegaminghub": 49
   }
 }
