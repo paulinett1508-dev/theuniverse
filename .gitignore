@@ -11,3 +11,13 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# playwright MCP artifacts
+.playwright-mcp/
+
+# dashboard screenshots / test captures
+dashboard-*.png
+dashboard-*.jpeg
+galactic-*.jpeg
+orbital-*.jpeg
+image.png
