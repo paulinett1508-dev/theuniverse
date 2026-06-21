@@ -41,7 +41,7 @@ CLUSTERS = {
     "AlgodaoAtelie": "landing-clientes", "florianorun": "landing-clientes",
     "lp-restauranteflutuante": "landing-clientes", "lp-ellenpedrosa": "landing-clientes",
     "imersaobitrix24": "landing-clientes", "GessoExpress": "landing-clientes",
-    "botclinop": "landing-clientes",
+    "luna-base": "observatorio",
 }
 
 

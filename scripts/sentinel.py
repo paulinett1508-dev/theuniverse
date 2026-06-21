@@ -245,6 +245,17 @@ def main():
     new_state, sent = notify(events, state, snapshot, send_telegram)
     save_state(STATE_PATH, new_state)
     print(f"Eventos: {len(events)} detectados, {sent} notificados.")
+
+    # Despacha Voyager para novos CI failures — alerta o mundo do planeta
+    ci_failures = [e for e in events if e["kind"] == "ci_falhou"]
+    if ci_failures:
+        try:
+            from voyager import dispatch as voyager_dispatch
+            for e in ci_failures:
+                voyager_dispatch(e["repo"], "CI falhou", e.get("detail", ""), tok=tok)
+        except Exception as e:
+            print(f"  Voyager falhou: {e}", file=sys.stderr)
+
     return 0
 
 
