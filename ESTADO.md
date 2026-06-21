@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-20 (Artoo — mensageiro cósmico implementado)
+> Última atualização: 2026-06-21 (Carta de Apresentação enviada a 29/31 planetas via Artoo)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -151,7 +151,7 @@ Próximas evoluções: pack de stickers · `sbrgestao` CI fix.
 
 ### 5. Artoo — Mensageiro Cósmico | ✅ IMPLEMENTADO (2026-06-20)
 
-**Arquivo:** `scripts/voyager.py`  
+**Arquivo:** `scripts/artoo.py`  
 **Nome:** Artoo (R2-D2) — decisão do TheGod.
 
 Quando o Observatório detecta uma ameaça num planeta, Artoo abre uma Issue no repo afetado
@@ -160,13 +160,15 @@ e notifica TheGod via Telegram em dois momentos:
 - ✅ entrega: "Artoo chegou · sbrgestao · issue #N aberta" + link direto
 
 **Integração automática:** `sentinel.py` chama Artoo para todo evento `ci_falhou`.  
-**Invocação manual:** `python scripts/voyager.py sbrgestao --reason "CI falhou" --detail "agnvendas-unit-tests"`
+**Invocação manual:** `python scripts/artoo.py sbrgestao --reason "CI falhou" --detail "agnvendas-unit-tests"`
 
-Label criada nos repos alertados: `observatory-alert` (vermelho escuro).
+Labels criadas nos repos: `observatory-alert` (vermelho escuro), `observatory` (azul — comunicados gerais).
 
 **Testado ao vivo (2026-06-20):** `sbrgestao` · issue #6 aberta com sucesso. TheGod recebeu 🛸 lançamento + ✅ entrega via Telegram. Órbita atravessada.
 
-**Regra de ouro do Artoo:** Guardião nunca escreve em outro repo — mas Artoo é um agente autorizado explicitamente pelo TheGod. A única escrita externa permitida são Issues de alerta.
+**Carta de Apresentação (2026-06-21):** `scripts/carta_apresentacao.py` — abre issue `📡 Carta do Observatório — TheUniverse se apresenta` em todos os planetas. Enviada a **29/31** planetas (2 arquivados: `agnvendas-painelsbr`, `pedidomobile` — 403 esperado).
+
+**Regra de ouro do Artoo:** Guardião nunca escreve em outro repo — mas Artoo é um agente autorizado explicitamente pelo TheGod. A única escrita externa permitida são Issues de alerta e comunicados oficiais.
 
 ### 6. Subsistema D — DESCARTADO
 
