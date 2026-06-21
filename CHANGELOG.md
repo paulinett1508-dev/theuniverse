@@ -4,6 +4,17 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-21 — Dashboard NOC v4: Galáctica WebGL final
+
+### 🪐 Three.js — planetas discretos, sem sobreposição
+- Remove cascas de atmosfera (`radius*1.7 BackSide`) que causavam blobs translúcidos sobrepostos.
+- Planetas reduzidos: 5-18 → 3-9 unidades. Emissive 0.3 → 0.5 mantém visibilidade.
+- `THREE_SCALE` 580 → 720: órbitas mais espaçadas.
+- Distribuição angular inicial uniforme por anel (`j/sp[ri] * 2π + offset`): planetas nascem distribuídos, não empilhados no ângulo 0.
+- Sol menor (52 → 44 unidades) e glows 30% mais sutis.
+- Poeiras cósmicas expandidas (r_max 560 → 700) para cobrir órbitas externas.
+- Supernovas: shell de pulso `radius*2.8`, opacity 0.12 (mais visível em corpo menor).
+
 ## 2026-06-20 — Dashboard NOC v3: Vista Galáctica 3D real
 
 ### 🌌 Perspectiva verdadeira + Poeiras Cósmicas

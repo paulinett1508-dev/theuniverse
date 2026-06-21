@@ -145,7 +145,7 @@ Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_T
 
 Quando `luna-base` for excluído ou outro repo ganhar tipo especial: atualizar `SPECIAL_BODIES`.
 
-**Vista galáctica v3** (2026-06-20): CSS perspective + rotateX = projeção 3D real; poeiras cósmicas + braços espirais no canvas; ângulo 64°. Selecionável pelo botão "━ galáctica" no header.
+**Vista galáctica v4** (2026-06-21): Three.js WebGL — planetas 3D reais (SphereGeometry), 4 anéis com torus, poeiras cósmicas como PointCloud, câmera em perspectiva 21°. Planetas 3-9 unidades (magnitude 1-5), distribuição angular uniforme por anel, sem cascas de atmosfera sobrepostas. THREE_SCALE=720. Selecionável pelo botão "━ galáctica" no header.
 
 Próximas evoluções: pack de stickers · `sbrgestao` CI fix.
 
