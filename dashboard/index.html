@@ -979,7 +979,7 @@ function _initThree(){
     const col=_healthCol(planet.health,planet.bodyType);
     const ptype=_classifyPlanetType(planet);
     const seed=_hashStr(planet.name);
-    const radius=3+((planet.magnitude||3)/5)*6;
+    const radius=7+((planet.magnitude||3)/5)*10;
 
     let geom,mat,tex=null;
     if(ptype==='satellite'){
@@ -988,15 +988,15 @@ function _initThree(){
     } else {
       geom=new THREE.SphereGeometry(radius,32,16);
       tex=_buildPlanetTex(ptype,seed);
-      const emInt=ptype==='toys'?.0:.18;
-      mat=new THREE.MeshPhongMaterial({map:tex,emissive:col.emissive,emissiveIntensity:emInt,shininess:45,specular:0x223355});
+      const emInt=ptype==='toys'?.0:.04;
+      mat=new THREE.MeshPhongMaterial({map:tex,emissive:col.emissive,emissiveIntensity:emInt,shininess:55,specular:0x334466});
       if(ptype==='supernova') mat.emissiveIntensity=.9;
     }
 
     const mesh=new THREE.Mesh(geom,mat);
     // glow sprite
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:col.glow,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,depthWrite:false}));
-    sp.scale.set(radius*7,radius*7,1);
+    sp.scale.set(radius*2.2,radius*2.2,1);
     mesh.add(sp);
 
     if(ptype==='supernova'){
