@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-20 (sessão noite/madrugada — Dashboard NOC v2 + cosmologia planetária)
+> Última atualização: 2026-06-20 (sessão madrugada — Dashboard NOC v2 + fixes Oráculo + luna-base)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -75,6 +75,10 @@ Gravidade = agnostic-core (submodule).
   - Digitando: `sendChatAction typing` imediato ao receber mensagem.
   - `sendSticker` nos momentos de órbita: 🚀 proposta, 🌌 confirmada, 👋 negada. Packs espaciais provisórios; pack customizado planejado (Star Wars, Severance).
   - **Vocabulário vivo** no system prompt: Pluribus (o próprio Oráculo), Estrela da Morte, Lado Sombrio, A Força, Supernova, Órbita estável.
+- **Oráculo v3.2 (sessão 2026-06-20 madrugada):**
+  - Fix: reply a notificação agora envia sticker `orbit_confirmed` 🌌 antes de responder.
+  - Fix: mensagem só-emoji (ex: 🚀) → query implícita `"status de {repo}"` em vez de perguntar nada ao LLM.
+  - `planets/luna-base.md` criado (era `botclinop.md`) — `detect_planet` agora reconhece `luna-base`.
 - **Dashboard NOC v1 (sessão 2026-06-20 noite):**
   - URL: `theuniverse-lake.vercel.app`
   - Mapa orbital animado: 4 anéis, 27 planetas, starfield + cometas + bólidos.
@@ -97,7 +101,7 @@ Gravidade = agnostic-core (submodule).
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
-### 1. Hermes-Oráculo (subsistema A) — ✅ NO AR | v3.1
+### 1. Hermes-Oráculo (subsistema A) — ✅ NO AR | v3.2 (Polaris desatualizada — requer git pull)
 
 Deploy: Polaris `195.200.5.145`. Telegram: `@guardiao_universo_bot`. 227 chunks indexados.
 
@@ -109,6 +113,11 @@ Deploy: Polaris `195.200.5.145`. Telegram: `@guardiao_universo_bot`. 227 chunks 
 - Atualizar: `git pull` em `/opt/theuniverse` + `systemctl restart oraculo webhook`
 
 **Re-deploy do zero:** `bash oraculo/deploy.sh` + `bash webhook/deploy.sh`
+
+⚠️ **Pendente**: Polaris ainda roda v3.1 — atualizar com:
+```
+ssh -i ~/.ssh/vscode_key root@195.200.5.145 "cd /opt/theuniverse && git pull && systemctl restart oraculo"
+```
 
 ### 2. Subsistema B2 (Webhook Notifier) — ✅ NO AR
 
