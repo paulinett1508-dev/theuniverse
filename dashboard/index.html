@@ -182,11 +182,12 @@ body.panel-open #wrap{padding-right:270px}
 .vb.active{border-color:rgba(100,120,200,.5);color:#c8ceff;background:rgba(100,120,200,.07)}
 .vb:hover:not(.active){color:#7880a8;border-color:rgba(100,120,200,.3)}
 
-/* ── perspectiva: escala por profundidade ── */
+/* ── perspectiva 3D real ── */
+#wrap.galactic{perspective:820px;perspective-origin:50% 26%}
+#wrap.galactic #univ{transform:rotateX(64deg);transform-origin:center 64%}
 #wrap.galactic .pw{transform:translate(calc(var(--px) - 50%), calc(var(--py) - 50%)) scale(var(--ds,1))}
 #wrap.galactic .pw:hover .pd,#wrap.galactic .pw:active .pd{transform:scale(2.2)}
-/* sol com glow quente expandido na vista perspectiva */
-#wrap.galactic #sun{box-shadow:0 0 30px #ffd700,0 0 80px rgba(255,180,0,.5),0 0 160px rgba(255,120,0,.25),0 0 300px rgba(255,80,0,.1)}
+#wrap.galactic #sun{width:44px;height:44px;box-shadow:0 0 40px #ffd700,0 0 100px rgba(255,175,0,.6),0 0 200px rgba(255,110,0,.3),0 0 380px rgba(255,70,0,.12)}
 
 /* ── body types ── */
 .body-station .pd{clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);border-radius:0;background:linear-gradient(135deg,#9ab2d0 0%,#4a6888 55%,#2a3e58 100%);box-shadow:0 0 8px rgba(130,170,220,.7),0 0 24px rgba(70,110,200,.35);animation:station-spin 28s linear infinite}
@@ -245,12 +246,24 @@ body.panel-open #wrap{padding-right:270px}
 const cnv=document.getElementById('stars'), ctx=cnv.getContext('2d');
 let stars=[], comets=[], meteors=[];
 let cometCd=0, meteorCd=0;
+let dustParticles=[];
 
 function initStars(){
   cnv.width=innerWidth; cnv.height=innerHeight;
   stars=Array.from({length:220},()=>({
     x:Math.random()*cnv.width, y:Math.random()*cnv.height,
     r:Math.random()*1.3, a:Math.random(), da:(Math.random()-.5)*.004,
+  }));
+  // poeiras cósmicas — visíveis só na vista galáctica
+  dustParticles=Array.from({length:340},()=>({
+    x:Math.random()*cnv.width, y:Math.random()*cnv.height,
+    r:0.5+Math.random()*2.2,
+    a:0.04+Math.random()*0.18,
+    // deriva lenta para simular o giro galáctico
+    vx:(Math.random()-.5)*0.06, vy:(Math.random()-.5)*0.04,
+    // cor: mistura entre branco frio, âmbar e lilás
+    hue:[210,35,270,45,200][Math.floor(Math.random()*5)],
+    sat:[20,40,30,50,10][Math.floor(Math.random()*5)],
   }));
 }
 
@@ -329,14 +342,44 @@ function drawMeteor(m){
 function drawBg(){
   ctx.clearRect(0,0,cnv.width,cnv.height);
   if(currentView==='galactic'){
-    // glow quente ao redor do sol — como a imagem referência
+    // glow quente ao redor do sol
     const gx=cnv.width/2, gy=cnv.height/2;
     const bg=ctx.createRadialGradient(gx,gy,0,gx,gy,cnv.width*.5);
-    bg.addColorStop(0,'rgba(255,210,80,.05)');
-    bg.addColorStop(.15,'rgba(255,150,40,.025)');
-    bg.addColorStop(.35,'rgba(120,100,200,.012)');
+    bg.addColorStop(0,'rgba(255,210,80,.06)');
+    bg.addColorStop(.15,'rgba(255,150,40,.03)');
+    bg.addColorStop(.35,'rgba(120,100,200,.015)');
     bg.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=bg; ctx.fillRect(0,0,cnv.width,cnv.height);
+
+    // braços espirais da Via Láctea — nebulosidade difusa
+    const arms=[0, Math.PI*.67, Math.PI*1.33];
+    for(const offset of arms){
+      for(let t=0;t<Math.PI*1.6;t+=0.06){
+        const r=(40+t*58)*Math.min(cnv.width,cnv.height)/900;
+        const angle=t+offset;
+        const nx=gx+r*Math.cos(angle);
+        const ny=gy+r*Math.sin(angle)*0.32; // achatado em Y para perspectiva
+        const spread=6+t*4;
+        const nb=ctx.createRadialGradient(nx,ny,0,nx,ny,spread);
+        nb.addColorStop(0,`rgba(180,160,255,${(0.025-t*0.006).toFixed(3)})`);
+        nb.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=nb; ctx.fillRect(nx-spread,ny-spread,spread*2,spread*2);
+      }
+    }
+
+    // poeiras cósmicas — partículas com deriva lenta
+    for(const d of dustParticles){
+      d.x=(d.x+d.vx+cnv.width)%cnv.width;
+      d.y=(d.y+d.vy+cnv.height)%cnv.height;
+      // densidade maior perto do centro galáctico
+      const dx=d.x-gx, dy=d.y-gy;
+      const distFrac=Math.min(1,Math.hypot(dx,dy)/(cnv.width*.42));
+      const alpha=d.a*(1-distFrac*.6);
+      ctx.beginPath();
+      ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${d.hue},${d.sat}%,85%,${alpha.toFixed(3)})`;
+      ctx.fill();
+    }
   }
 
   // spawn
@@ -683,7 +726,6 @@ const univ=document.getElementById('univ');
 const savedAngles={};
 let stationWrapper=null;
 let currentView='orbital', allPlanets=[];
-const PERSP_SCALE=0.42; // elipse: eixo vertical = 42% do horizontal
 
 function isMobile(){return innerWidth<=600}
 function getUnivSz(){
@@ -794,17 +836,9 @@ function resizeOrbit(){
   _placeStation();
 }
 
-// ── PERSPECTIVA (vista galáctica = orbital em elipse 3D) ──
-function _reshapeRings(){
-  document.querySelectorAll('#univ .ring').forEach(ring=>{
-    const w=parseFloat(ring.style.width);
-    ring.style.height=(w*PERSP_SCALE)+'px';
-  });
-}
-
+// ── PERSPECTIVA 3D (CSS rotateX + perspective no container) ──
 function buildGalactic(planets){
-  buildOrbit(planets);  // reutiliza toda a lógica orbital
-  _reshapeRings();      // achata os anéis em elipses
+  buildOrbit(planets); // órbitas circulares normais — CSS faz a projeção 3D
 }
 
 function stepGalactic(){
@@ -815,22 +849,17 @@ function stepGalactic(){
     savedAngles[name]=angles[i];
     const r=RINGS[ri].rf*univSz;
     const x=cx+r*Math.cos(angles[i]);
-    const y=cy+r*Math.sin(angles[i])*PERSP_SCALE;
-    // profundidade: 0=fundo(topo), 1=frente(baixo)
-    const depth=(1+Math.sin(angles[i]))/2;
+    const y=cy+r*Math.sin(angles[i]); // circular puro
+    const depth=(1+Math.sin(angles[i]))/2; // 0=fundo/topo, 1=frente/baixo
     el.style.setProperty('--px',x+'px');
     el.style.setProperty('--py',y+'px');
-    el.style.setProperty('--ds',(0.7+0.6*depth).toFixed(3));
-    el.style.zIndex=Math.round(10+depth*20);
+    el.style.setProperty('--ds',(0.45+1.1*depth).toFixed(3)); // 0.45x fundo → 1.55x frente
+    el.style.zIndex=Math.round(5+depth*26);
   }
-  // station fixed — ajusta zIndex pelo ângulo fixo
-  if(stationWrapper) stationWrapper.style.zIndex=15;
+  if(stationWrapper) stationWrapper.style.zIndex=16;
 }
 
-function resizeGalactic(){
-  resizeOrbit();
-  _reshapeRings();
-}
+function resizeGalactic(){ resizeOrbit(); }
 
 function switchView(v){
   if(v===currentView) return;
