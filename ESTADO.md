@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-20 (Voyager — mensageiro cósmico implementado)
+> Última atualização: 2026-06-20 (Artoo — mensageiro cósmico implementado)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -147,22 +147,22 @@ Quando `luna-base` for excluído ou outro repo ganhar tipo especial: atualizar `
 
 Próximas evoluções: pack de stickers · `sbrgestao` CI fix.
 
-### 5. Voyager — Mensageiro Cósmico | ✅ IMPLEMENTADO (2026-06-20)
+### 5. Artoo — Mensageiro Cósmico | ✅ IMPLEMENTADO (2026-06-20)
 
 **Arquivo:** `scripts/voyager.py`  
-**Nome pendente de decisão do TheGod** (candidatos: Artoo/R2-D2, BB-8, Hedwig — ver conversa).
+**Nome:** Artoo (R2-D2) — decisão do TheGod.
 
-Quando o Observatório detecta uma ameaça num planeta, Voyager abre uma Issue no repo afetado
+Quando o Observatório detecta uma ameaça num planeta, Artoo abre uma Issue no repo afetado
 e notifica TheGod via Telegram em dois momentos:
-- 🛸 lançamento: "Voyager em rota para {repo} — ameaça: CI falhou"
-- ✅ entrega: "Voyager chegou · sbrgestao · issue #N aberta" + link direto
+- 🛸 lançamento: "Artoo em rota para {repo} — ameaça: CI falhou"
+- ✅ entrega: "Artoo chegou · sbrgestao · issue #N aberta" + link direto
 
-**Integração automática:** `sentinel.py` chama Voyager para todo evento `ci_falhou`.  
+**Integração automática:** `sentinel.py` chama Artoo para todo evento `ci_falhou`.  
 **Invocação manual:** `python scripts/voyager.py sbrgestao --reason "CI falhou" --detail "agnvendas-unit-tests"`
 
 Label criada nos repos alertados: `observatory-alert` (vermelho escuro).
 
-**Regra de ouro do Voyager:** Guardião nunca escreve em outro repo — mas Voyager é um agente autorizado explicitamente pelo TheGod. A única escrita externa permitida são Issues de alerta.
+**Regra de ouro do Artoo:** Guardião nunca escreve em outro repo — mas Artoo é um agente autorizado explicitamente pelo TheGod. A única escrita externa permitida são Issues de alerta.
 
 ### 6. Subsistema D — DESCARTADO
 
@@ -170,7 +170,7 @@ Cada planeta decide sua própria IA se precisar. Não é responsabilidade do obs
 
 ## Regras de ouro (não violar)
 
-- Guardião **nunca** escreve em outro repo. Só observa (leitura) e escreve em casa (theuniverse). Exceção explícita: **Voyager** (autorizado pelo TheGod) pode abrir Issues de alerta em planetas afetados.
+- Guardião **nunca** escreve em outro repo. Só observa (leitura) e escreve em casa (theuniverse). Exceção explícita: **Artoo** (autorizado pelo TheGod) pode abrir Issues de alerta em planetas afetados.
 - Mundo Matrix (`the-matrix`, `matrix-core`) = ecossistema separado. Observar de fora, não acoplar.
 - Token vive só no `.vault` (local) e no `/opt/oraculo/.env` (Polaris). Nunca commitar.
 - `UNIVERSE_OWNERS` em `gh.py` é o controle de escopo — alterar só com decisão do TheGod.

@@ -246,15 +246,15 @@ def main():
     save_state(STATE_PATH, new_state)
     print(f"Eventos: {len(events)} detectados, {sent} notificados.")
 
-    # Despacha Voyager para novos CI failures — alerta o mundo do planeta
+    # Despacha Artoo para novos CI failures — alerta o mundo do planeta
     ci_failures = [e for e in events if e["kind"] == "ci_falhou"]
     if ci_failures:
         try:
-            from voyager import dispatch as voyager_dispatch
+            from artoo import dispatch as artoo_dispatch
             for e in ci_failures:
-                voyager_dispatch(e["repo"], "CI falhou", e.get("detail", ""), tok=tok)
+                artoo_dispatch(e["repo"], "CI falhou", e.get("detail", ""), tok=tok)
         except Exception as e:
-            print(f"  Voyager falhou: {e}", file=sys.stderr)
+            print(f"  Artoo falhou: {e}", file=sys.stderr)
 
     return 0
 

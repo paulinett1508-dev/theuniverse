@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
-Voyager — Mensageiro Cósmico do Observatório.
+Artoo — Mensageiro Cósmico do Observatório.
 
-Quando o Observatório detecta uma ameaça num planeta, Voyager atravessa a
+Quando o Observatório detecta uma ameaça num planeta, Artoo atravessa a
 órbita e entrega um alerta diretamente no mundo deles (GitHub Issue).
+O mundo deles não sabe da ameaça — até Artoo chegar.
 
 TheGod é notificado em dois momentos:
-  🛸 lançamento — "Voyager em rota para X"
-  ✅ entrega confirmada — "Voyager chegou · issue #N aberta"
-  ❌ perdido — "Voyager perdido na órbita · erro: ..."
+  🛸 lançamento — "Artoo em rota para X"
+  ✅ entrega confirmada — "Artoo chegou · issue #N aberta"
+  ❌ perdido — "Artoo perdido na órbita · erro: ..."
 
 Uso manual:
-  python scripts/voyager.py sbrgestao --reason "CI falhou" --detail "agnvendas-unit-tests"
+  python scripts/artoo.py sbrgestao --reason "CI falhou" --detail "agnvendas-unit-tests"
 
 Integrado ao sentinel.py para disparo automático em ci_falhou.
 """
@@ -101,7 +102,7 @@ def _issue_body(repo, reason, detail, today):
 
 def dispatch(repo, reason, detail="", tok=None, notify=True):
     """
-    Despacha Voyager para um planeta.
+    Despacha Artoo para um planeta.
 
     Returns:
         dict {'issue_url', 'issue_number'} em caso de sucesso, None se falhou.
@@ -113,7 +114,7 @@ def dispatch(repo, reason, detail="", tok=None, notify=True):
     if notify:
         try:
             _tg_send(
-                f"🛸 <b>Voyager</b> em rota\n\n"
+                f"🛸 <b>Artoo</b> em rota\n\n"
                 f"destino: <b>{repo}</b>\n"
                 f"ameaça: {reason}"
                 + (f"\ndetalhe: <i>{detail}</i>" if detail else "")
@@ -134,7 +135,7 @@ def dispatch(repo, reason, detail="", tok=None, notify=True):
         if notify:
             try:
                 _tg_send(
-                    f"✅ <b>Voyager chegou</b>\n\n"
+                    f"✅ <b>Artoo chegou</b>\n\n"
                     f"<b>{repo}</b> · issue #{issue_number} aberta\n"
                     f"o mundo deles foi alertado\n\n"
                     f'<a href="{issue_url}">↗ ver issue</a>'
@@ -150,7 +151,7 @@ def dispatch(repo, reason, detail="", tok=None, notify=True):
         if notify:
             try:
                 _tg_send(
-                    f"❌ <b>Voyager perdido na órbita</b>\n\n"
+                    f"❌ <b>Artoo perdido na órbita</b>\n\n"
                     f"destino: <b>{repo}</b>\n"
                     f"erro: <code>{err[:200]}</code>"
                 )
@@ -162,7 +163,7 @@ def dispatch(repo, reason, detail="", tok=None, notify=True):
 
 def main():
     import argparse
-    ap = argparse.ArgumentParser(description="Voyager — Mensageiro Cósmico do Observatório")
+    ap = argparse.ArgumentParser(description="Artoo — Mensageiro Cósmico do Observatório")
     ap.add_argument("repo", help="Repo destino (ex: sbrgestao)")
     ap.add_argument("--reason", required=True, help="Tipo de ameaça (ex: 'CI falhou')")
     ap.add_argument("--detail", default="", help="Detalhe adicional (ex: nome do workflow)")
