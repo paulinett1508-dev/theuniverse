@@ -4,6 +4,48 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-20 — Dashboard NOC v2.1: canvas especiais por tipo de corpo
+
+### 🎨 Canvas dedicados no card lateral
+- `drawStation()` — hexágono metálico giratório com hub central, raios e anel externo. Animação via `rotate: 1turn` (individual transform, sem conflito com hover `scale`).
+- `drawSatellite()` — diamante + painéis solares bilaterais com grid + antena beacon pulsante. Caractere `−` corrigido para ASCII (unicode U+2212 causava SyntaxError JS).
+- `drawObservatory()` — esfera cinza-azulada com crateras, trilha orbital pontilhada e lua menor em órbita animada.
+- `startPlanetAnim()` roteia por bodyType: station → drawStation, satellite → drawSatellite, observatory → drawObservatory, demais → drawPlanet.
+
+### 🌙 luna-base (ex-botclinop)
+- Repo renomeado no GitHub via API REST (`PATCH /repos/paulinett1508-dev/botclinop`).
+- `planets/luna-base.md` criada, `planets/botclinop.md` removida.
+- `SPECIAL_BODIES` e `detect_planet` (Oráculo) atualizados para `luna-base`.
+
+### 🤖 Oráculo v3.2 — sticker + emoji-only fix
+- Reply a notificação agora dispara sticker `orbit_confirmed` (🌌) antes de responder.
+- Mensagem com só emoji (ex: 🚀) usa query implícita `"status de {repo}"` em vez de mandar o emoji como pergunta ao LLM.
+
+## 2026-06-20 — Dashboard NOC v2: cosmologia planetária
+
+### 🌌 Cinco tipos de corpos celestes
+- `SPECIAL_BODIES` em `api/planets.js` — mapa de repos para tipos: station, satellite, observatory, supernova, toys.
+- `agnostic-core` → 🛸 Estação Espacial: hexágono fixo entre sol e anel 1, não orbita, gira lento.
+- `mcp-eventos` → 🛰 Satélite Artificial: diamante, forçado ao anel 0 (mais interno).
+- `luna-base` → 🌙 Observatório Lunar: sphere branco-azulada com anel pontilhado.
+- `bolaocopa2026` / `f1-pulse` → 💥 Supernova Iminente: pulso vermelho-laranja.
+- `vibegaminghub` → 🎮 Planeta Toys: gradiente rosa↔roxo↔azul animado.
+
+### 🎨 Paleta cromática determinística
+- 6 tonalidades por estado de saúde (healthy/warning/alert) via `hashStr(planet.name) % 6`.
+- Nenhum planeta visualmente idêntico ao outro.
+- Tamanhos aumentados: range 8–26px (era 6–18px).
+
+### 📋 Métricas novas no card
+- Linguagem principal com dot colorido (`primaryLanguage.color`).
+- Contribuidores (`mentionableUsers.totalCount`).
+- Último PR: badge de estado + título + data.
+- XSS fix: helper `esc()` + `safeHex()` em todos os campos interpolados em innerHTML.
+
+### ☠️ sbrgestao — Estrela da Morte
+- CI `agnvendas-unit-tests failure` detectado — `health: alert` intencional para forçar investigação.
+- Não suprimir — Estrela da Morte serve de sinal de alerta para o planeta.
+
 ## 2026-06-20 — Dashboard NOC: observatório visual do universo
 
 ### 🌌 Orbital map — 27 planetas em órbita animada
