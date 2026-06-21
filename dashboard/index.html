@@ -208,6 +208,29 @@ input.gc-range::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9p
 @keyframes nebula-pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.18);opacity:1}}
 .body-observatory .pd{background:#c8d8f8!important;box-shadow:0 0 6px rgba(180,200,255,.7),0 0 18px rgba(140,170,255,.35)!important}
 .body-observatory .pd::before{content:'';position:absolute;width:calc(100% + 14px);height:calc(100% + 14px);border:1px dashed rgba(180,210,255,.45);border-radius:50%;top:-7px;left:-7px;pointer-events:none}
+
+/* ── simulated clock (top-right, galactic only) ── */
+#gal-clock{position:fixed;top:56px;right:32px;text-align:right;z-index:15;display:none;pointer-events:none}
+#gal-clock.visible{display:block}
+body.panel-open #gal-legend{display:none!important}
+#gal-clock .lbl{font-size:9px;letter-spacing:.4em;color:rgba(255,255,255,.18);text-transform:uppercase}
+#gal-clock .yr{font-family:Georgia,serif;font-size:22px;color:rgba(255,255,255,.55);margin-top:3px;letter-spacing:.04em}
+#gal-clock .dt{font-size:9px;letter-spacing:.22em;color:rgba(255,255,255,.2);margin-top:2px}
+
+/* ── legend (center-right, galactic only) ── */
+#gal-legend{position:fixed;top:50%;right:28px;transform:translateY(-50%);z-index:15;display:none;flex-direction:column;gap:5px;max-height:60vh;overflow-y:auto;pointer-events:auto}
+#gal-legend.visible{display:flex}
+#gal-legend::-webkit-scrollbar{width:2px}
+#gal-legend::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1)}
+.leg-row{display:flex;align-items:center;justify-content:flex-end;gap:7px;cursor:pointer;padding:2px 5px;border-radius:3px;transition:background .15s}
+.leg-row:hover{background:rgba(255,255,255,.07)}
+.leg-row.active .leg-lbl{color:rgba(255,200,80,.9)}
+.leg-row.leg-special{padding-left:12px}
+.leg-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.leg-lbl{font-size:8px;letter-spacing:.18em;color:rgba(255,255,255,.2);text-transform:uppercase;transition:color .2s;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── bloom slider in gal-ui ── */
+.gc-row-bloom{display:flex;align-items:center;gap:10px;pointer-events:auto}
 </style>
 </head>
 <body>
@@ -259,7 +282,25 @@ input.gc-range::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9p
     <span class="gc-lbl">órbitas</span>
     <button class="gc-btn gc-tog" id="gc-orbits" title="Mostrar/ocultar órbitas (O)">ON</button>
   </div>
+  <div class="gc-row">
+    <span class="gc-lbl">bloom</span>
+    <input class="gc-range" type="range" id="gc-bloom" min="0" max="3" step=".05" value="1.2">
+    <span class="gc-val" id="gc-bloom-val">1.2</span>
+  </div>
+  <div class="gc-row">
+    <span class="gc-lbl">atmosfera</span>
+    <input class="gc-range" type="range" id="gc-atm-sl" min="0" max="2" step=".05" value="1">
+    <span class="gc-val" id="gc-atm-val">1.0</span>
+  </div>
 </div>
+
+<div id="gal-clock">
+  <div class="lbl">Ano simulado</div>
+  <div class="yr" id="gc-year">2024.000</div>
+  <div class="dt" id="gc-date">01 Jan 2024</div>
+</div>
+
+<div id="gal-legend"></div>
 
 <div id="bar">
   <span id="alerts">&#10024; Órbita estável</span>
@@ -267,6 +308,12 @@ input.gc-range::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9p
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
 // CANVAS — starfield + comets + meteors
@@ -943,8 +990,8 @@ function _galSaturnRingTex(ringHue=45){
 // ── Identidade única por planeta — cores e superfície fixas por nome ──
 const _GAL_PERSONA={
   // ── SATURNOS BINÁRIOS ────────────────────────────────────────────
-  'nexus-labsobral':    {surface:'banded',      hue:44,  sat:82,  lit:56, radius:5.5, rings:true, ringHue:40,  ringAlpha:.90},
-  'sbrgestao':          {surface:'banded',      hue:197, sat:68,  lit:57, radius:5.0, rings:true, ringHue:192, ringAlpha:.80},
+  'nexus-labsobral':    {surface:'banded',      hue:44,  sat:82,  lit:56, radius:5.5, rings:true, ringHue:40,  ringAlpha:.90, ringOuter:1.45},
+  'sbrgestao':          {surface:'banded',      hue:197, sat:68,  lit:57, radius:5.0, rings:true, ringHue:192, ringAlpha:.80, ringOuter:1.45},
   // ── JÚPITER ──────────────────────────────────────────────────────
   'SuperCartolaManagerv5-production': {surface:'giant', hue:28, sat:85, lit:48, radius:4.5, rings:false},
   // ── SOBRAL-CORE ──────────────────────────────────────────────────
@@ -970,7 +1017,7 @@ const _GAL_PERSONA={
   'lpjaraujoinfo':      {surface:'continental', hue:108, sat:35,  lit:35, radius:0.8, rings:false},
   'temperodemamae':     {surface:'rocky',       hue:21,  sat:67,  lit:47, radius:0.8, rings:false},
   // ── ESPECIAIS ────────────────────────────────────────────────────
-  'luna-base':          {surface:'rocky',       hue:218, sat:22,  lit:72, radius:1.8, rings:false},
+  'luna-base':          {surface:'rocky',       hue:218, sat:22,  lit:72, radius:0.55, rings:false, moonOrbit:4.2},
   'bolaocopa2026':      {surface:'smooth',      hue:335, sat:88,  lit:52, radius:2.0, rings:false},
   'f1-pulse':           {surface:'smooth',      hue:350, sat:92,  lit:48, radius:2.0, rings:false},
 };
@@ -1004,7 +1051,6 @@ const _GAL_FORCED_RING={
   'bolaocopa2026':             3,
   'f1-pulse':                  3,
   'vibegaminghub':             9,
-  'luna-base':                 2,
   'mcp-eventos':               1,
 };
 const _GAL_FORCED_ANGLE={
@@ -1015,6 +1061,7 @@ const _GAL_FORCED_ANGLE={
 const _GAL_MOON_OF={
   'the-matrix':  _GAL_BINARY_KEY,  // orbita o baricentro
   'matrix-core': _GAL_BINARY_KEY,
+  'luna-base':   'sbrchecks',      // satélite natural de sbrchecks
 };
 
 // Ângulo dourado — distribui pontos no círculo sem clustering
@@ -1097,6 +1144,9 @@ function _galInitScene(planets){
   const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
   renderer.setSize(innerWidth,innerHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.toneMapping=THREE.ReinhardToneMapping;
+  renderer.toneMappingExposure=1.0;
+  renderer.outputEncoding=THREE.sRGBEncoding;
 
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.05,12000);
@@ -1195,7 +1245,8 @@ function _galInitScene(planets){
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(7.5,64,64),new THREE.MeshBasicMaterial({map:sunTex})));
   [[22,0xff9900,.22],[38,0xff6600,.10],[62,0xff3300,.05],[110,0xff1100,.025],[200,0xaa2200,.010]].forEach(([r,c,o])=>scene.add(_galGlow(r,c,o)));
   scene.add(new THREE.PointLight(0xfff5e0,3.0,1000));
-  scene.add(new THREE.AmbientLight(0x0d1020,.8));
+  scene.add(new THREE.AmbientLight(0x223355,1.2));
+  const _fillLight=new THREE.DirectionalLight(0x112244,.3);_fillLight.position.set(-200,50,-200);scene.add(_fillLight);
 
   // ── orbit lines (array para toggle) ──
   const orbitLines=[];
@@ -1279,8 +1330,8 @@ function _galInitScene(planets){
     });
     const mesh=new THREE.Mesh(new THREE.SphereGeometry(radius,40,40),new THREE.MeshStandardMaterial({
       map:tex,roughness:.82,metalness:.03,
-      emissive:new THREE.Color(bt==='supernova'?0xff4400:dna.col),
-      emissiveIntensity:bt==='supernova'?.5:.03
+      emissive:bt==='supernova'?new THREE.Color(0xff4400):new THREE.Color(dna.col).multiplyScalar(.12),
+      emissiveIntensity:bt==='supernova'?.5:1.0
     }));
     mesh.rotation.z=dna.tilt;
     const ob=_GAL_OB[dna.surface]||0;
@@ -1375,7 +1426,7 @@ function _galInitScene(planets){
         if(persona?.rings){
           const ringTex=_galSaturnRingTex(persona.ringHue||45);
           const ringMesh=new THREE.Mesh(
-            new THREE.RingGeometry(radius*1.35,radius*2.6,96),
+            new THREE.RingGeometry(radius*1.35,radius*(persona?.ringOuter||2.6),96),
             new THREE.MeshBasicMaterial({map:ringTex,side:THREE.DoubleSide,transparent:true,opacity:persona.ringAlpha||.85,depthWrite:false})
           );
           ringMesh.rotation.x=Math.PI*.5+dna.tilt*.4;
@@ -1415,7 +1466,7 @@ function _galInitScene(planets){
     // As matrix orbitam o baricentro.
     if(binaryPlanetList.length>0){
       const BINARY_RI=10, BINARY_ORBIT=_GAL_RINGS[BINARY_RI].orbit;
-      const BINARY_SEP=8; // distância de cada planeta ao centro do baricentro
+      const BINARY_SEP=12; // distância de cada planeta ao centro do baricentro
       if(savedAngles[_GAL_BINARY_KEY]===undefined) savedAngles[_GAL_BINARY_KEY]=1.8;
       const bAng=savedAngles[_GAL_BINARY_KEY];
 
@@ -1444,7 +1495,7 @@ function _galInitScene(planets){
         if(persona?.rings){
           const ringTex=_galSaturnRingTex(persona.ringHue||45);
           const ringMesh=new THREE.Mesh(
-            new THREE.RingGeometry(radius*1.35,radius*2.6,96),
+            new THREE.RingGeometry(radius*1.35,radius*(persona?.ringOuter||2.6),96),
             new THREE.MeshBasicMaterial({map:ringTex,side:THREE.DoubleSide,transparent:true,opacity:persona.ringAlpha||.85,depthWrite:false})
           );
           ringMesh.rotation.x=Math.PI*.5+dna.tilt*.4;
@@ -1465,10 +1516,11 @@ function _galInitScene(planets){
       const parentName=_GAL_MOON_OF[moon.name];
       const parentGroup=parentGroupMap[parentName];
       if(!parentGroup)return; // pai não encontrado (pode não estar na lista)
-      const mRadius=Math.max(0.9,_galRadius(moon));
+      const mRadius=Math.max(0.55,_galRadius(moon));
       const parentData=parentGroup.userData;
       const parentRadius=_galRadius(parentData)||2;
-      const mOrbit=parentRadius*3.2+6;
+      const mOrbitOverride=_GAL_PERSONA[moon.name]?.moonOrbit;
+      const mOrbit=mOrbitOverride||(parentRadius*3.2+6);
       if(savedAngles[moon.name+'_m']===undefined) savedAngles[moon.name+'_m']=Math.PI*(moon.name.length%10)/5;
       const mAng=savedAngles[moon.name+'_m'];
       const moonGroup=new THREE.Group();
@@ -1512,7 +1564,52 @@ function _galInitScene(planets){
     }
   }
 
+  // ── Bloom ──
+  let _bloomPass;
+  function _initBloom(){
+    const rp=new THREE.RenderPass(scene,camera);
+    _bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),1.2,.4,.15);
+    const c=new THREE.EffectComposer(renderer);
+    c.addPass(rp);c.addPass(_bloomPass);
+    return c;
+  }
+  const _composer=_initBloom();
+
+  // ── Simulated year ──
+  let _simYear=2024.0;
+  const _MONTHS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  function _yearToDate(y){const yr=Math.floor(y),fr=y-yr;const s=new Date(yr,0,1),e=new Date(yr+1,0,1);return new Date(s.getTime()+(e-s)*fr);}
+  function _updateClock(){
+    const yel=document.getElementById('gc-year');
+    const del=document.getElementById('gc-date');
+    if(yel)yel.textContent=_simYear.toFixed(3);
+    if(del){const d=_yearToDate(_simYear);del.textContent=String(d.getDate()).padStart(2,'0')+' '+_MONTHS[d.getMonth()]+' '+d.getFullYear();}
+  }
+
+  // ── Legend ──
+  const _legendEl=document.getElementById('gal-legend');
+  let _legendSelected=null;
+  function _buildLegend(pList){
+    if(!_legendEl)return;
+    _legendEl.innerHTML='';
+    pList.forEach(pd=>{
+      const ud=actualMeshes.find(m=>m.userData.name===pd.name)?.userData||pd;
+      const col=ud.colorHex||'#8090c0';
+      const row=document.createElement('div');
+      row.className='leg-row';row.dataset.name=pd.name;
+      row.innerHTML=`<span class="leg-lbl">${pd.name}</span><div class="leg-dot" style="background:${col}"></div>`;
+      row.addEventListener('click',()=>{
+        _legendSelected=pd.name;
+        _legendEl.querySelectorAll('.leg-row').forEach(r=>r.classList.toggle('active',r.dataset.name===pd.name));
+        const m=actualMeshes.find(x=>x.userData.name===pd.name);
+        if(m){focusMesh=m;tSph.r=(_galRadius(pd)||2)*8+20;}
+      });
+      _legendEl.appendChild(row);
+    });
+  }
+
   buildPlanetMeshes(planets);
+  _buildLegend(planets);
 
   // ── comet ──
   const cometGroup=new THREE.Group();
@@ -1572,6 +1669,7 @@ function _galInitScene(planets){
     const raw=clock.getDelta();                       // segundos reais
     const dt=_galState.paused?0:Math.min(raw,.05)*_galState.speed;
     t3+=raw; // t3 sempre corre (animações cosméticas independentes de pausa)
+    if(!_galState.paused){_simYear+=dt*0.015*_galState.speed;_updateClock();}
     sph.th+=(tSph.th-sph.th)*.065;sph.ph+=(tSph.ph-sph.ph)*.065;sph.r+=(tSph.r-sph.r)*.065;
     applyCam();
 
@@ -1652,16 +1750,23 @@ function _galInitScene(planets){
       if(m.life>=m.maxLife){scene.remove(m.line);meteors3.splice(i,1);}
     }
 
-    renderer.render(scene,camera);
+    _composer.render();
   }
   animate3();
 
   return{
     start(){if(!animId3)animate3();},
     stop(){if(animId3){cancelAnimationFrame(animId3);animId3=null;}},
-    resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);},
-    rebuild(pList){this.stop();buildPlanetMeshes(pList);this.start();},
+    resize(){
+      camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth,innerHeight);
+      _composer.setSize(innerWidth,innerHeight);
+      if(_bloomPass)_bloomPass.resolution.set(innerWidth,innerHeight);
+    },
+    rebuild(pList){this.stop();buildPlanetMeshes(pList);_buildLegend(pList);this.start();},
     updateAtm(on){atmospheres.forEach(a=>{a.visible=on;});},
+    setAtmIntensity(v){atmospheres.forEach(a=>{if(a.material?.uniforms?.uIntensity)a.material.uniforms.uIntensity.value=v;});},
+    setBloom(v){if(_bloomPass)_bloomPass.strength=v;},
     togglePause(){
       _galState.paused=!_galState.paused;
       const btn=document.getElementById('gc-pause');
@@ -1708,14 +1813,20 @@ function switchView(v){
   document.getElementById('wrap').classList.toggle('galactic',v==='galactic');
   const gc=document.getElementById('gal-canvas');
   const gui=document.getElementById('gal-ui');
+  const clk=document.getElementById('gal-clock');
+  const leg=document.getElementById('gal-legend');
   if(v==='galactic'){
     gc.style.display='block';gc.style.pointerEvents='auto';
     if(gui)gui.classList.add('visible');
+    if(clk)clk.classList.add('visible');
+    if(leg)leg.classList.add('visible');
     document.getElementById('stars').style.display='none';
     if(allPlanets.length)buildGalactic(allPlanets);
   } else {
     gc.style.display='none';gc.style.pointerEvents='none';
     if(gui)gui.classList.remove('visible');
+    if(clk)clk.classList.remove('visible');
+    if(leg)leg.classList.remove('visible');
     document.getElementById('stars').style.display='block';
     if(_gal)_gal.stop();
     if(allPlanets.length){buildOrbit(allPlanets);resizeOrbit();}
@@ -1728,11 +1839,29 @@ function switchView(v){
   const speedSlider=document.getElementById('gc-speed');
   const atmBtn=document.getElementById('gc-atm');
   const orbitsBtn=document.getElementById('gc-orbits');
+  const bloomSlider=document.getElementById('gc-bloom');
+  const atmSlider=document.getElementById('gc-atm-sl');
 
   if(pauseBtn) pauseBtn.addEventListener('click',()=>{if(_gal)_gal.togglePause();});
   if(speedSlider){
     speedSlider.value=50; // centro = 1×
     speedSlider.addEventListener('input',e=>{if(_gal)_gal.setSpeed(+e.target.value);});
+  }
+  if(bloomSlider){
+    bloomSlider.addEventListener('input',e=>{
+      const v=parseFloat(e.target.value);
+      if(_gal)_gal.setBloom(v);
+      const lbl=document.getElementById('gc-bloom-val');
+      if(lbl)lbl.textContent=v.toFixed(1);
+    });
+  }
+  if(atmSlider){
+    atmSlider.addEventListener('input',e=>{
+      const v=parseFloat(e.target.value);
+      if(_gal)_gal.setAtmIntensity(v);
+      const lbl=document.getElementById('gc-atm-val');
+      if(lbl)lbl.textContent=v.toFixed(1);
+    });
   }
   if(atmBtn) atmBtn.addEventListener('click',()=>{
     if(!_gal)return;
