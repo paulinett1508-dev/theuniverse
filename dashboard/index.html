@@ -1022,7 +1022,7 @@ const _GAL_PERSONA={
   'lpjaraujoinfo':      {surface:'continental', hue:108, sat:35,  lit:35, radius:0.8, rings:false},
   'temperodemamae':     {surface:'rocky',       hue:21,  sat:67,  lit:47, radius:0.8, rings:false},
   // ── ESPECIAIS ────────────────────────────────────────────────────
-  'luna-base':          {surface:'rocky',       hue:218, sat:22,  lit:72, radius:0.55, rings:false, moonOrbit:4.2},
+  'luna-base':          {surface:'rocky',       hue:148, sat:78,  lit:52, radius:0.5,  rings:false},
   'the-matrix':         {surface:'rocky',       hue:140, sat:35,  lit:42, radius:1.2,  rings:false, moonOrbit:28},
   'matrix-core':        {surface:'rocky',       hue:220, sat:55,  lit:40, radius:1.0,  rings:false, moonOrbit:35},
   'bolaocopa2026':      {surface:'smooth',      hue:335, sat:88,  lit:52, radius:2.0, rings:false},
@@ -1038,6 +1038,7 @@ const _GAL_BINARY_KEY='_binary_nexus_sbrgestao'; // key em parentGroupMap + save
 const _GAL_FORCED_RING={
   'SuperCartolaManagerv5-production': 3,
   'sigmed':                    4,
+  'luna-base':                 4,
   'sbrchecks':                 5,
   'CertiSYS':                  7,
   'sicefsus-sistema':          8,
@@ -1068,7 +1069,6 @@ const _GAL_FORCED_ANGLE={
 const _GAL_MOON_OF={
   'the-matrix':  _GAL_BINARY_KEY,  // orbita o baricentro
   'matrix-core': _GAL_BINARY_KEY,
-  'luna-base':   'sbrchecks',      // satélite natural de sbrchecks
 };
 
 // Ângulo dourado — distribui pontos no círculo sem clustering
@@ -1342,6 +1342,7 @@ function _galInitScene(planets){
   })();
 
   // ── planets ──
+  let lunaBaseMeshRef=null;
   const planetGroups=[];   // orbit groups
   const actualMeshes=[];   // raycaster targets
   const atmospheres=[];    // atmosphere meshes (toggle visibility)
@@ -1428,6 +1429,55 @@ function _galInitScene(planets){
     return orbitGroup;
   }
 
+  function _buildLunaBaseMesh(){
+    const g=new THREE.Group();
+    const blinkObjs=[];
+    // Materiais
+    const _lhMat=new THREE.MeshStandardMaterial({color:0x00aa77,roughness:.25,metalness:.6,emissive:new THREE.Color(0x00ff99),emissiveIntensity:.9});
+    const _laMat=new THREE.MeshStandardMaterial({color:0xcc8800,roughness:.2,metalness:.5,emissive:new THREE.Color(0xff9900),emissiveIntensity:1.1});
+    const _lgMat=new THREE.MeshStandardMaterial({color:0x88ffdd,roughness:.0,metalness:.9,emissive:new THREE.Color(0x00ffcc),emissiveIntensity:.7,transparent:true,opacity:.7});
+    const _lpMat=new THREE.MeshStandardMaterial({color:0x003322,roughness:.4,metalness:.6,emissive:new THREE.Color(0x00cc66),emissiveIntensity:.5});
+    // Hub hexagonal
+    g.add(new THREE.Mesh(new THREE.CylinderGeometry(.18,.15,.42,6),_lhMat));
+    // Anel de reforço
+    const _lr=new THREE.Mesh(new THREE.TorusGeometry(.17,.02,8,24),_lhMat);_lr.rotation.x=Math.PI/2;_lr.position.y=.05;g.add(_lr);
+    // Cúpula vidro
+    const _ld=new THREE.Mesh(new THREE.SphereGeometry(.10,12,8,0,Math.PI*2,0,Math.PI/2),_lgMat);_ld.position.y=.21;g.add(_ld);
+    const _ldb=new THREE.Mesh(new THREE.TorusGeometry(.10,.012,6,24),_lhMat);_ldb.rotation.x=Math.PI/2;_ldb.position.y=.21;g.add(_ldb);
+    // Módulos
+    const _m1=new THREE.Mesh(new THREE.BoxGeometry(.22,.20,.25),_laMat);_m1.position.set(.28,.05,0);_m1.rotation.y=.15;g.add(_m1);
+    const _w1=new THREE.Mesh(new THREE.BoxGeometry(.08,.08,.01),_lgMat);_w1.position.set(.4,.07,0);_w1.rotation.y=Math.PI/2;g.add(_w1);
+    const _m2=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.32,8),_lhMat);_m2.rotation.z=Math.PI/2;_m2.position.set(-.28,.02,.08);g.add(_m2);
+    const _m3=new THREE.Mesh(new THREE.BoxGeometry(.12,.18,.12),_laMat);_m3.position.set(.05,.28,-.14);_m3.rotation.y=-.3;g.add(_m3);
+    const _m4=new THREE.Mesh(new THREE.SphereGeometry(.10,10,8),_lhMat);_m4.position.set(-.05,-.05,-.24);g.add(_m4);
+    // Tubos
+    const _tg=new THREE.CylinderGeometry(.025,.025,.3,6);
+    const _t1=new THREE.Mesh(_tg,_lhMat);_t1.rotation.z=Math.PI/2;_t1.position.set(.12,.03,0);g.add(_t1);
+    const _t2=new THREE.Mesh(_tg,_lhMat);_t2.rotation.z=Math.PI/2;_t2.position.set(-.12,.02,.04);g.add(_t2);
+    // Painéis solares
+    [[-.38,.04,0,0,.5,.18],[.38,.04,0,0,.38,.15],[.06,.02,-.32,1.5,.32,.12],[-.15,.08,.28,-.4,.25,.10]].forEach(([x,y,z,ry,w,h])=>{
+      const _pp=new THREE.Mesh(new THREE.BoxGeometry(w,.008,h),_lpMat);_pp.position.set(x,y,z);_pp.rotation.y=ry;g.add(_pp);
+      const _pg=new THREE.Mesh(new THREE.BoxGeometry(w,.009,h),new THREE.MeshBasicMaterial({color:0x00ff88,wireframe:true,transparent:true,opacity:.18}));_pg.position.set(x,y,z);_pg.rotation.y=ry;g.add(_pg);
+    });
+    // Antenas
+    [[.08,.21,.05,.25,0x00ffaa],[-.1,.15,-.08,.18,0x00ccff],[.18,.08,.12,.14,0x88ff00],[.25,.04,-.05,.10,0x00ffcc]].forEach(([ax,ay,az,ah,ac])=>{
+      const _as=new THREE.Mesh(new THREE.CylinderGeometry(.005,.005,ah,4),new THREE.MeshStandardMaterial({color:ac,emissive:new THREE.Color(ac),emissiveIntensity:.9,roughness:.1,metalness:.9}));
+      _as.position.set(ax,ay+ah/2,az);g.add(_as);
+      const _at=new THREE.Mesh(new THREE.SphereGeometry(.016,6,6),new THREE.MeshBasicMaterial({color:0x00ffff}));
+      _at.position.set(ax,ay+ah,az);_at.userData={blink:true,blinkColor:0x00ffff,blinkOff:0x001133,blinkOffset:Math.random()*Math.PI*2};blinkObjs.push(_at);g.add(_at);
+    });
+    // LEDs status
+    [0x00ff00,0x00ff00,0xffcc00,0x00ffaa,0x00ff00,0x44ffcc].forEach((col,i)=>{
+      const _led=new THREE.Mesh(new THREE.SphereGeometry(.018,6,6),new THREE.MeshBasicMaterial({color:col}));
+      _led.position.set(-.07+i*.03,.235,.12);_led.userData={blink:true,blinkColor:col,blinkOff:0x001108,blinkOffset:i*.55};blinkObjs.push(_led);g.add(_led);
+    });
+    // Glows
+    g.add(_galGlow(.6,0x00ffcc,.75));g.add(_galGlow(1.4,0x00ffaa,.35));g.add(_galGlow(2.8,0x00ff88,.12));g.add(_galGlow(4.0,0x44ff99,.04));
+    g.add(new THREE.PointLight(0x00ffcc,.8,12));
+    g.userData={id:'luna-base',name:'luna-base',colorHex:'#00ffcc',cluster:'laboratório',radius:.5,status:'active',blinkObjs};
+    return g;
+  }
+
   function buildPlanetMeshes(pList){
     planetGroups.forEach(g=>scene.remove(g));
     planetGroups.length=0;
@@ -1435,6 +1485,7 @@ function _galInitScene(planets){
     atmospheres.length=0;
     moonGroups.length=0;
     moonPivots.length=0;
+    lunaBaseMeshRef=null;
     Object.keys(parentGroupMap).forEach(k=>delete parentGroupMap[k]);
 
     const station=pList.find(p=>p.bodyType==='station');
@@ -1457,6 +1508,26 @@ function _galInitScene(planets){
 
     // ── função interna que constrói um planeta e adiciona à cena ──
     function addPlanet(p,ri,totalInRing,jInRing){
+      // luna-base: laboratório independente — mesh especial
+      if(p.name==='luna-base'){
+        const _lbm=_buildLunaBaseMesh();
+        const _lbGroup=new THREE.Group();
+        _lbGroup.userData=_lbm.userData;
+        _lbGroup.add(_lbm);
+        const _lbAng=_GAL_FORCED_ANGLE['luna-base']!=null?_GAL_FORCED_ANGLE['luna-base']:(savedAngles['luna-base']!=null?savedAngles['luna-base']:Math.PI*(p.name.length%10)/5);
+        savedAngles['luna-base']=_lbAng;
+        const _lbOrbit=ri<_GAL_RINGS.length?_GAL_RINGS[ri].orbit:100;
+        let _lbnh=0;const _lbnm=p.name;for(let i=0;i<_lbnm.length;i++)_lbnh=(Math.imul(31,_lbnh)+_lbnm.charCodeAt(i))|0;
+        const _lbTilt=0.04+(ri/20)*0.38+((_lbnh>>>0)%12)/100;
+        _lbGroup.position.set(_lbOrbit*Math.cos(_lbAng),Math.sin(_lbAng)*_lbOrbit*_lbTilt,_lbOrbit*Math.sin(_lbAng));
+        _lbGroup.userData={..._lbm.userData,_galRi:ri,_galOrbit:_lbOrbit,_galOrbitTilt:_lbTilt};
+        scene.add(_lbGroup);
+        planetGroups.push(_lbGroup);
+        actualMeshes.push(_lbm);
+        parentGroupMap['luna-base']=_lbGroup;
+        lunaBaseMeshRef=_lbm;
+        return;
+      }
       const bt=p.bodyType||'planet';
       const baseCol=_galBaseCol(p);
       const atmCol=_galAtmCol(p);
@@ -1873,25 +1944,50 @@ function _galInitScene(planets){
 
   // ── ESTAÇÃO OBI-WAN (agnostic-core) ──────────────────────────────
   function _buildObiWanISS(){
-    const grp=new THREE.Group();
-    const _m=new THREE.MeshStandardMaterial({color:0x99aabb,emissive:new THREE.Color(0x223344),emissiveIntensity:.28,roughness:.3,metalness:.8});
-    const _sm=new THREE.MeshStandardMaterial({color:0x1a3a6a,emissive:new THREE.Color(0x0a1a3a),emissiveIntensity:.18,roughness:.5,metalness:.55});
-    // Corpo principal
-    const _oc=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),_m);_oc.rotation.z=Math.PI/2;grp.add(_oc);
-    // Treliça
-    const _ot=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,1.8,6),_m);_ot.rotation.z=Math.PI/2;grp.add(_ot);
-    // 4 painéis solares
-    [[-0.7,-0.25],[-0.7,0.25],[0.7,-0.25],[0.7,0.25]].forEach(([x,z])=>{const _op=new THREE.Mesh(new THREE.BoxGeometry(.55,.02,.22),_sm);_op.position.set(x,0,z);grp.add(_op);});
+    const g=new THREE.Group();
+    // Materiais envelhecidos e frios
+    const _im=new THREE.MeshStandardMaterial({color:0x8899aa,roughness:.35,metalness:.85,emissive:new THREE.Color(0x112233),emissiveIntensity:.2});
+    const _is=new THREE.MeshStandardMaterial({color:0x1a2a4a,roughness:.4,metalness:.6,emissive:new THREE.Color(0x0a1a3a),emissiveIntensity:.3});
+    const _imod=new THREE.MeshStandardMaterial({color:0x99aabb,roughness:.3,metalness:.8,emissive:new THREE.Color(0x223344),emissiveIntensity:.15});
+    const _igl=new THREE.MeshStandardMaterial({color:0xaaccee,roughness:.0,metalness:.9,emissive:new THREE.Color(0x336688),emissiveIntensity:.4,transparent:true,opacity:.75});
+    const _io=new THREE.MeshStandardMaterial({color:0x7788aa,roughness:.6,metalness:.5,emissive:new THREE.Color(0x111a22),emissiveIntensity:.1});
+    // Truss principal
+    const _truss=new THREE.Mesh(new THREE.BoxGeometry(4.2,.06,.06),_im);g.add(_truss);
+    [-1.8,-0.9,0,0.9,1.8].forEach(x=>{const s=new THREE.Mesh(new THREE.BoxGeometry(.03,.12,.12),_im);s.position.set(x,0,0);g.add(s);});
     // Módulos habitacionais
-    [-0.15,0,0.15].forEach(z=>{const _om=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.2,8),_m);_om.rotation.z=Math.PI/2;_om.position.z=z;_om.position.y=.06;grp.add(_om);});
-    // Antena de monitoramento apontando para o sol
-    const _oa=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.35,4),new THREE.MeshStandardMaterial({color:0xaaaaaa,emissive:new THREE.Color(0x334455),emissiveIntensity:.3,roughness:.2,metalness:.9}));
-    _oa.rotation.z=Math.PI/2;_oa.position.set(-.2,0,0);grp.add(_oa);
-    // Glow discreto — ele não quer ser encontrado
-    grp.add(_galGlow(.6,0xaabbdd,.25));grp.add(_galGlow(1.4,0x8899aa,.08));
-    grp.add(new THREE.PointLight(0x8899cc,.15,5));
-    grp.userData={id:'agnostic-core',name:'agnostic-core',colorHex:'#aabbcc',cluster:'exílio',isMoon:false,status:'active',radius:.9};
-    return grp;
+    const _zarya=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.55,12),_imod);_zarya.rotation.z=Math.PI/2;_zarya.position.set(-.35,0,.1);g.add(_zarya);
+    const _unity=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.4,12),_imod);_unity.rotation.z=Math.PI/2;_unity.position.set(.08,0,.1);g.add(_unity);
+    const _zvezda=new THREE.Mesh(new THREE.CylinderGeometry(.12,.14,.65,12),_io);_zvezda.rotation.z=Math.PI/2;_zvezda.position.set(-.85,0,.1);g.add(_zvezda);
+    const _destiny=new THREE.Mesh(new THREE.CylinderGeometry(.155,.155,.5,12),_imod);_destiny.rotation.z=Math.PI/2;_destiny.position.set(.45,0,.1);g.add(_destiny);
+    const _columbus=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,.38,10),_imod);_columbus.rotation.x=Math.PI/2;_columbus.position.set(.45,0,.38);g.add(_columbus);
+    const _kibo=new THREE.Mesh(new THREE.CylinderGeometry(.155,.155,.58,12),_imod);_kibo.rotation.x=Math.PI/2;_kibo.position.set(.3,-.02,.42);g.add(_kibo);
+    const _tran=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.4,10),_imod);_tran.rotation.x=Math.PI/2;_tran.position.set(-.05,0,-.35);g.add(_tran);
+    // Cúpula
+    const _cup=new THREE.Mesh(new THREE.CylinderGeometry(.09,.14,.12,8),_igl);_cup.position.set(-.05,-.18,-.35);g.add(_cup);
+    const _cupd=new THREE.Mesh(new THREE.SphereGeometry(.09,8,6,0,Math.PI*2,0,Math.PI/2),_igl);_cupd.rotation.x=Math.PI;_cupd.position.set(-.05,-.24,-.35);g.add(_cupd);
+    // Painéis solares — 8 arrays (4 pares)
+    function _solarArr(x,side){
+      const ag=new THREE.Group();
+      const _mst=new THREE.Mesh(new THREE.BoxGeometry(.02,.02,.4),_im);_mst.position.set(x,0,side*.22);ag.add(_mst);
+      const _pnl=new THREE.Mesh(new THREE.BoxGeometry(.05,.55,.35),_is);_pnl.position.set(x,.0,side*.42);ag.add(_pnl);
+      const _grd=new THREE.Mesh(new THREE.BoxGeometry(.051,.56,.36),new THREE.MeshBasicMaterial({color:0x334466,wireframe:true,transparent:true,opacity:.15}));_grd.position.set(x,.0,side*.42);ag.add(_grd);
+      const _blk=new THREE.Mesh(new THREE.BoxGeometry(.01,.52,.32),new THREE.MeshStandardMaterial({color:0x0a1528,roughness:.3,metalness:.5,emissive:new THREE.Color(0x0a1a3a),emissiveIntensity:.2}));_blk.position.set(x+.015,0,side*.42);ag.add(_blk);
+      return ag;
+    }
+    [-1.8,-0.6,0.6,1.8].forEach(x=>{g.add(_solarArr(x,1));g.add(_solarArr(x,-1));});
+    // Radiadores térmicos
+    [-1.4,1.4].forEach(x=>{const _rad=new THREE.Mesh(new THREE.BoxGeometry(.02,.3,.55),new THREE.MeshStandardMaterial({color:0xccddee,roughness:.1,metalness:.3,emissive:new THREE.Color(0x334455),emissiveIntensity:.1}));_rad.position.set(x,.32,0);g.add(_rad);});
+    // Antena Ku-band + prato
+    const _kua=new THREE.Mesh(new THREE.CylinderGeometry(.005,.005,.25,4),_im);_kua.position.set(.6,.18,.1);g.add(_kua);
+    const _dish=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.01,16),new THREE.MeshStandardMaterial({color:0xaabbcc,roughness:.1,metalness:.8,emissive:new THREE.Color(0x334455),emissiveIntensity:.3,transparent:true,opacity:.8}));_dish.rotation.x=Math.PI/4;_dish.position.set(.6,.3,.15);g.add(_dish);
+    // Canadarm2
+    const _a1=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.45,6),_im);_a1.rotation.z=Math.PI/4;_a1.position.set(.15,.18,-.12);g.add(_a1);
+    const _a2=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.35,6),_im);_a2.rotation.z=-Math.PI/6;_a2.position.set(.38,.32,-.12);g.add(_a2);
+    // Glow discreto
+    g.add(_galGlow(1.2,0x8899cc,.04));g.add(_galGlow(.8,0x8899cc,.08));
+    g.add(new THREE.PointLight(0x8899cc,.3,6));
+    g.userData={id:'agnostic-core',name:'agnostic-core',colorHex:'#aabbcc',cluster:'exílio',status:'active',radius:.9};
+    return g;
   }
   const _obiWanPivot=new THREE.Object3D();
   _obiWanPivot.setRotationFromEuler(new THREE.Euler(Math.PI/4,Math.random()*Math.PI*2,0));
@@ -2012,6 +2108,8 @@ function _galInitScene(planets){
         savedAngles[p.name]=(savedAngles[p.name]||0)+_GAL_RINGS[ri].speed*dt;
         const ang=savedAngles[p.name],orbit=p._galOrbit;
         group.position.set(orbit*Math.cos(ang),Math.sin(ang)*orbit*(p._galOrbitTilt||0),orbit*Math.sin(ang));
+        // luna-base: órbita é atualizada aqui, mas rotação é tratada por lunaBaseMeshRef
+        if(p.name==='luna-base')return;
 
         const actualMesh=group.children[0];
         if(!actualMesh)return;
@@ -2069,6 +2167,16 @@ function _galInitScene(planets){
           moonMesh.rotateOnAxis(_localY,selfRotSpeed*dt);
         }
       });
+      // luna-base — laboratório independente
+      if(lunaBaseMeshRef){
+        lunaBaseMeshRef.rotation.y+=dt*.4*_galState.speed;
+        lunaBaseMeshRef.rotation.z=Math.sin(_simYear*1200*.4)*.04;
+        const _lbBlinks=lunaBaseMeshRef.userData.blinkObjs||[];
+        _lbBlinks.forEach(obj=>{
+          const bv=Math.sin(_simYear*1200*4+(obj.userData.blinkOffset||0));
+          if(obj.material?.color)obj.material.color.setHex(bv>0?(obj.userData.blinkColor||0x00ff00):(obj.userData.blinkOff||0x001108));
+        });
+      }
       // buraco negro — disco gira
       _bhRef.disk1.rotation.z+=dt*.12;
       _bhRef.disk2.rotation.z-=dt*.08;
