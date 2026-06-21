@@ -402,6 +402,53 @@ function stopPlanetAnim(){
   if(planetRaf){cancelAnimationFrame(planetRaf);planetRaf=null;}
 }
 
+function drawObservatory(pc,W,H,planet,rot){
+  pc.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,R=Math.min(W,H)*.30;
+  // atmosphere glow — pale blue-white
+  const ag=pc.createRadialGradient(cx,cy,R*.7,cx,cy,R*1.7);
+  ag.addColorStop(0,'rgba(140,170,255,.22)'); ag.addColorStop(1,'rgba(0,0,0,0)');
+  pc.fillStyle=ag; pc.beginPath(); pc.arc(cx,cy,R*1.7,0,Math.PI*2); pc.fill();
+  // sphere
+  pc.save(); pc.beginPath(); pc.arc(cx,cy,R,0,Math.PI*2); pc.clip();
+  const base=pc.createRadialGradient(cx-R*.35,cy-R*.38,R*.05,cx+R*.2,cy+R*.25,R*1.1);
+  base.addColorStop(0,'#d8e8ff'); base.addColorStop(.45,'#8090c8'); base.addColorStop(1,'#202848');
+  pc.fillStyle=base; pc.fillRect(0,0,W,H);
+  // craters
+  const craters=[[-.3,-.25,R*.12],[.2,.35,R*.08],[-.1,.4,R*.06],[.4,-.1,R*.10],[-.45,.15,R*.07]];
+  for(const[dx,dy,cr]of craters){
+    const cx2=cx+dx*R,cy2=cy+dy*R;
+    const cg=pc.createRadialGradient(cx2-cr*.2,cy2-cr*.2,0,cx2,cy2,cr);
+    cg.addColorStop(0,'rgba(180,195,240,.15)'); cg.addColorStop(.6,'rgba(80,90,140,.18)'); cg.addColorStop(1,'rgba(40,50,100,.1)');
+    pc.fillStyle=cg; pc.beginPath(); pc.ellipse(cx2,cy2,cr,cr*.55,rot*.3,0,Math.PI*2); pc.fill();
+  }
+  // specular
+  const spec=pc.createRadialGradient(cx-R*.38,cy-R*.4,0,cx-R*.38,cy-R*.4,R*.85);
+  spec.addColorStop(0,'rgba(255,255,255,.28)'); spec.addColorStop(.5,'rgba(255,255,255,.07)'); spec.addColorStop(1,'rgba(255,255,255,0)');
+  pc.fillStyle=spec; pc.fillRect(0,0,W,H);
+  // terminator shadow
+  const sh=pc.createRadialGradient(cx+R*.3,cy+R*.35,R*.3,cx+R*.2,cy+R*.2,R*1.05);
+  sh.addColorStop(0,'rgba(0,0,0,0)'); sh.addColorStop(.6,'rgba(0,0,0,.2)'); sh.addColorStop(1,'rgba(0,0,0,.7)');
+  pc.fillStyle=sh; pc.fillRect(0,0,W,H);
+  pc.restore();
+  // orbiting moon
+  const moonR=R*.12, moonDist=R*1.55;
+  const mx=cx+moonDist*Math.cos(rot*2.8), my=cy+moonDist*Math.sin(rot*2.8);
+  // dashed orbit ring
+  pc.save(); pc.setLineDash([3,5]);
+  pc.beginPath(); pc.arc(cx,cy,moonDist,0,Math.PI*2);
+  pc.strokeStyle='rgba(160,190,255,.25)'; pc.lineWidth=1; pc.stroke();
+  pc.restore();
+  // moon sphere
+  const mg=pc.createRadialGradient(mx-moonR*.3,my-moonR*.3,0,mx,my,moonR);
+  mg.addColorStop(0,'#e8eeff'); mg.addColorStop(.6,'#a0b0d0'); mg.addColorStop(1,'#505878');
+  pc.beginPath(); pc.arc(mx,my,moonR,0,Math.PI*2); pc.fillStyle=mg; pc.fill();
+  // label
+  const [gr,gg,gb]=hex2rgb('#6090e0');
+  pc.font='10px Courier New'; pc.fillStyle=`rgba(${gr},${gg},${gb},.55)`;
+  pc.textAlign='right'; pc.fillText(planet.name,W-10,H-8);
+}
+
 function drawStation(pc,W,H,planet,rot){
   pc.clearRect(0,0,W,H);
   const cx=W/2,cy=H/2,R=Math.min(W,H)*.34;
@@ -497,6 +544,7 @@ function startPlanetAnim(planet){
   function frame(){
     if(bt==='station') drawStation(pc,W,H,planet,planetRot);
     else if(bt==='satellite') drawSatellite(pc,W,H,planet,planetRot);
+    else if(bt==='observatory') drawObservatory(pc,W,H,planet,planetRot);
     else drawPlanet(pc,W,H,planet,seed,planetRot,hasRings);
     planetRot+=0.006;
     planetRaf=requestAnimationFrame(frame);
