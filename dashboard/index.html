@@ -807,31 +807,49 @@ let _gal=null, _galLastPlanets=null, _galToysHue=0;
 const _ATM_VERT=`varying vec3 vNormal;varying vec3 vViewDir;void main(){vNormal=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);vViewDir=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}`;
 const _ATM_FRAG=`uniform vec3 uColor;uniform float uIntensity;varying vec3 vNormal;varying vec3 vViewDir;void main(){float rim=1.0-abs(dot(vNormal,vViewDir));rim=pow(rim,2.8);gl_FragColor=vec4(uColor,rim*uIntensity);}`;
 
+// DNA única por planeta — cor + tipo de superfície derivados do nome
+function _galPlanetDNA(p){
+  let h=0;for(let i=0;i<p.name.length;i++)h=(Math.imul(31,h)+p.name.charCodeAt(i))|0;
+  const hue=((h>>>0)%360);
+  const kb=p.diskKB||0,days=p.daysSincePush||999;
+  let surface;
+  if(kb>4000&&days<90)  surface='giant';
+  else if(days<30)       surface='continental';
+  else if(kb>2000)       surface='banded';
+  else if(days>365)      surface='rocky';
+  else                   surface='smooth';
+  const satMap={giant:55,continental:62,banded:50,rocky:28,smooth:52};
+  const litMap={giant:48,continental:50,banded:44,rocky:33,smooth:52};
+  function hslHex(h,s,l){s/=100;l/=100;const a=s*Math.min(l,1-l);const f=n=>{const k=(n+h/30)%12;const c=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*c)|0;};return(f(0)<<16)|(f(8)<<8)|f(4);}
+  const col=hslHex(hue,satMap[surface]||50,litMap[surface]||48);
+  const tilt=.05+(((h>>>0)%100)/100)*.55;
+  const seed=(h>>>0)%99999;
+  return{col,surface,tilt,hue,seed};
+}
+
 function _galBaseCol(p){
   const bt=p.bodyType;
   if(bt==='station')     return 0x5080b0;
   if(bt==='satellite')   return 0x8090a8;
   if(bt==='supernova')   return 0xff4400;
-  if(bt==='nebula')        return 0xa050e0;
+  if(bt==='nebula')      return 0xa050e0;
   if(bt==='observatory') return 0x6090e0;
-  const h=p.health;
-  if(h==='alert')        return 0xcc2233;
-  if(h==='warning')      return 0xcc9900;
-  if(h==='dormant')      return 0x2a2a4a;
-  return 0x00aa55;
+  return _galPlanetDNA(p).col;
 }
 function _galAtmCol(p){
   const bt=p.bodyType;
   if(bt==='satellite')   return null;
   if(bt==='supernova')   return '#ff8800';
-  if(bt==='nebula')        return '#c060ff';
+  if(bt==='nebula')      return '#c060ff';
   if(bt==='station')     return '#6090e0';
   if(bt==='observatory') return '#88aaff';
   const h=p.health;
   if(h==='dormant')      return null;
   if(h==='alert')        return '#ff4466';
   if(h==='warning')      return '#ffcc00';
-  return '#44ff88';
+  // saudável: atmosfera na cor única do planeta
+  const {hue}=_galPlanetDNA(p);
+  return `hsl(${hue},70%,72%)`;
 }
 function _galRadius(p){
   const bt=p.bodyType;
@@ -1048,25 +1066,64 @@ function _galInitScene(planets){
           planetMeshes.push(mesh);
           continue;
         } else {
-          const col=new THREE.Color(baseCol);
+          const dna=_galPlanetDNA(p);
+          const col=new THREE.Color(bt==='supernova'?0xff4400:bt==='observatory'?0x6090e0:dna.col);
+          const sr=_rng(dna.seed);
           const tex=_galCanvasTex(256,(ctx,sz)=>{
-            const g=ctx.createRadialGradient(sz*.35,sz*.35,0,sz/2,sz/2,sz*.6);
-            const lc=col.clone().lerp(new THREE.Color(0xffffff),.25);
-            const dc=col.clone().lerp(new THREE.Color(0x000000),.45);
-            g.addColorStop(0,`#${lc.getHexString()}`);g.addColorStop(.5,`#${col.getHexString()}`);g.addColorStop(1,`#${dc.getHexString()}`);
+            // base radial gradient
+            const g=ctx.createRadialGradient(sz*.38,sz*.32,0,sz/2,sz/2,sz*.62);
+            const lc=col.clone().lerp(new THREE.Color(0xffffff),.28);
+            const dc=col.clone().lerp(new THREE.Color(0x000000),.5);
+            g.addColorStop(0,`#${lc.getHexString()}`);g.addColorStop(.55,`#${col.getHexString()}`);g.addColorStop(1,`#${dc.getHexString()}`);
             ctx.fillStyle=g;ctx.fillRect(0,0,sz,sz);
             if(bt==='supernova'){
-              for(let k=0;k<8;k++){const x=Math.random()*sz,y=Math.random()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,20+Math.random()*40);rg.addColorStop(0,'rgba(255,255,180,.5)');rg.addColorStop(1,'rgba(255,100,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-60,y-60,120,120);}
-            } else if(p.health==='healthy'){
-              for(let k=0;k<4;k++){const x=Math.random()*sz,y=Math.random()*sz;ctx.fillStyle='rgba(0,80,20,.22)';ctx.beginPath();ctx.ellipse(x,y,20+Math.random()*50,10+Math.random()*25,Math.random()*2,0,Math.PI*2);ctx.fill();}
-            } else if(p.health==='alert'){
-              for(let k=0;k<6;k++){const x=Math.random()*sz,y=Math.random()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,15+Math.random()*25);rg.addColorStop(0,'rgba(255,80,30,.32)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-40,y-40,80,80);}
+              for(let k=0;k<9;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,18+sr()*38);rg.addColorStop(0,'rgba(255,255,180,.55)');rg.addColorStop(1,'rgba(255,100,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-60,y-60,120,120);}
             } else if(bt==='observatory'){
-              for(let k=0;k<5;k++){const x=Math.random()*sz,y=Math.random()*sz,cr=8+Math.random()*20,cg=ctx.createRadialGradient(x,y,0,x,y,cr);cg.addColorStop(0,'rgba(200,220,255,.15)');cg.addColorStop(1,'rgba(0,0,30,.1)');ctx.fillStyle=cg;ctx.beginPath();ctx.arc(x,y,cr,0,Math.PI*2);ctx.fill();}
+              for(let k=0;k<6;k++){const x=sr()*sz,y=sr()*sz,cr=8+sr()*22,cg=ctx.createRadialGradient(x,y,0,x,y,cr);cg.addColorStop(0,'rgba(180,210,255,.18)');cg.addColorStop(1,'rgba(0,0,30,.08)');ctx.fillStyle=cg;ctx.beginPath();ctx.arc(x,y,cr,0,Math.PI*2);ctx.fill();}
+            } else if(dna.surface==='giant'||dna.surface==='banded'){
+              // bandas gasosas horizontais
+              [.10,.20,.30,.40,.50,.60,.70,.80,.88].forEach(y=>{
+                const v=sr()>.5?0xffffff:0x000000;
+                const bc=col.clone().lerp(new THREE.Color(v),.12+sr()*.22);
+                ctx.fillStyle=`rgba(${Math.round(bc.r*255)},${Math.round(bc.g*255)},${Math.round(bc.b*255)},.38)`;
+                ctx.fillRect(0,y*sz,sz,sz*(.03+sr()*.045));
+              });
+              // turbulência
+              for(let k=0;k<3;k++){const x=sr()*sz,y=sr()*sz;const eg=ctx.createEllipse?null:null;ctx.save();ctx.globalAlpha=.12;ctx.beginPath();ctx.ellipse(x,y,40+sr()*60,8+sr()*12,0,0,Math.PI*2);ctx.fillStyle=`#${lc.getHexString()}`;ctx.fill();ctx.restore();}
+            } else if(dna.surface==='continental'){
+              // continentes — blobs irregulares com sombra
+              for(let k=0;k<6;k++){
+                const x=sr()*sz,y=sr()*sz,a=sr()*Math.PI*2,w=18+sr()*48,h2=10+sr()*28;
+                const cg=ctx.createRadialGradient(x,y,0,x,y,Math.max(w,h2));
+                cg.addColorStop(0,`rgba(${Math.round(lc.r*255)},${Math.round(lc.g*255)},${Math.round(lc.b*255)},.52)`);
+                cg.addColorStop(1,'rgba(0,0,0,0)');
+                ctx.fillStyle=cg;ctx.save();ctx.beginPath();ctx.ellipse(x,y,w,h2,a,0,Math.PI*2);ctx.fill();ctx.restore();
+              }
+            } else if(dna.surface==='rocky'){
+              // crateras
+              for(let k=0;k<9;k++){
+                const x=sr()*sz,y=sr()*sz,cr=3+sr()*13;
+                const cg=ctx.createRadialGradient(x,y,0,x,y,cr);
+                cg.addColorStop(0,'rgba(0,0,0,.45)');cg.addColorStop(.65,'rgba(0,0,0,.12)');cg.addColorStop(1,'rgba(255,255,255,.04)');
+                ctx.fillStyle=cg;ctx.fillRect(x-cr*1.6,y-cr*1.6,cr*3.2,cr*3.2);
+              }
+            } else {
+              // smooth: wisps de névoa
+              for(let k=0;k<4;k++){
+                const x=sr()*sz,y=sr()*sz,cg=ctx.createRadialGradient(x,y,0,x,y,25+sr()*55);
+                cg.addColorStop(0,'rgba(255,255,255,.07)');cg.addColorStop(1,'rgba(0,0,0,0)');
+                ctx.fillStyle=cg;ctx.fillRect(x-85,y-85,170,170);
+              }
+            }
+            // overlay de saúde: alert = pontos quentes, warning = manchas amarelas
+            if(p.health==='alert'){
+              for(let k=0;k<5;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,10+sr()*18);rg.addColorStop(0,'rgba(255,130,20,.5)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-30,y-30,60,60);}
+            } else if(p.health==='warning'){
+              for(let k=0;k<3;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,14+sr()*22);rg.addColorStop(0,'rgba(255,220,40,.25)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-38,y-38,76,76);}
             }
           });
-          mesh=new THREE.Mesh(new THREE.SphereGeometry(radius,40,40),new THREE.MeshStandardMaterial({map:tex,roughness:.82,metalness:.03,emissive:new THREE.Color(baseCol),emissiveIntensity:bt==='supernova'?.5:.03}));
-          mesh.rotation.z=.1+Math.random()*.3;
+          mesh=new THREE.Mesh(new THREE.SphereGeometry(radius,40,40),new THREE.MeshStandardMaterial({map:tex,roughness:.82,metalness:.03,emissive:new THREE.Color(bt==='supernova'?0xff4400:dna.col),emissiveIntensity:bt==='supernova'?.5:.03}));
+          mesh.rotation.z=dna.tilt;
         }
 
         mesh.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
