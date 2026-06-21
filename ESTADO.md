@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-21 (Oráculo v3.2 testado e confirmado — sticker + Carl Sagan)
+> Última atualização: 2026-06-21 (Dashboard NOC v2.1 — canvas especial para station/satellite/observatory)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -98,6 +98,14 @@ Gravidade = agnostic-core (submodule).
   - **Métricas novas no card**: linguagem principal (dot colorido), contribuidores, último PR (badge estado + título + data)
   - **XSS fix**: `esc()` + `safeHex()` em todos os campos da API interpolados em innerHTML
   - **`sbrgestao`** está como Estrela da Morte: `agnvendas-unit-tests failure` no CI — monitorar, não suprimir
+- **Dashboard NOC v2.1 (sessão 2026-06-21):**
+  - Canvas dedicado por tipo de corpo no card:
+    - `drawStation()` — hexágono metálico giratório, hub central, raios, anel externo
+    - `drawSatellite()` — diamante + painéis solares bilaterais + antena com beacon
+    - `drawObservatory()` — lua cinza-azulada com crateras, lua menor em órbita animada com trilha pontilhada
+  - **Vivacidade do dashboard** (documentado):
+    - Efeitos ao vivo (shockwave/pulso): poll 8s, janela 90s, latência real 10–90s — perda se aba fechada
+    - Status/cor/saúde: cache 2min — nunca perde, sempre atualiza
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
@@ -126,7 +134,7 @@ Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após c
 - **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. `POLARIS_SSH_KEY` configurado — cron totalmente autônomo.
 - **C2 (Secrets Scan):** sentinel detecta secrets expostos em qualquer planeta e notifica Telegram.
 
-### 4. Dashboard NOC — ✅ NO AR | v2
+### 4. Dashboard NOC — ✅ NO AR | v2.1
 
 URL: `theuniverse-lake.vercel.app` (Vercel, deploy automático no push).
 Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_TOKEN` no painel Vercel.
