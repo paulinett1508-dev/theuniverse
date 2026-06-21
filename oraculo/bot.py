@@ -183,9 +183,16 @@ def main():
 
                     # ── reply a notificação → entra na órbita direto ────────
                     if reply_context:
+                        facts = brain._parse_notification(reply_context)
+                        if facts.get("repo"):
+                            _ctx_repo[0] = facts["repo"]
+                            log.info("Órbita via reply: %s", facts["repo"])
+                            _send_sticker(cfg.telegram_token, cfg.sol_chat_id, "orbit_confirmed")
                         context_str = context_fn(tok)
-                        chunks = rag.retrieve(question)
-                        reply = brain_fn(question, context_str, chunks, reply_context)
+                        # se mensagem for só emoji/vazia, usa prompt implícito de órbita
+                        effective_q = question if len(question) > 2 else f"status de {facts.get('repo', 'este repo')}"
+                        chunks = rag.retrieve(effective_q)
+                        reply = brain_fn(effective_q, context_str, chunks, reply_context)
                         _send(cfg.telegram_token, cfg.sol_chat_id, reply)
                         continue
 
