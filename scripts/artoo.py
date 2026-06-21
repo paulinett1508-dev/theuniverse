@@ -23,7 +23,21 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
-from gh import API, token
+from gh import API, ROOT
+
+def token():
+    """Prefere ARTOO_TOKEN (master PAT com repo scope). Fallback: GITHUB_TOKEN."""
+    import os
+    t = os.getenv("ARTOO_TOKEN") or os.getenv("GITHUB_TOKEN")
+    if t:
+        return t.strip()
+    vault = ROOT / ".vault"
+    if vault.exists():
+        for line in vault.read_text(encoding="utf-8").splitlines():
+            if line.startswith("GITHUB_TOKEN="):
+                return line.split("=", 1)[1].strip()
+    import sys
+    sys.exit("ERRO: ARTOO_TOKEN ou GITHUB_TOKEN ausente.")
 
 OWNER = "paulinett1508-dev"
 OBSERVATORY_LABEL = "observatory-alert"
