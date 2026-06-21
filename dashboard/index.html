@@ -188,6 +188,18 @@ body.panel-open #wrap{padding-right:270px}
 #wrap.galactic #loader{display:none}
 #wrap.galactic #gal-canvas{display:block;pointer-events:auto}
 
+/* ── galactic UI controls (bottom-left, visível só na vista galáctica) ── */
+#gal-ui{position:fixed;bottom:28px;left:36px;z-index:15;display:none;flex-direction:column;gap:10px;pointer-events:none}
+#gal-ui.visible{display:flex}
+.gc-row{display:flex;align-items:center;gap:10px;pointer-events:auto}
+.gc-lbl{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.2);text-transform:uppercase;width:72px;flex-shrink:0}
+.gc-val{font-size:10px;color:rgba(255,200,80,.6);width:32px;text-align:right;flex-shrink:0}
+.gc-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
+.gc-btn:hover{background:rgba(255,255,255,.12)}
+.gc-tog{font-size:9px;letter-spacing:.2em;min-width:30px}
+input.gc-range{-webkit-appearance:none;width:110px;height:1px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;flex-shrink:0}
+input.gc-range::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;border-radius:50%;background:rgba(255,200,80,.75);cursor:pointer}
+
 /* ── body types ── */
 .body-station .pd{clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);border-radius:0;background:linear-gradient(135deg,#9ab2d0 0%,#4a6888 55%,#2a3e58 100%);box-shadow:0 0 8px rgba(130,170,220,.7),0 0 24px rgba(70,110,200,.35);animation:station-spin 28s linear infinite}
 @keyframes station-spin{to{rotate:1turn}}
@@ -233,6 +245,27 @@ body.panel-open #wrap{padding-right:270px}
 </div>
 
 <div id="tip"></div>
+
+<div id="gal-ui">
+  <div class="gc-row">
+    <button class="gc-btn" id="gc-pause" title="Pausar / Retomar (Espaço)">⏸</button>
+    <span class="gc-lbl">pausa</span>
+  </div>
+  <div class="gc-row">
+    <span class="gc-lbl">velocidade</span>
+    <input class="gc-range" type="range" id="gc-speed" min="0" max="100" step="0.5" value="30">
+    <span class="gc-val" id="gc-speed-val">1×</span>
+  </div>
+  <div class="gc-row">
+    <span class="gc-lbl">atmosfera</span>
+    <input class="gc-range" type="range" id="gc-atm" min="0" max="2" step="0.05" value="1">
+    <span class="gc-val" id="gc-atm-val">1×</span>
+  </div>
+  <div class="gc-row">
+    <span class="gc-lbl">órbitas</span>
+    <button class="gc-btn gc-tog" id="gc-orbits" title="Mostrar/ocultar órbitas (O)">ON</button>
+  </div>
+</div>
 
 <div id="bar">
   <span id="alerts">&#10024; Órbita estável</span>
@@ -899,6 +932,15 @@ function _galSaturnRingTex(){
 
 const _GAL_RINGS=[{orbit:35,speed:.26},{orbit:58,speed:.165},{orbit:85,speed:.105},{orbit:118,speed:.067}];
 
+// Achatamento polar por tipo de superfície (do guia do dev sênior)
+const _GAL_OB={giant:.065,banded:.035,continental:.015,smooth:.008,rocky:.003};
+
+// Estado central — fonte de verdade para controles UI
+const _galState={speed:1.0,paused:false,atmosphere:1.0,showOrbits:true};
+
+function _sliderToSpeed(v){return v===0?0:Math.pow(10,(v/100)*3);}
+function _fmtSpeed(v){if(v===0)return'0×';if(v<2)return v.toFixed(2)+'×';if(v<10)return v.toFixed(1)+'×';if(v<100)return Math.round(v)+'×';return(v/1000).toFixed(1)+'k×';}
+
 function _galInitScene(planets){
   const canvas=document.getElementById('gal-canvas');
   const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
@@ -907,29 +949,38 @@ function _galInitScene(planets){
 
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.05,12000);
+  const clock=new THREE.Clock();
+  const _localY=new THREE.Vector3(0,1,0); // reusado a cada frame
 
   // ── camera orbit ──
   let sph={th:.3,ph:1.1,r:185},tSph={...sph};
-  let isDragging=false,pm={x:0,y:0},focusMesh=null;
+  let _dragStart={x:0,y:0},_dragged=false,focusGroup=null;
 
   function applyCam(){
-    const lookAt=focusMesh?focusMesh.position:new THREE.Vector3();
+    const lookAt=focusGroup?focusGroup.position.clone():new THREE.Vector3();
     camera.position.copy(lookAt).add(new THREE.Vector3(sph.r*Math.sin(sph.ph)*Math.sin(sph.th),sph.r*Math.cos(sph.ph),sph.r*Math.sin(sph.ph)*Math.cos(sph.th)));
     camera.lookAt(lookAt);
   }
 
-  canvas.addEventListener('mousedown',e=>{isDragging=true;pm={x:e.clientX,y:e.clientY}});
-  window.addEventListener('mouseup',()=>isDragging=false);
+  // mousedown: registra posição de início (distinguir clique de drag)
+  canvas.addEventListener('mousedown',e=>{_dragStart={x:e.clientX,y:e.clientY};_dragged=false;});
   window.addEventListener('mousemove',e=>{
-    if(!isDragging)return;
-    tSph.th-=(e.clientX-pm.x)*.007;
-    tSph.ph=Math.max(.12,Math.min(Math.PI*.48,tSph.ph+(e.clientY-pm.y)*.005));
-    pm={x:e.clientX,y:e.clientY};
+    if(!(e.buttons&1))return;
+    const dx=e.clientX-_dragStart.x,dy=e.clientY-_dragStart.y;
+    if(Math.abs(dx)>4||Math.abs(dy)>4)_dragged=true;
+    tSph.th-=dx*.007;
+    tSph.ph=Math.max(.12,Math.min(Math.PI*.48,tSph.ph+dy*.005));
+    _dragStart={x:e.clientX,y:e.clientY};
   });
   canvas.addEventListener('wheel',e=>{tSph.r=Math.max(20,Math.min(700,tSph.r+e.deltaY*.15));});
-  canvas.addEventListener('touchstart',e=>{isDragging=true;pm={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
-  canvas.addEventListener('touchmove',e=>{if(!isDragging)return;const t=e.touches[0];tSph.th-=(t.clientX-pm.x)*.007;tSph.ph=Math.max(.12,Math.min(Math.PI*.48,tSph.ph+(t.clientY-pm.y)*.005));pm={x:t.clientX,y:t.clientY};},{passive:true});
-  canvas.addEventListener('touchend',()=>isDragging=false);
+  canvas.addEventListener('touchstart',e=>{_dragStart={x:e.touches[0].clientX,y:e.touches[0].clientY};_dragged=false;},{passive:true});
+  canvas.addEventListener('touchmove',e=>{
+    if(!e.touches[0])return;
+    const t=e.touches[0],dx=t.clientX-_dragStart.x,dy=t.clientY-_dragStart.y;
+    if(Math.abs(dx)>4||Math.abs(dy)>4)_dragged=true;
+    tSph.th-=dx*.007;tSph.ph=Math.max(.12,Math.min(Math.PI*.48,tSph.ph+dy*.005));
+    _dragStart={x:t.clientX,y:t.clientY};
+  },{passive:true});
 
   // ── stars ──
   (()=>{
@@ -995,10 +1046,12 @@ function _galInitScene(planets){
   scene.add(new THREE.PointLight(0xfff5e0,3.0,1000));
   scene.add(new THREE.AmbientLight(0x0d1020,.8));
 
-  // ── orbit lines ──
+  // ── orbit lines (array para toggle) ──
+  const orbitLines=[];
   _GAL_RINGS.forEach(ring=>{
     const pts=[];for(let i=0;i<=128;i++){const a=i/128*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(a)*ring.orbit,0,Math.sin(a)*ring.orbit));}
-    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.055})));
+    const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.055}));
+    scene.add(ln);orbitLines.push(ln);
   });
 
   // ── asteroid belt (between ring 1 and 2) ──
@@ -1010,12 +1063,16 @@ function _galInitScene(planets){
   })();
 
   // ── planets ──
-  const planetMeshes=[];
+  // planetGroups: orbit groups (posição, userData)
+  // actualMeshes: renderables reais (raycaster)
+  const planetGroups=[];
+  const actualMeshes=[];
   const atmospheres=[];
 
   function buildPlanetMeshes(pList){
-    planetMeshes.forEach(m=>scene.remove(m));
-    planetMeshes.length=0;
+    planetGroups.forEach(g=>scene.remove(g));
+    planetGroups.length=0;
+    actualMeshes.length=0;
     atmospheres.length=0;
 
     const station=pList.find(p=>p.bodyType==='station');
@@ -1039,38 +1096,44 @@ function _galInitScene(planets){
         const radius=_galRadius(p);
         const ang=savedAngles[p.name];
         const orbit=_GAL_RINGS[ri].orbit;
-        let mesh;
+        // ── orbit group: move na órbita, carrega userData ──
+        const orbitGroup=new THREE.Group();
+        orbitGroup.userData={...p,_galRi:ri,_galOrbit:orbit};
+        orbitGroup.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
+
+        let actualMesh; // renderable real (raycaster)
 
         if(bt==='satellite'){
-          mesh=new THREE.Mesh(new THREE.OctahedronGeometry(radius),new THREE.MeshStandardMaterial({color:baseCol,metalness:.8,roughness:.2}));
+          actualMesh=new THREE.Mesh(new THREE.OctahedronGeometry(radius),new THREE.MeshStandardMaterial({color:baseCol,metalness:.8,roughness:.2}));
+          actualMesh.userData={...p,_galRi:ri,_galOrbit:orbit};
+
         } else if(bt==='nebula'){
-          // nuvem de partículas — sem forma sólida, matéria-prima não condensada
-          const group=new THREE.Group();
+          // nuvem de partículas — orbit group direto, sem mesh sólido
           const nr=_rng(p.name.charCodeAt(0)||7);
-          const N=320,pos=new Float32Array(N*3),col=new Float32Array(N*3);
+          const N=320,npos=new Float32Array(N*3),ncol=new Float32Array(N*3);
           for(let k=0;k<N;k++){
             const d=radius*(0.5+nr()*1.2),th2=nr()*Math.PI*2,ph2=Math.acos(2*nr()-1);
-            pos[k*3]=d*Math.sin(ph2)*Math.cos(th2);pos[k*3+1]=d*Math.sin(ph2)*Math.sin(th2);pos[k*3+2]=d*Math.cos(ph2);
-            const br=.4+nr()*.6;col[k*3]=.55*br;col[k*3+1]=.25*br;col[k*3+2]=br;
+            npos[k*3]=d*Math.sin(ph2)*Math.cos(th2);npos[k*3+1]=d*Math.sin(ph2)*Math.sin(th2);npos[k*3+2]=d*Math.cos(ph2);
+            const br=.4+nr()*.6;ncol[k*3]=.55*br;ncol[k*3+1]=.25*br;ncol[k*3+2]=br;
           }
-          const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('color',new THREE.BufferAttribute(col,3));
-          group.add(new THREE.Points(geo,new THREE.PointsMaterial({size:0.55,sizeAttenuation:true,vertexColors:true,transparent:true,opacity:.82,depthWrite:false})));
-          // núcleo difuso central
-          group.add(new THREE.Mesh(new THREE.SphereGeometry(radius*.55,16,16),new THREE.MeshBasicMaterial({color:0x9040e0,transparent:true,opacity:.18,depthWrite:false})));
-          group.add(_galGlow(radius*3.2,0x8030d0,.22));
-          group.add(_galGlow(radius*5.5,0x5018a0,.08));
-          mesh=group;
-          mesh.userData={...p,_galRi:ri,_galOrbit:orbit};
-          mesh.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
-          scene.add(mesh);
-          planetMeshes.push(mesh);
+          const ngeo=new THREE.BufferGeometry();ngeo.setAttribute('position',new THREE.BufferAttribute(npos,3));ngeo.setAttribute('color',new THREE.BufferAttribute(ncol,3));
+          orbitGroup.add(new THREE.Points(ngeo,new THREE.PointsMaterial({size:0.55,sizeAttenuation:true,vertexColors:true,transparent:true,opacity:.82,depthWrite:false})));
+          const nCore=new THREE.Mesh(new THREE.SphereGeometry(radius*.55,16,16),new THREE.MeshBasicMaterial({color:0x9040e0,transparent:true,opacity:.18,depthWrite:false}));
+          nCore.userData={...p,_galRi:ri,_galOrbit:orbit};
+          orbitGroup.add(nCore);
+          orbitGroup.add(_galGlow(radius*3.2,0x8030d0,.22));
+          orbitGroup.add(_galGlow(radius*5.5,0x5018a0,.08));
+          actualMesh=nCore; // proxy para raycaster
+          scene.add(orbitGroup);
+          planetGroups.push(orbitGroup);
+          actualMeshes.push(actualMesh);
           continue;
+
         } else {
           const dna=_galPlanetDNA(p);
           const col=new THREE.Color(bt==='supernova'?0xff4400:bt==='observatory'?0x6090e0:dna.col);
           const sr=_rng(dna.seed);
           const tex=_galCanvasTex(256,(ctx,sz)=>{
-            // base radial gradient
             const g=ctx.createRadialGradient(sz*.38,sz*.32,0,sz/2,sz/2,sz*.62);
             const lc=col.clone().lerp(new THREE.Color(0xffffff),.28);
             const dc=col.clone().lerp(new THREE.Color(0x000000),.5);
@@ -1081,17 +1144,13 @@ function _galInitScene(planets){
             } else if(bt==='observatory'){
               for(let k=0;k<6;k++){const x=sr()*sz,y=sr()*sz,cr=8+sr()*22,cg=ctx.createRadialGradient(x,y,0,x,y,cr);cg.addColorStop(0,'rgba(180,210,255,.18)');cg.addColorStop(1,'rgba(0,0,30,.08)');ctx.fillStyle=cg;ctx.beginPath();ctx.arc(x,y,cr,0,Math.PI*2);ctx.fill();}
             } else if(dna.surface==='giant'||dna.surface==='banded'){
-              // bandas gasosas horizontais
               [.10,.20,.30,.40,.50,.60,.70,.80,.88].forEach(y=>{
-                const v=sr()>.5?0xffffff:0x000000;
-                const bc=col.clone().lerp(new THREE.Color(v),.12+sr()*.22);
+                const bc=col.clone().lerp(new THREE.Color(sr()>.5?0xffffff:0x000000),.12+sr()*.22);
                 ctx.fillStyle=`rgba(${Math.round(bc.r*255)},${Math.round(bc.g*255)},${Math.round(bc.b*255)},.38)`;
                 ctx.fillRect(0,y*sz,sz,sz*(.03+sr()*.045));
               });
-              // turbulência
-              for(let k=0;k<3;k++){const x=sr()*sz,y=sr()*sz;const eg=ctx.createEllipse?null:null;ctx.save();ctx.globalAlpha=.12;ctx.beginPath();ctx.ellipse(x,y,40+sr()*60,8+sr()*12,0,0,Math.PI*2);ctx.fillStyle=`#${lc.getHexString()}`;ctx.fill();ctx.restore();}
+              for(let k=0;k<3;k++){const x=sr()*sz,y=sr()*sz;ctx.save();ctx.globalAlpha=.12;ctx.beginPath();ctx.ellipse(x,y,40+sr()*60,8+sr()*12,0,0,Math.PI*2);ctx.fillStyle=`#${lc.getHexString()}`;ctx.fill();ctx.restore();}
             } else if(dna.surface==='continental'){
-              // continentes — blobs irregulares com sombra
               for(let k=0;k<6;k++){
                 const x=sr()*sz,y=sr()*sz,a=sr()*Math.PI*2,w=18+sr()*48,h2=10+sr()*28;
                 const cg=ctx.createRadialGradient(x,y,0,x,y,Math.max(w,h2));
@@ -1100,7 +1159,6 @@ function _galInitScene(planets){
                 ctx.fillStyle=cg;ctx.save();ctx.beginPath();ctx.ellipse(x,y,w,h2,a,0,Math.PI*2);ctx.fill();ctx.restore();
               }
             } else if(dna.surface==='rocky'){
-              // crateras
               for(let k=0;k<9;k++){
                 const x=sr()*sz,y=sr()*sz,cr=3+sr()*13;
                 const cg=ctx.createRadialGradient(x,y,0,x,y,cr);
@@ -1108,44 +1166,55 @@ function _galInitScene(planets){
                 ctx.fillStyle=cg;ctx.fillRect(x-cr*1.6,y-cr*1.6,cr*3.2,cr*3.2);
               }
             } else {
-              // smooth: wisps de névoa
               for(let k=0;k<4;k++){
                 const x=sr()*sz,y=sr()*sz,cg=ctx.createRadialGradient(x,y,0,x,y,25+sr()*55);
                 cg.addColorStop(0,'rgba(255,255,255,.07)');cg.addColorStop(1,'rgba(0,0,0,0)');
                 ctx.fillStyle=cg;ctx.fillRect(x-85,y-85,170,170);
               }
             }
-            // overlay de saúde: alert = pontos quentes, warning = manchas amarelas
-            if(p.health==='alert'){
-              for(let k=0;k<5;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,10+sr()*18);rg.addColorStop(0,'rgba(255,130,20,.5)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-30,y-30,60,60);}
-            } else if(p.health==='warning'){
-              for(let k=0;k<3;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,14+sr()*22);rg.addColorStop(0,'rgba(255,220,40,.25)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-38,y-38,76,76);}
-            }
+            if(p.health==='alert'){for(let k=0;k<5;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,10+sr()*18);rg.addColorStop(0,'rgba(255,130,20,.5)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-30,y-30,60,60);}}
+            else if(p.health==='warning'){for(let k=0;k<3;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,14+sr()*22);rg.addColorStop(0,'rgba(255,220,40,.25)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-38,y-38,76,76);}}
           });
-          mesh=new THREE.Mesh(new THREE.SphereGeometry(radius,40,40),new THREE.MeshStandardMaterial({map:tex,roughness:.82,metalness:.03,emissive:new THREE.Color(bt==='supernova'?0xff4400:dna.col),emissiveIntensity:bt==='supernova'?.5:.03}));
-          mesh.rotation.z=dna.tilt;
+          actualMesh=new THREE.Mesh(new THREE.SphereGeometry(radius,40,40),new THREE.MeshStandardMaterial({
+            map:tex,roughness:.82,metalness:.03,
+            emissive:new THREE.Color(bt==='supernova'?0xff4400:dna.col),
+            emissiveIntensity:bt==='supernova'?.5:.03
+          }));
+          // inclinação axial no MESH (não no group) — group orbita reto
+          actualMesh.rotation.z=dna.tilt;
+          // achatamento polar: aplicado ao eixo Y do mesh
+          const ob=_GAL_OB[dna.surface]||0;
+          if(ob>0) actualMesh.scale.y=1-ob;
+          actualMesh.userData={...p,_galRi:ri,_galOrbit:orbit};
         }
 
-        mesh.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
-        mesh.userData={...p,_galRi:ri,_galOrbit:orbit};
-        scene.add(mesh);
-        if(atmCol){const atm=_galMakeAtm(radius,atmCol,1.0);mesh.add(atm);atmospheres.push(atm);}
-        mesh.add(_galGlow(radius*2.5,baseCol,.12));
-        if(p.health==='alert')  mesh.add(_galGlow(radius*3.5,0xff2200,.22));
-        if(p.health==='warning')mesh.add(_galGlow(radius*3.0,0xffaa00,.16));
-        planetMeshes.push(mesh);
+        orbitGroup.add(actualMesh);
+        // atmosfera é filha do mesh (rota/inclina junto)
+        if(atmCol){const atm=_galMakeAtm(radius,atmCol,1.0);actualMesh.add(atm);atmospheres.push(atm);}
+        // glows no group (não giram com o mesh)
+        orbitGroup.add(_galGlow(radius*2.5,baseCol,.12));
+        if(p.health==='alert')  orbitGroup.add(_galGlow(radius*3.5,0xff2200,.22));
+        if(p.health==='warning')orbitGroup.add(_galGlow(radius*3.0,0xffaa00,.16));
+
+        scene.add(orbitGroup);
+        planetGroups.push(orbitGroup);
+        actualMeshes.push(actualMesh);
       }
     }
 
-    // station: fixed hexagonal near sun
+    // station — também usa group para consistência
     if(station){
       const stCol=_galBaseCol(station);
+      const stGroup=new THREE.Group();
+      stGroup.userData={...station,_isStation:true};
+      stGroup.position.set(14,0,0);
       const stMesh=new THREE.Mesh(new THREE.CylinderGeometry(1.8,1.8,1.1,6),new THREE.MeshPhongMaterial({color:stCol,emissive:new THREE.Color(stCol).multiplyScalar(.15),shininess:80}));
-      stMesh.position.set(14,0,0);
       stMesh.userData={...station,_isStation:true};
-      scene.add(stMesh);
-      stMesh.add(_galGlow(4,stCol,.3));
-      planetMeshes.push(stMesh);
+      stGroup.add(stMesh);
+      stGroup.add(_galGlow(4,stCol,.3));
+      scene.add(stGroup);
+      planetGroups.push(stGroup);
+      actualMeshes.push(stMesh);
     }
   }
 
@@ -1181,47 +1250,76 @@ function _galInitScene(planets){
   const mouse=new THREE.Vector2();
 
   canvas.addEventListener('mousemove',e=>{
-    if(isDragging)return;
+    if(_dragged)return;
     mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
     raycaster.setFromCamera(mouse,camera);
-    const hits=raycaster.intersectObjects(planetMeshes,false);
+    const hits=raycaster.intersectObjects(actualMeshes,false);
     if(hits.length){showTip(e,hits[0].object.userData);}else{hideTip();}
   });
-  canvas.addEventListener('click',e=>{
-    if(isDragging)return;
+  // mouseup distingue click de drag — só abre painel se não arrastou
+  canvas.addEventListener('mouseup',e=>{
+    if(_dragged)return;
     mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
     raycaster.setFromCamera(mouse,camera);
-    const hits=raycaster.intersectObjects(planetMeshes,false);
-    if(hits.length){focusMesh=hits[0].object;tSph.r=_galRadius(hits[0].object.userData)*8+20;openPanel(hits[0].object.userData,null);}
-    else{focusMesh=null;tSph.r=185;}
+    const hits=raycaster.intersectObjects(actualMeshes,false);
+    if(hits.length){
+      const ud=hits[0].object.userData;
+      focusMesh=hits[0].object;tSph.r=_galRadius(ud)*8+20;
+      openPanel(ud,null);
+    } else {
+      focusMesh=null;tSph.r=185;
+    }
   });
 
   // ── render loop ──
   let t3=0,animId3=null;
   function animate3(){
     animId3=requestAnimationFrame(animate3);
-    t3+=.008;
+    const raw=clock.getDelta();                       // segundos reais
+    const dt=_galState.paused?0:Math.min(raw,.05)*_galState.speed;
+    t3+=raw; // t3 sempre corre (animações cosméticas independentes de pausa)
     sph.th+=(tSph.th-sph.th)*.065;sph.ph+=(tSph.ph-sph.ph)*.065;sph.r+=(tSph.r-sph.r)*.065;
     applyCam();
 
-    planetMeshes.forEach(mesh=>{
-      const p=mesh.userData;
-      if(p._isStation){mesh.rotation.y+=.003;return;}
-      const ri=p._galRi; if(ri===undefined)return;
-      savedAngles[p.name]=(savedAngles[p.name]||0)+_GAL_RINGS[ri].speed*.003;
-      const ang=savedAngles[p.name],orbit=p._galOrbit;
-      mesh.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
-      mesh.rotation.y+=p.bodyType==='supernova'?.025:p.bodyType==='satellite'?.015:.005+((p.magnitude||3)*.001);
-      if(p.bodyType==='supernova'){const pulse=1+.3*Math.sin(t3*4+(p.name.charCodeAt(0)||0)*.7);mesh.scale.setScalar(pulse);}
-      if(p.health==='alert'){mesh.material.emissiveIntensity=.03+.07*Math.abs(Math.sin(t3*3));}
+    if(!_galState.paused){
+      planetGroups.forEach(group=>{
+        const p=group.userData;
+        if(p._isStation){
+          // station gira no próprio eixo
+          const sm=group.children[0];
+          if(sm)sm.rotateOnAxis(_localY,dt*.8);
+          return;
+        }
+        const ri=p._galRi; if(ri===undefined)return;
+        // órbita: avança o ângulo pelo grupo, não pelo mesh
+        savedAngles[p.name]=(savedAngles[p.name]||0)+_GAL_RINGS[ri].speed*dt;
+        const ang=savedAngles[p.name],orbit=p._galOrbit;
+        group.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
+
+        // rotação axial: no actualMesh (respeita inclinação setada em rotation.z)
+        const actualMesh=group.children[0];
+        if(!actualMesh)return;
+        const spinSpeed=p.bodyType==='supernova'?2.5:p.bodyType==='satellite'?1.5:.5+((p.magnitude||3)*.1);
+        actualMesh.rotateOnAxis(_localY,spinSpeed*dt);
+
+        // pulso supernova
+        if(p.bodyType==='supernova'){
+          const pulse=1+.3*Math.sin(t3*4+(p.name.charCodeAt(0)||0)*.7);
+          actualMesh.scale.set(pulse,pulse*(1-(_GAL_OB.smooth||0)),pulse);
+        }
+        // alerta emissivo
+        if(p.health==='alert'&&actualMesh.material?.emissiveIntensity!==undefined){
+          actualMesh.material.emissiveIntensity=.03+.07*Math.abs(Math.sin(t3*3));
+        }
+      });
+    }
+
+    // nebula: nuvem gira sempre (ignoramos pausa pra efeito visual)
+    planetGroups.forEach(group=>{
+      if(group.userData.bodyType==='nebula') group.rotation.y+=.001;
     });
 
-    // nebula: rotação lenta da nuvem de partículas
-    planetMeshes.forEach(mesh=>{
-      if(mesh.userData.bodyType==='nebula') mesh.rotation.y+=.003;
-    });
-
-    cometAngle+=.002;
+    cometAngle+=dt*.2||.0004;
     cometGroup.position.set(Math.cos(cometAngle)*160,Math.sin(cometAngle*.4)*22,Math.sin(cometAngle)*65);
     cometGroup.quaternion.setFromUnitVectors(new THREE.Vector3(1,0,0),new THREE.Vector3().sub(cometGroup.position).normalize().negate());
 
@@ -1246,7 +1344,26 @@ function _galInitScene(planets){
     stop(){if(animId3){cancelAnimationFrame(animId3);animId3=null;}},
     resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);},
     rebuild(pList){this.stop();buildPlanetMeshes(pList);this.start();},
-    updateAtm(v){atmospheres.forEach(a=>a.material.uniforms.uIntensity.value=v);},
+    updateAtm(v){atmospheres.forEach(a=>{if(a.material.uniforms?.uIntensity)a.material.uniforms.uIntensity.value=v;});},
+    togglePause(){
+      _galState.paused=!_galState.paused;
+      const btn=document.getElementById('gc-pause');
+      if(btn)btn.textContent=_galState.paused?'▶':'⏸';
+    },
+    setSpeed(v){
+      _galState.speed=_sliderToSpeed(v);
+      const lbl=document.getElementById('gc-speed-val');
+      if(lbl)lbl.textContent=_fmtSpeed(v);
+    },
+    setAtm(v){
+      _galState.atmosphere=v;
+      this.updateAtm(v);
+    },
+    toggleOrbits(on){
+      _galState.showOrbits=on;
+      orbitLines.forEach(l=>{l.visible=on;});
+    },
+    resetCam(){Object.assign(tSph,{th:Math.PI/2,ph:.38,r:185});},
   };
 }
 
@@ -1273,17 +1390,60 @@ function switchView(v){
   document.querySelectorAll('.vb').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
   document.getElementById('wrap').classList.toggle('galactic',v==='galactic');
   const gc=document.getElementById('gal-canvas');
+  const gui=document.getElementById('gal-ui');
   if(v==='galactic'){
     gc.style.display='block';gc.style.pointerEvents='auto';
+    if(gui)gui.classList.add('visible');
     document.getElementById('stars').style.display='none';
     if(allPlanets.length)buildGalactic(allPlanets);
   } else {
     gc.style.display='none';gc.style.pointerEvents='none';
+    if(gui)gui.classList.remove('visible');
     document.getElementById('stars').style.display='block';
     if(_gal)_gal.stop();
     if(allPlanets.length){buildOrbit(allPlanets);resizeOrbit();}
   }
 }
+
+// ── UI controls wiring ──
+(function(){
+  const pauseBtn=document.getElementById('gc-pause');
+  const speedSlider=document.getElementById('gc-speed');
+  const atmSlider=document.getElementById('gc-atm');
+  const orbitsBtn=document.getElementById('gc-orbits');
+
+  if(pauseBtn) pauseBtn.addEventListener('click',()=>{if(_gal)_gal.togglePause();});
+  if(speedSlider){
+    speedSlider.value=50; // inicia no meio (1×)
+    speedSlider.addEventListener('input',e=>{if(_gal)_gal.setSpeed(+e.target.value);});
+  }
+  if(atmSlider){
+    atmSlider.value=100;
+    atmSlider.addEventListener('input',e=>{if(_gal)_gal.setAtm(+e.target.value/100);});
+  }
+  if(orbitsBtn) orbitsBtn.addEventListener('click',()=>{
+    if(!_gal)return;
+    _galState.showOrbits=!_galState.showOrbits;
+    _gal.toggleOrbits(_galState.showOrbits);
+    orbitsBtn.classList.toggle('active',_galState.showOrbits);
+  });
+
+  // ── keyboard shortcuts (só activos na visão galáctica) ──
+  document.addEventListener('keydown',e=>{
+    if(currentView!=='galactic')return;
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if(e.code==='Space'){e.preventDefault();if(_gal)_gal.togglePause();}
+    else if(e.key==='+'||e.key==='='){
+      if(speedSlider){speedSlider.value=Math.min(100,+speedSlider.value+5);if(_gal)_gal.setSpeed(+speedSlider.value);}
+    }
+    else if(e.key==='-'){
+      if(speedSlider){speedSlider.value=Math.max(0,+speedSlider.value-5);if(_gal)_gal.setSpeed(+speedSlider.value);}
+    }
+    else if(e.key==='o'||e.key==='O'){if(orbitsBtn)orbitsBtn.click();}
+    else if(e.key==='Escape'){if(_gal){_gal.resetCam();}}
+    else if(e.key==='r'||e.key==='R'){if(_gal)_gal.resetCam();}
+  });
+})();
 
 // ═══════════════════════════════════════════════════════
 // TOOLTIP
