@@ -28,13 +28,13 @@ echo "=== systemd ==="
 ssh $SSH_OPTS "$POLARIS" "
   cp /opt/theuniverse/webhook/webhook.service /etc/systemd/system/
   systemctl daemon-reload
-  if grep -q WEBHOOK_SECRET /opt/oraculo/.env; then
+  if grep -q WEBHOOK_SECRET /opt/obi-wan/.env; then
     systemctl enable webhook.service
     systemctl restart webhook.service
     systemctl status webhook.service --no-pager | head -10
   else
     echo 'AVISO: WEBHOOK_SECRET ausente no .env — adicionar antes de iniciar:'
-    echo '  echo WEBHOOK_SECRET=<secret> >> /opt/oraculo/.env'
+    echo '  echo WEBHOOK_SECRET=<secret> >> /opt/obi-wan/.env'
     echo '  systemctl enable --now webhook.service'
   fi
 "

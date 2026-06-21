@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
-sys.path.insert(0, str(Path(__file__).parent.parent / "oraculo"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "obi-wan"))
 
 import context
 

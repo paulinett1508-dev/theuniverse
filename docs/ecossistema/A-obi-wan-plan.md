@@ -1,12 +1,12 @@
-> ⚠️ **OBSOLETO (2026-06-19).** Este plano implementava o design v1 (RAG-puro Ollama+Qdrant no nexus-labsobral). O spec foi reescrito pra v2 (agente/receita-SHELDON: Groq+BM25, código no theuniverse, runtime na Polaris) — ver `A-hermes-oraculo-spec.md`. Um novo plano será escrito. Mantido só como histórico.
+> ⚠️ **OBSOLETO (2026-06-19).** Este plano implementava o design v1 (RAG-puro Ollama+Qdrant no nexus-labsobral). O spec foi reescrito pra v2 (agente/receita-SHELDON: Groq+BM25, código no theuniverse, runtime na Polaris) — ver `A-hermes-obi-wan-spec.md`. Um novo plano será escrito. Mantido só como histórico.
 
-# Hermes-Oráculo Implementation Plan (v1 — OBSOLETO)
+# Obi-Wan Implementation Plan (v1 — OBSOLETO)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 >
 > ⚠️ **Onde executar:** este plano é executado **dentro do repo `nexus-labsobral`** (casa do código, `hermes/bot/`). O Guardião do theuniverse **não** executa — só escreveu o plano. Quem implementar trabalha no `nexus-labsobral`.
 >
-> Spec de origem: [`A-hermes-oraculo-spec.md`](A-hermes-oraculo-spec.md). Blueprint: [`00-blueprint.md`](00-blueprint.md).
+> Spec de origem: [`A-hermes-obi-wan-spec.md`](A-hermes-obi-wan-spec.md). Blueprint: [`00-blueprint.md`](00-blueprint.md).
 
 **Goal:** Bot Telegram conversacional (long-polling) que deixa o Sol perguntar em linguagem natural e responde consultando o RAG local (Ollama + Qdrant) na estrela Polaris.
 
@@ -97,7 +97,7 @@ Expected: FAIL — `ModuleNotFoundError: No module named 'config'`
 
 ```python
 # hermes/bot/config.py
-"""Carrega e valida configuração do Hermes-Oráculo a partir do ambiente."""
+"""Carrega e valida configuração do Obi-Wan a partir do ambiente."""
 import os
 
 
@@ -203,7 +203,7 @@ def test_answer_no_results_returns_fallback():
 def test_answer_with_context_calls_chat_and_returns_sources():
     http = FakeHttp([
         FakeResp({"embedding": [0.1, 0.2]}),                 # /api/embeddings
-        FakeResp({"message": {"content": "Resposta do Oráculo"}}),  # /api/chat
+        FakeResp({"message": {"content": "Resposta do Obi-Wan"}}),  # /api/chat
     ])
     hits = [
         FakeHit("texto sobre zion", "planets/zion.md"),
@@ -214,7 +214,7 @@ def test_answer_with_context_calls_chat_and_returns_sources():
 
     text, sources = rag.answer("o que é zion?")
 
-    assert text == "Resposta do Oráculo"
+    assert text == "Resposta do Obi-Wan"
     assert sources == ["CHANGELOG.md", "planets/zion.md"]  # ordenado e deduplicado
     # busca usou os parâmetros corretos
     assert qdrant.search_kwargs["collection_name"] == "lab_knowledge"
@@ -237,7 +237,7 @@ Expected: FAIL — `ModuleNotFoundError: No module named 'rag'`
 
 ```python
 # hermes/bot/rag.py
-"""Cliente RAG do Hermes-Oráculo: embed → busca Qdrant → chat Ollama.
+"""Cliente RAG do Obi-Wan: embed → busca Qdrant → chat Ollama.
 
 Reusa o padrão de embed/busca de hermes/mcp/rag_server.py, adicionando
 a etapa generativa (/api/chat) que o MCP não tinha.
@@ -251,7 +251,7 @@ TOP_K = 5
 SCORE_THRESHOLD = 0.75
 
 SYSTEM_PROMPT = (
-    "Você é o Oráculo do Laboratório Sobral. Responda em português, de forma "
+    "Você é o Obi-Wan do Laboratório Sobral. Responda em português, de forma "
     "direta e técnica, usando SOMENTE o contexto fornecido. Se o contexto não "
     "contém a resposta, diga que não sabe — não invente."
 )
@@ -379,7 +379,7 @@ Expected: FAIL — `ModuleNotFoundError: No module named 'bot'` (ou `telegram`, 
 
 ```python
 # hermes/bot/bot.py
-"""Hermes-Oráculo — bot Telegram conversacional (long-polling).
+"""Obi-Wan — bot Telegram conversacional (long-polling).
 
 Guard de chat_id único: só o Sol é atendido; o resto é ignorado em silêncio.
 """
@@ -422,7 +422,7 @@ def build_application(cfg, rag):
             text, sources = rag.answer(question)
         except Exception:
             log.exception("Falha ao consultar o RAG")
-            await update.message.reply_text("Falhei ao consultar o Oráculo. Tenta de novo.")
+            await update.message.reply_text("Falhei ao consultar o Obi-Wan. Tenta de novo.")
             return
         await update.message.reply_text(format_reply(text, sources))
 
@@ -434,7 +434,7 @@ def main():
     cfg = Config()
     rag = Rag(cfg.ollama_url, cfg.qdrant_url, cfg.chat_model)
     app = build_application(cfg, rag)
-    log.info("Hermes-Oráculo online. Long-polling iniciado.")
+    log.info("Obi-Wan online. Long-polling iniciado.")
     app.run_polling()
 
 
@@ -482,7 +482,7 @@ requests==2.32.3
 ```ini
 # hermes/systemd/hermes-bot.service
 [Unit]
-Description=Hermes-Oráculo — bot Telegram conversacional
+Description=Obi-Wan — bot Telegram conversacional
 After=network.target ollama.service
 Wants=ollama.service
 
@@ -703,7 +703,7 @@ ssh $SSH_OPTS "$ORACULO" "
 Logo após o bloco do MCP server (antes do bloco `=== Deploying systemd units ===`), inserir:
 
 ```bash
-echo "=== Deploying bot (Hermes-Oráculo) ==="
+echo "=== Deploying bot (Obi-Wan) ==="
 ssh $SSH_OPTS "$ORACULO" "mkdir -p /opt/hermes-bot"
 scp $SCP_OPTS \
   "$REPO_ROOT/hermes/bot/bot.py" \
@@ -775,7 +775,7 @@ CHAT_MODEL=<modelo de chat instalado no Ollama>
 
 ## Validação fim-a-fim (após deploy)
 
-1. `journalctl -u hermes-bot -f` → ver "Hermes-Oráculo online".
+1. `journalctl -u hermes-bot -f` → ver "Obi-Wan online".
 2. Mandar pergunta de outro Telegram (não-Sol) → bot ignora; log mostra "Ignorado chat_id não autorizado".
 3. Mandar pergunta do Sol sobre algo do Lab (ex.: um procedimento conhecido) → resposta com seção "📚 Fontes".
 4. Mandar pergunta sobre o universo (ex.: "o que é a estrela Polaris?") → resposta citando ficha do theuniverse, confirmando a 2ª fonte de ingestão.

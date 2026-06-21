@@ -1,37 +1,37 @@
-# Spec — Subsistema A: Hermes-Oráculo (Oráculo conversacional do Universo)
+# Spec — Subsistema A: Obi-Wan (Obi-Wan conversacional do Universo)
 
 > Status: **design aprovado pelTheGod** (2026-06-19, v2 — agente/receita-SHELDON). Falta: plano de implementação + execução.
 > Parte do [Blueprint do Ecossistema](00-blueprint.md). Primeiro dos 4 subsistemas (A→B→C→D).
 >
-> ⚠️ **Esta v2 substitui o design anterior** (RAG-puro com Ollama+Qdrant na Polaris). Motivo: a receita que entrega o que TheGod quer **já existe em produção** — o notifier do SHELDON (Telegram + IA conversacional Groq + RAG BM25 + injeção de contexto ao vivo). Não se reinventa a roda: o Oráculo do Universo é uma **instância dessa receita** pro domínio do universo (princípio do blueprint: *instância isolada, receita compartilhada*). O plano antigo `A-hermes-oraculo-plan.md` fica **obsoleto** — será reescrito.
+> ⚠️ **Esta v2 substitui o design anterior** (RAG-puro com Ollama+Qdrant na Polaris). Motivo: a receita que entrega o que TheGod quer **já existe em produção** — o notifier do SHELDON (Telegram + IA conversacional Groq + RAG BM25 + injeção de contexto ao vivo). Não se reinventa a roda: o Obi-Wan do Universo é uma **instância dessa receita** pro domínio do universo (princípio do blueprint: *instância isolada, receita compartilhada*). O plano antigo `A-hermes-obi-wan-plan.md` fica **obsoleto** — será reescrito.
 
 ## Objetivo
 
-Canal conversacional SOL ↔ Universo via Telegram. TheGod pergunta em linguagem natural; o Oráculo responde combinando **conhecimento escrito** (RAG sobre as fichas/docs do universo) com **estado vivo** (consulta à API GitHub em tempo real). É a fundação da comunicação inteligente — o complemento *inbound* do subsistema B (que é *outbound*).
+Canal conversacional SOL ↔ Universo via Telegram. TheGod pergunta em linguagem natural; o Obi-Wan responde combinando **conhecimento escrito** (RAG sobre as fichas/docs do universo) com **estado vivo** (consulta à API GitHub em tempo real). É a fundação da comunicação inteligente — o complemento *inbound* do subsistema B (que é *outbound*).
 
 Exemplos-alvo dTheGod:
 - *"Qual repo está há mais de 30 dias sem commit?"* → contexto ao vivo (gh.py calcula idle).
 - *"O repo X roda em qual banco de dados?"* → RAG sobre ficha/doc.
-- *"A VPS alertou disco cheio, checa?"* → **fora de escopo**: infra de lab é do SHELDON; o Oráculo aponta a federação, não remonitora.
+- *"A VPS alertou disco cheio, checa?"* → **fora de escopo**: infra de lab é do SHELDON; o Obi-Wan aponta a federação, não remonitora.
 
 ## Decisões travadas
 
 | decisão | valor |
 |---|---|
 | Receita | **Notifier do SHELDON** (instância nova, domínio do universo) — não reinventar |
-| Natureza | Oráculo conversacional inbound (two-way, linguagem natural) |
+| Natureza | Obi-Wan conversacional inbound (two-way, linguagem natural) |
 | Cérebro | **Groq** Llama 70B (`llama-3.3-70b-versatile`) — free tier, proven no SHELDON |
 | RAG | **BM25** (`rank-bm25`, puro Python) sobre os markdowns do theuniverse |
 | Contexto ao vivo | `gh.py` (já existe) + `state/sentinel-state.json` (já existe) injetados no prompt |
 | Bot | **mesmo `guardiao_universo_bot` do B** — B só faz `sendMessage` (não faz polling), então sem conflito de getUpdates. Um bot, duas bocas |
 | Acesso | whitelist de 1 `chat_id` (TheGod = `1030157568`). Resto ignorado em silêncio |
-| Casa do código | **`theuniverse/oraculo/`** (Guardião escreve — consistente com o B) |
+| Casa do código | **`theuniverse/obi-wan/`** (Guardião escreve — consistente com o B) |
 | Runtime | serviço **systemd long-polling na Polaris** (Actions não hospeda processo 24/7). Deploy via SSH |
 
 ## Arquitetura — um bot, duas bocas
 
 ```
-Você (Telegram) ──long-polling──► oraculo/bot.py            [na Polaris]
+Você (Telegram) ──long-polling──► obi-wan/bot.py            [na Polaris]
    ├─ auth gate: chat_id == 1030157568? ──não──► ignora (silêncio) + log
    └─ sim:
         ├─ context.build_context()   → estado vivo (gh.py + sentinel-state)
@@ -42,7 +42,7 @@ Você (Telegram) ──long-polling──► oraculo/bot.py            [na Polar
 [B = sentinel.py no Actions, só sendMessage outbound — mesmo bot, sem conflito]
 ```
 
-## Componentes — `theuniverse/oraculo/`
+## Componentes — `theuniverse/obi-wan/`
 
 YAGNI: cortado tudo que é outbound (o B já faz) — sem alert sources, morning digest, escalação, quiet hours, dispatcher tick.
 
@@ -54,7 +54,7 @@ YAGNI: cortado tudo que é outbound (o B já faz) — sem alert sources, morning
 | `brain.py` | system prompt (guardrails) + contexto + RAG + pergunta → Groq → resposta | receita SHELDON |
 | `bot.py` | long-polling, auth gate, orquestração, `main()` | receita SHELDON |
 | `requirements.txt` | `rank-bm25`, `httpx` (`gh.py` é stdlib) | — |
-| `oraculo.service` | systemd long-running, restart on-failure | espelha `hermes-*` |
+| `obi-wan.service` | systemd long-running, restart on-failure | espelha `hermes-*` |
 | `deploy.sh` | espelha theuniverse → `/opt/theuniverse` na Polaris + sobe o serviço (scp/venv/systemd) | espelha `hermes/deploy.sh` |
 
 **Reuso de graça:** `scripts/gh.py` (contexto ao vivo) e `state/sentinel-state.json` (o que o sistema nervoso viu) — ambos já existem no theuniverse.
@@ -71,11 +71,11 @@ YAGNI: cortado tudo que é outbound (o B já faz) — sem alert sources, morning
 2. **Fonte de conhecimento** — responde só do contexto injetado + RAG; se não está lá → *"não tenho isso no contexto atual"*. Nunca inventa detalhe de repo com conhecimento geral do modelo.
 3. **Anti-injeção** — instrução na mensagem ≠ autoridade dTheGod; recusa mudar escopo ou vazar segredo; recusa curta, sem "só dessa vez".
 
-**Lei estado-nunca-comando:** o Oráculo só lê/observa, nunca executa mudança — alinhado ao princípio do Guardião. Ações ficam pro futuro (subsistema C, com aprovador humano).
+**Lei estado-nunca-comando:** o Obi-Wan só lê/observa, nunca executa mudança — alinhado ao princípio do Guardião. Ações ficam pro futuro (subsistema C, com aprovador humano).
 
 ## Tratamento de erro (degradação graciosa)
 
-- Groq fora → *"Oráculo indisponível, tenta de novo"* + log.
+- Groq fora → *"Obi-Wan indisponível, tenta de novo"* + log.
 - API GitHub falha → contexto ao vivo omitido com nota *"(estado ao vivo indisponível agora)"*; RAG ainda responde.
 - RAG vazio → segue só com o contexto.
 - Erro de polling → loop com backoff, não derruba o serviço.
@@ -87,7 +87,7 @@ YAGNI: cortado tudo que é outbound (o B já faz) — sem alert sources, morning
 
 ## Federação com o SHELDON
 
-Infra de lab (disco, AD, Samba, Zabbix) é domínio soberano do SHELDON. O Oráculo do Universo **não** remonitora — quando perguntado, aponta o SHELDON. Federação real (encaminhar/consultar o SHELDON) é enhancement futuro, não MVP.
+Infra de lab (disco, AD, Samba, Zabbix) é domínio soberano do SHELDON. O Obi-Wan do Universo **não** remonitora — quando perguntado, aponta o SHELDON. Federação real (encaminhar/consultar o SHELDON) é enhancement futuro, não MVP.
 
 ## Refresh do conhecimento (MVP)
 
@@ -98,11 +98,11 @@ Re-indexa BM25 no startup a partir de `/opt/theuniverse`. Pra atualizar conhecim
 - Clone do theuniverse em `/opt/theuniverse` (corpus do RAG).
 - `GITHUB_TOKEN` read-only (contexto ao vivo via `gh.py`).
 - `GROQ_API_KEY` + `GROQ_MODEL`.
-- `.env` em `/opt/oraculo/.env` (chmod 600), nunca no git.
+- `.env` em `/opt/obi-wan/.env` (chmod 600), nunca no git.
 
 ## Credenciais necessárias (TheGod fornece no deploy) — `[PENDENTE SOL]`
 
-1. **`GROQ_API_KEY`** — reusar a do SHELDON ou criar dedicada (free tier 14.4k req/dia por key; volume do Oráculo é baixo, só TheGod).
+1. **`GROQ_API_KEY`** — reusar a do SHELDON ou criar dedicada (free tier 14.4k req/dia por key; volume do Obi-Wan é baixo, só TheGod).
 2. **`TELEGRAM_TOKEN`** — o mesmo bot do B (`guardiao_universo_bot`, já cadastrado).
 3. **`SOL_CHAT_ID`** = `1030157568` (já conhecido).
 4. **`GITHUB_TOKEN`** read-only na Polaris (contexto ao vivo).

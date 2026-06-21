@@ -2,11 +2,11 @@
 
 > Status: **design aprovado pelo TheGod** (2026-06-19). Falta: plano de implementação + execução.
 > Parte do [Blueprint do Ecossistema](00-blueprint.md). Segundo dos 4 subsistemas (A→B→C→D).
-> Depende de **A** ([Hermes-Oráculo](A-hermes-oraculo-spec.md)): reusa o bot do Telegram como trilho de saída.
+> Depende de **A** ([Obi-Wan](A-hermes-obi-wan-spec.md)): reusa o bot do Telegram como trilho de saída.
 
 ## Objetivo
 
-Dar ao universo um **sistema nervoso sensorial**: o observatório sente o que já enxerga via API e empurra os eventos de sinal alto pro Telegram do TheGod. Fluxo **outbound** (universo → TheGod), complementar ao A (inbound: TheGod pergunta, Oráculo responde). Os dois dividem o mesmo bot — o *trilho* universal do blueprint.
+Dar ao universo um **sistema nervoso sensorial**: o observatório sente o que já enxerga via API e empurra os eventos de sinal alto pro Telegram do TheGod. Fluxo **outbound** (universo → TheGod), complementar ao A (inbound: TheGod pergunta, Obi-Wan responde). Os dois dividem o mesmo bot — o *trilho* universal do blueprint.
 
 ## Decisões travadas
 

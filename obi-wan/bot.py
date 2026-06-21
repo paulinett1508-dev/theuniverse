@@ -16,7 +16,7 @@ import context
 import brain
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s — %(message)s", level=logging.INFO)
-log = logging.getLogger("oraculo")
+log = logging.getLogger("obi-wan")
 
 KNOWLEDGE_PATHS = ["planets", "docs/ecossistema", "CHANGELOG.md", "CLAUDE.md"]
 

@@ -1,0 +1,26 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - heading "theuniverse · observatório" [level=1] [ref=e3]:
+      - text: the
+      - emphasis [ref=e4]: universe
+      - text: · observatório
+    - generic [ref=e5]:
+      - button "⬡ orbital" [ref=e6] [cursor=pointer]
+      - button "━ galáctica" [active] [ref=e7] [cursor=pointer]
+    - generic [ref=e8]:
+      - generic [ref=e9]: planetas 31
+      - generic [ref=e10]: saudáveis 11
+      - generic [ref=e11]: atenção 19
+      - generic [ref=e12]: ☠ 1
+  - button "✕" [ref=e79] [cursor=pointer]
+  - generic:
+    - generic: sicefsus-sistema
+    - generic: 🟢 saudável
+    - generic: "magnitude: ★★★★★"
+    - generic: "commits: 1.508"
+    - generic: "último push: hoje"
+    - generic: "issues: 0"
+    - generic: clique para fixar
+  - generic [ref=e81]:
+    - generic [ref=e82]: 💥 Estrela da Morte · sbrgestao
+    - generic [ref=e83]: atualizado 23:05

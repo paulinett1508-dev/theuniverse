@@ -17,7 +17,7 @@ O que é universal é o *trilho* (como se comunica). O que é local é o *motor*
         │
 ┌───────▼──────────────────────────────────────────────┐
 │ CAMADA 1 — NÚCLEO DE COMUNICAÇÃO (universal, burro)   │
-│ Hermes-Bot + barramento de eventos · VPS Oráculo      │
+│ Hermes-Bot + barramento de eventos · VPS Obi-Wan      │
 │ Só transporte. Não sabe nada sobre nenhum planeta.    │
 └───────┬───────────────────────────────────────────────┘
         │ protocolo comum (contrato matrix-core / Zod)
@@ -52,12 +52,12 @@ Isolamento ≠ ilhamento. A distinção é entre **instância** e **receita**:
 
 Não se reinventa o que já foi validado. Uma vitória num planeta vira conhecimento coletivo — sobe pra **gravidade** (agnostic-core) como skill/template, e desce em cada planeta ajustada ao seu tamanho e stack.
 
-> Exemplo: o **Hermes-Oráculo** nasce no nexus/Lab. Validado, sua receita sobe à gravidade. Outro planeta ganha o *seu* oráculo — instância nova, isolada, nas suas proporções. Mesmo padrão, motores diferentes.
+> Exemplo: o **Obi-Wan** nasce no nexus/Lab. Validado, sua receita sobe à gravidade. Outro planeta ganha o *seu* obi-wan — instância nova, isolada, nas suas proporções. Mesmo padrão, motores diferentes.
 
 ## Decisões travadas
 
 - **Casa do satélite**: dentro do próprio planeta (pasta/submodule no repo). Motor nasce e morre com o planeta.
-- **Núcleo na VPS Oráculo** (`2.25.163.125`, SSH :49222), reaproveitando o motor Hermes (ingestor + RAG + MCP já instalados em `/opt/hermes-*`).
+- **Núcleo na VPS Obi-Wan** (`2.25.163.125`, SSH :49222), reaproveitando o motor Hermes (ingestor + RAG + MCP já instalados em `/opt/hermes-*`).
 
 ## Os dois fluxos — o universo nunca afeta a vida dos planetas
 
@@ -73,13 +73,13 @@ Rotina que materializa a Observação: lista todos os repos (API), faz diff cont
 
 - **Cadência**: agendado (GitHub Actions, cron diário). Token vive como *secret* `UNIVERSE_PAT`, nunca no código.
 - Planeta novo é **auto-descoberto** — TheGod não precisa anunciar.
-- *(futuro)* quando o Hermes-Oráculo existir, o Censo notifica via Telegram: "novo planeta detectado".
+- *(futuro)* quando o Obi-Wan existir, o Censo notifica via Telegram: "novo planeta detectado".
 
 ## Subsistemas (ordem de construção)
 
 | # | Subsistema | Papel | Depende de | Status |
 |---|---|---|---|---|
-| **A** | Hermes-Oráculo (canal) | Oráculo conversacional: RAG (BM25) + estado vivo (API) via Groq. Receita SHELDON. Código no theuniverse, runtime na Polaris | — (bot já existe) | ✅ implementado (falta deploy) |
+| **A** | Obi-Wan (canal) | Obi-Wan conversacional: RAG (BM25) + estado vivo (API) via Groq. Receita SHELDON. Código no theuniverse, runtime na Polaris | — (bot já existe) | ✅ implementado (falta deploy) |
 | **B** | Sistema Nervoso (notificar) | Eventos observados (API) → Telegram. Roda no theuniverse (Actions), não na Polaris | A (só o bot) | ✅ implementado/ativo |
 | **C** | Guardião da Galáxia (segurança) | Curadoria de skills + varredura local + escudos | A, B | ⏳ |
 | **D** | Satélites Naturais (helpers locais) | Motor de IA por planeta (nebuloso, refino próprio) | A, B | ⏳ |

@@ -18,7 +18,7 @@
 | Manifesto do guardião + cosmologia | `CLAUDE.md` |
 | Constituição do ecossistema (3 camadas, dois fluxos) | `docs/ecossistema/00-blueprint.md` |
 | Frota (servidores = estrelas) | `docs/ecossistema/frota.md` |
-| Spec Hermes-Oráculo (subsistema A) | `docs/ecossistema/A-hermes-oraculo-spec.md` |
+| Spec Obi-Wan (subsistema A) | `docs/ecossistema/A-obi-wan-spec.md` |
 | Spec Webhook Notifier (subsistema B2) | `docs/ecossistema/B2-webhook-notifier-spec.md` |
 | Script escudos (C1) | `scripts/c1-update-github-ips.py` |
 | Fichas dos planetas | `planets/*.md` + `planets/_index.md` |
@@ -54,7 +54,7 @@ Gravidade = agnostic-core (submodule).
 - **Sessão 2026-06-19/20 (máquina anterior):** Frota 100% mapeada · Subsistema B no ar · Subsistema A implementado (26 testes).
 - **Sessão 2026-06-20 (esta máquina):**
   - Universo remapeado: Matrix separado, Lab-Sobral-Dev incluído, exclusões definidas (31 planetas)
-  - Hermes-Oráculo deployado na Polaris — Telegram respondendo via `@guardiao_universo_bot`
+  - Obi-Wan deployado na Polaris — Telegram respondendo via `@guardiao_universo_bot`
   - **Skill Sol** criada em `.agnostic-core/skills/automacao/sol-aquece-planetas.md` — testada em `botclinop`
   - **Subsistema B2 (Webhook Notifier)** deployado na Polaris porta 9120:
     - `webhook/receiver.py` — FastAPI + HMAC-SHA256
@@ -65,17 +65,17 @@ Gravidade = agnostic-core (submodule).
   - **Subsistema C implementado:**
     - C1 (Escudos): porta 9120 restrita aos 6 CIDRs oficiais do GitHub via UFW. Cron semanal (`.github/workflows/c1-update-ips.yml`) mantém IPs atualizados. `POLARIS_SSH_KEY` configurado nos secrets do GitHub.
     - C2 (Secrets Scan): `sentinel.py` agora verifica `secret-scanning/alerts` em cada planeta. Novo evento `secret_exposto` notifica Telegram com tipo e link direto ao painel de segurança.
-- **Oráculo v2 (sessão 2026-06-20 tarde):**
+- **Obi-Wan v2 (sessão 2026-06-20 tarde):**
   - Reply contextual: bot detecta `reply_to_message`, extrai fatos (repo, branch, horário, commits via `_parse_notification`), injeta como `<dados_notificacao>` no prompt.
   - Multi-turn: histórico de 5 turnos no `brain_fn`. Follow-ups lembram o repo da conversa.
   - `ctx_repo`: filtra chunks do RAG pelo repo ativo — evita RAG de doc errado em follow-ups.
   - Estética: strip de prefixos convencionais nos commits, truncação por palavra, respostas negativas em 1 linha.
-- **Oráculo v3.1 (sessão 2026-06-20 noite):**
+- **Obi-Wan v3.1 (sessão 2026-06-20 noite):**
   - Fluxo de órbita: mensagem solta com planeta detectado → bot pergunta confirmação antes de entrar. Reply em notificação = consentimento implícito (entra direto). `SOVEREIGN_PLANETS` com aviso especial.
   - Digitando: `sendChatAction typing` imediato ao receber mensagem.
   - `sendSticker` nos momentos de órbita: 🚀 proposta, 🌌 confirmada, 👋 negada. Packs espaciais provisórios; pack customizado planejado (Star Wars, Severance).
-  - **Vocabulário vivo** no system prompt: Pluribus (o próprio Oráculo), Estrela da Morte, Lado Sombrio, A Força, Supernova, Órbita estável.
-- **Oráculo v3.2 (sessão 2026-06-20 madrugada):**
+  - **Vocabulário vivo** no system prompt: Pluribus (o próprio Obi-Wan), Estrela da Morte, Lado Sombrio, A Força, Supernova, Órbita estável.
+- **Obi-Wan v3.2 (sessão 2026-06-20 madrugada):**
   - Fix: reply a notificação agora envia sticker `orbit_confirmed` 🌌 antes de responder.
   - Fix: mensagem só-emoji (ex: 🚀) → query implícita `"status de {repo}"` em vez de perguntar nada ao LLM.
   - `planets/luna-base.md` criado (era `botclinop.md`) — `detect_planet` agora reconhece `luna-base`.
@@ -109,18 +109,18 @@ Gravidade = agnostic-core (submodule).
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
-### 1. Hermes-Oráculo (subsistema A) — ✅ NO AR | v3.2
+### 1. Obi-Wan (subsistema A) — ✅ NO AR | v3.2
 
 Deploy: Polaris `195.200.5.145`. Telegram: `@guardiao_universo_bot`. 227 chunks indexados.
 
 **Infra da Polaris:**
 - SSH: `ssh -i ~/.ssh/vscode_key root@195.200.5.145`
-- Oráculo: `systemctl status oraculo` · `journalctl -u oraculo -f`
+- Obi-Wan: `systemctl status obi-wan` · `journalctl -u obi-wan -f`
 - Webhook: `systemctl status webhook` · `journalctl -u webhook -f`
-- Clone: `/opt/theuniverse` · env: `/opt/oraculo/.env`
-- Atualizar: `git pull` em `/opt/theuniverse` + `systemctl restart oraculo webhook`
+- Clone: `/opt/theuniverse` · env: `/opt/obi-wan/.env`
+- Atualizar: `git pull` em `/opt/theuniverse` + `systemctl restart obi-wan webhook`
 
-**Re-deploy do zero:** `bash oraculo/deploy.sh` + `bash webhook/deploy.sh`
+**Re-deploy do zero:** `bash obi-wan/deploy.sh` + `bash webhook/deploy.sh`
 
 Polaris atualizada em 2026-06-21. Testado: reply a notificação → sticker 🌌 + resposta contextual. ✅
 
@@ -176,7 +176,7 @@ Cada planeta decide sua própria IA se precisar. Não é responsabilidade do obs
 
 - Guardião **nunca** escreve em outro repo. Só observa (leitura) e escreve em casa (theuniverse). Exceção explícita: **Artoo** (autorizado pelo TheGod) pode abrir Issues de alerta em planetas afetados.
 - Mundo Matrix (`the-matrix`, `matrix-core`) = ecossistema separado. Observar de fora, não acoplar.
-- Token vive só no `.vault` (local) e no `/opt/oraculo/.env` (Polaris). Nunca commitar.
+- Token vive só no `.vault` (local) e no `/opt/obi-wan/.env` (Polaris). Nunca commitar.
 - `UNIVERSE_OWNERS` em `gh.py` é o controle de escopo — alterar só com decisão do TheGod.
 - Após adicionar repo ao universo: rodar `python scripts/setup-webhooks.py` para registrar webhook.
 

@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent / "oraculo"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "obi-wan"))
 
 from rag import tokenize, chunk_text, Rag
 

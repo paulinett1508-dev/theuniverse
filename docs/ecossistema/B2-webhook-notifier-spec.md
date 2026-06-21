@@ -28,18 +28,18 @@ TheGod
 |---|---|
 | `webhook/receiver.py` | FastAPI — recebe evento, valida HMAC, formata, manda Telegram |
 | `webhook/requirements.txt` | fastapi + uvicorn + httpx + python-dotenv |
-| `webhook/webhook.service` | systemd unit (porta 9120, EnvironmentFile=/opt/oraculo/.env) |
+| `webhook/webhook.service` | systemd unit (porta 9120, EnvironmentFile=/opt/obi-wan/.env) |
 | `webhook/deploy.sh` | deploy na Polaris: pull → venv → firewall → systemd |
 | `scripts/setup-webhooks.py` | registra webhook nos 31 repos via GitHub API |
 
 ---
 
-## Variáveis de ambiente (em `/opt/oraculo/.env`)
+## Variáveis de ambiente (em `/opt/obi-wan/.env`)
 
 | variável | descrição |
 |---|---|
-| `TELEGRAM_TOKEN` | já existente (oráculo) |
-| `SOL_CHAT_ID` | já existente (oráculo) |
+| `TELEGRAM_TOKEN` | já existente (obi-wan) |
+| `SOL_CHAT_ID` | já existente (obi-wan) |
 | `WEBHOOK_SECRET` | HMAC secret — gerado na instalação, em `.vault` local |
 
 ---
@@ -95,7 +95,7 @@ ver PR
 ```bash
 # 1. adicionar WEBHOOK_SECRET ao .env da Polaris
 ssh -i ~/.ssh/vscode_key root@195.200.5.145 \
-  "echo 'WEBHOOK_SECRET=<secret>' >> /opt/oraculo/.env"
+  "echo 'WEBHOOK_SECRET=<secret>' >> /opt/obi-wan/.env"
 
 # 2. deploy do serviço
 bash webhook/deploy.sh
@@ -110,7 +110,7 @@ python scripts/setup-webhooks.py             # registra
 ## Segurança
 
 - Toda requisição validada via HMAC-SHA256 (`X-Hub-Signature-256`)
-- Secret nunca no git — vive em `.vault` (local) e `/opt/oraculo/.env` (Polaris)
+- Secret nunca no git — vive em `.vault` (local) e `/opt/obi-wan/.env` (Polaris)
 - Porta 9120 aberta só para GitHub webhook IPs (ver subsistema C futuro)
 
 ---

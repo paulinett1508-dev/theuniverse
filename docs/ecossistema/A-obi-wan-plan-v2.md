@@ -1,12 +1,12 @@
-# Hermes-Oráculo v2 — Implementation Plan
+# Obi-Wan v2 — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 >
-> ✅ **Onde executar:** código no **theuniverse** (`oraculo/`), implementável aqui em casa (Guardião escreve + roda os testes). A **execução em produção** é um serviço systemd na **Polaris** (deploy via SSH = acesso do Sol).
+> ✅ **Onde executar:** código no **theuniverse** (`obi-wan/`), implementável aqui em casa (Guardião escreve + roda os testes). A **execução em produção** é um serviço systemd na **Polaris** (deploy via SSH = acesso do Sol).
 >
-> Spec: [`A-hermes-oraculo-spec.md`](A-hermes-oraculo-spec.md) (v2, receita-SHELDON). Substitui o plano v1 (`A-hermes-oraculo-plan.md`, OBSOLETO).
+> Spec: [`A-hermes-obi-wan-spec.md`](A-hermes-obi-wan-spec.md) (v2, receita-SHELDON). Substitui o plano v1 (`A-hermes-obi-wan-plan.md`, OBSOLETO).
 
-**Goal:** Oráculo conversacional no Telegram que responde perguntas do Sol sobre o universo, combinando RAG BM25 (fichas/docs) com estado vivo da API (idle/linguagem/issues), via Groq Llama 70B.
+**Goal:** Obi-Wan conversacional no Telegram que responde perguntas do Sol sobre o universo, combinando RAG BM25 (fichas/docs) com estado vivo da API (idle/linguagem/issues), via Groq Llama 70B.
 
 **Architecture:** Serviço Python long-polling rodando de dentro do clone do theuniverse em `/opt/theuniverse` na Polaris. `bot.py` recebe mensagens, filtra pelo `chat_id` do Sol, monta contexto vivo (`context.py` via `scripts/gh.py`) + recupera trechos (`rag.py` BM25 sobre os markdowns) e pede a resposta ao Groq (`brain.py`). Reusa o `guardiao_universo_bot` (o B só faz `sendMessage`, sem conflito de polling).
 
@@ -14,12 +14,12 @@
 
 ## Global Constraints
 
-- **Casa do código:** `theuniverse/oraculo/`. Reusa `scripts/gh.py` (contexto vivo) e `state/sentinel-state.json` (já existem).
+- **Casa do código:** `theuniverse/obi-wan/`. Reusa `scripts/gh.py` (contexto vivo) e `state/sentinel-state.json` (já existem).
 - **Roda de dentro de `/opt/theuniverse`** (WorkingDirectory) — assim importa `scripts/gh.py` e indexa os markdowns in-place.
 - **Cérebro:** Groq, modelo `llama-3.3-70b-versatile`, endpoint `https://api.groq.com/openai/v1/chat/completions` (Bearer auth).
 - **RAG:** BM25 (`rank-bm25`) sobre `planets/`, `docs/ecossistema/`, `CHANGELOG.md`, `CLAUDE.md`.
 - **Acesso:** whitelist de 1 `chat_id` (Sol = `1030157568`). Resto ignorado em silêncio.
-- **Segredos:** `/opt/oraculo/.env` (chmod 600), **fora** do clone do repo, sobrevive a `git pull`. Nunca no git.
+- **Segredos:** `/opt/obi-wan/.env` (chmod 600), **fora** do clone do repo, sobrevive a `git pull`. Nunca no git.
 - **Lei estado-nunca-comando:** só lê/observa, nunca executa mudança.
 - **Idioma:** respostas em português.
 - **Versões:** `rank-bm25==0.2.2`, `httpx>=0.27`.
@@ -30,18 +30,18 @@
 
 | arquivo | responsabilidade |
 |---|---|
-| `oraculo/config.py` | env: `TELEGRAM_TOKEN`, `SOL_CHAT_ID`, `GROQ_API_KEY`, `GROQ_MODEL` |
-| `oraculo/rag.py` | chunking + índice BM25 sobre markdowns + `retrieve` |
-| `oraculo/context.py` | estado vivo: `summarize_repo`/`format_context`/`gather` (via `scripts/gh.py`) |
-| `oraculo/brain.py` | system prompt (guardrails) + montagem de mensagens + chamada Groq |
-| `oraculo/bot.py` | auth gate, `handle_update`, loop long-polling, `main` |
-| `oraculo/requirements.txt` | `rank-bm25`, `httpx` |
-| `oraculo/oraculo.service` | systemd long-running |
-| `oraculo/deploy.sh` | clone/pull theuniverse → Polaris + venv + systemd |
-| `tests/test_oraculo_rag.py` | BM25 sobre fixture |
-| `tests/test_oraculo_context.py` | sumarização/formatação (gh mockado) |
-| `tests/test_oraculo_brain.py` | mensagens + parse da resposta (Groq mockado) |
-| `tests/test_oraculo_bot.py` | auth gate + `handle_update` (deps injetadas) |
+| `obi-wan/config.py` | env: `TELEGRAM_TOKEN`, `SOL_CHAT_ID`, `GROQ_API_KEY`, `GROQ_MODEL` |
+| `obi-wan/rag.py` | chunking + índice BM25 sobre markdowns + `retrieve` |
+| `obi-wan/context.py` | estado vivo: `summarize_repo`/`format_context`/`gather` (via `scripts/gh.py`) |
+| `obi-wan/brain.py` | system prompt (guardrails) + montagem de mensagens + chamada Groq |
+| `obi-wan/bot.py` | auth gate, `handle_update`, loop long-polling, `main` |
+| `obi-wan/requirements.txt` | `rank-bm25`, `httpx` |
+| `obi-wan/obi-wan.service` | systemd long-running |
+| `obi-wan/deploy.sh` | clone/pull theuniverse → Polaris + venv + systemd |
+| `tests/test_obi-wan_rag.py` | BM25 sobre fixture |
+| `tests/test_obi-wan_context.py` | sumarização/formatação (gh mockado) |
+| `tests/test_obi-wan_brain.py` | mensagens + parse da resposta (Groq mockado) |
+| `tests/test_obi-wan_bot.py` | auth gate + `handle_update` (deps injetadas) |
 
 Funções puras (rag/context/brain/handle_update) testáveis sem rede — Groq e `gh.py` injetáveis. Só o loop de polling em `main()` fica sem teste de unidade.
 
@@ -50,8 +50,8 @@ Funções puras (rag/context/brain/handle_update) testáveis sem rede — Groq e
 ### Task 1: Config
 
 **Files:**
-- Create: `oraculo/config.py`
-- Test: `tests/test_oraculo_config.py`
+- Create: `obi-wan/config.py`
+- Test: `tests/test_obi-wan_config.py`
 
 **Interfaces:**
 - Produces: `Config(env=None)` com `telegram_token: str`, `sol_chat_id: int`, `groq_api_key: str`, `groq_model: str`. `ValueError` se faltar `TELEGRAM_TOKEN`, `SOL_CHAT_ID` ou `GROQ_API_KEY`.
@@ -59,10 +59,10 @@ Funções puras (rag/context/brain/handle_update) testáveis sem rede — Groq e
 - [ ] **Step 1: Write the failing test**
 
 ```python
-# tests/test_oraculo_config.py
+# tests/test_obi-wan_config.py
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent / "oraculo"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "obi-wan"))
 
 import pytest
 from config import Config
@@ -81,14 +81,14 @@ def test_parses_and_defaults():
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `python -m pytest tests/test_oraculo_config.py -v`
+Run: `python -m pytest tests/test_obi-wan_config.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'config'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# oraculo/config.py
-"""Configuração do Oráculo do Universo a partir do ambiente."""
+# obi-wan/config.py
+"""Configuração do Obi-Wan do Universo a partir do ambiente."""
 import os
 
 
@@ -110,14 +110,14 @@ class Config:
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `python -m pytest tests/test_oraculo_config.py -v`
+Run: `python -m pytest tests/test_obi-wan_config.py -v`
 Expected: PASS (2 passed)
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add oraculo/config.py tests/test_oraculo_config.py
-git commit -m "feat(oraculo): config loader"
+git add obi-wan/config.py tests/test_obi-wan_config.py
+git commit -m "feat(obi-wan): config loader"
 ```
 
 ---
@@ -125,8 +125,8 @@ git commit -m "feat(oraculo): config loader"
 ### Task 2: RAG BM25
 
 **Files:**
-- Create: `oraculo/rag.py`
-- Test: `tests/test_oraculo_rag.py`
+- Create: `obi-wan/rag.py`
+- Test: `tests/test_obi-wan_rag.py`
 
 **Interfaces:**
 - Produces:
@@ -138,10 +138,10 @@ git commit -m "feat(oraculo): config loader"
 - [ ] **Step 1: Write the failing test**
 
 ```python
-# tests/test_oraculo_rag.py
+# tests/test_obi-wan_rag.py
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent / "oraculo"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "obi-wan"))
 
 from rag import tokenize, chunk_text, Rag
 
@@ -174,13 +174,13 @@ def test_retrieve_empty_index_returns_empty():
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `python -m pip install rank-bm25==0.2.2 && python -m pytest tests/test_oraculo_rag.py -v`
+Run: `python -m pip install rank-bm25==0.2.2 && python -m pytest tests/test_obi-wan_rag.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'rag'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# oraculo/rag.py
+# obi-wan/rag.py
 """RAG BM25 sobre os markdowns do universo."""
 import re
 from pathlib import Path
@@ -240,14 +240,14 @@ class Rag:
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `python -m pytest tests/test_oraculo_rag.py -v`
+Run: `python -m pytest tests/test_obi-wan_rag.py -v`
 Expected: PASS (4 passed)
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add oraculo/rag.py tests/test_oraculo_rag.py
-git commit -m "feat(oraculo): RAG BM25 sobre markdowns"
+git add obi-wan/rag.py tests/test_obi-wan_rag.py
+git commit -m "feat(obi-wan): RAG BM25 sobre markdowns"
 ```
 
 ---
@@ -255,8 +255,8 @@ git commit -m "feat(oraculo): RAG BM25 sobre markdowns"
 ### Task 3: Contexto ao vivo
 
 **Files:**
-- Create: `oraculo/context.py`
-- Test: `tests/test_oraculo_context.py`
+- Create: `obi-wan/context.py`
+- Test: `tests/test_obi-wan_context.py`
 
 **Interfaces:**
 - Consumes: `scripts/gh.py` (`token`, `list_repos`).
@@ -268,11 +268,11 @@ git commit -m "feat(oraculo): RAG BM25 sobre markdowns"
 - [ ] **Step 1: Write the failing test**
 
 ```python
-# tests/test_oraculo_context.py
+# tests/test_obi-wan_context.py
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
-sys.path.insert(0, str(Path(__file__).parent.parent / "oraculo"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "obi-wan"))
 
 import context
 
@@ -301,14 +301,14 @@ def test_format_context_sorts_by_idle_desc():
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `python -m pytest tests/test_oraculo_context.py -v`
+Run: `python -m pytest tests/test_obi-wan_context.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'context'` (ou `gh`, se o path shim ainda não existe — o Step 3 adiciona)
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# oraculo/context.py
-"""Estado vivo do universo, injetado no prompt do Oráculo."""
+# obi-wan/context.py
+"""Estado vivo do universo, injetado no prompt do Obi-Wan."""
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
@@ -345,14 +345,14 @@ def gather(tok, now=None):
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `python -m pytest tests/test_oraculo_context.py -v`
+Run: `python -m pytest tests/test_obi-wan_context.py -v`
 Expected: PASS (2 passed)
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add oraculo/context.py tests/test_oraculo_context.py
-git commit -m "feat(oraculo): contexto ao vivo via gh.py"
+git add obi-wan/context.py tests/test_obi-wan_context.py
+git commit -m "feat(obi-wan): contexto ao vivo via gh.py"
 ```
 
 ---
@@ -360,8 +360,8 @@ git commit -m "feat(oraculo): contexto ao vivo via gh.py"
 ### Task 4: Brain (Groq)
 
 **Files:**
-- Create: `oraculo/brain.py`
-- Test: `tests/test_oraculo_brain.py`
+- Create: `obi-wan/brain.py`
+- Test: `tests/test_obi-wan_brain.py`
 
 **Interfaces:**
 - Produces:
@@ -372,10 +372,10 @@ git commit -m "feat(oraculo): contexto ao vivo via gh.py"
 - [ ] **Step 1: Write the failing test**
 
 ```python
-# tests/test_oraculo_brain.py
+# tests/test_obi-wan_brain.py
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent / "oraculo"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "obi-wan"))
 
 import brain
 
@@ -393,7 +393,7 @@ def test_build_messages_includes_context_rag_and_question():
 def test_answer_parses_groq_response():
     class FakeResp:
         def raise_for_status(self): pass
-        def json(self): return {"choices": [{"message": {"content": " Resposta do Oráculo "}}]}
+        def json(self): return {"choices": [{"message": {"content": " Resposta do Obi-Wan "}}]}
 
     class FakeClient:
         def __init__(self): self.sent = None
@@ -403,27 +403,27 @@ def test_answer_parses_groq_response():
 
     client = FakeClient()
     out = brain.answer("p", "ctx", [], "gsk_x", "llama-3.3-70b-versatile", client=client)
-    assert out == "Resposta do Oráculo"
+    assert out == "Resposta do Obi-Wan"
     assert client.sent["headers"]["Authorization"] == "Bearer gsk_x"
     assert client.sent["json"]["model"] == "llama-3.3-70b-versatile"
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `python -m pytest tests/test_oraculo_brain.py -v`
+Run: `python -m pytest tests/test_obi-wan_brain.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'brain'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# oraculo/brain.py
-"""Cérebro do Oráculo: monta prompt com guardrails e chama o Groq."""
+# obi-wan/brain.py
+"""Cérebro do Obi-Wan: monta prompt com guardrails e chama o Groq."""
 import httpx
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 SYSTEM_PROMPT = (
-    "Você é o Oráculo do Universo — o canal conversacional do ecossistema de repos "
+    "Você é o Obi-Wan do Universo — o canal conversacional do ecossistema de repos "
     "de paulinett1508-dev. Responda em português, direto e técnico.\n\n"
     "REGRAS (inegociáveis):\n"
     "1. ESCOPO: só fale do universo (os repos/planetas, cosmologia, blueprint, dev). "
@@ -461,14 +461,14 @@ def answer(question, context_str, chunks, api_key, model, client=None):
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `python -m pytest tests/test_oraculo_brain.py -v`
+Run: `python -m pytest tests/test_obi-wan_brain.py -v`
 Expected: PASS (2 passed)
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add oraculo/brain.py tests/test_oraculo_brain.py
-git commit -m "feat(oraculo): brain Groq com guardrails"
+git add obi-wan/brain.py tests/test_obi-wan_brain.py
+git commit -m "feat(obi-wan): brain Groq com guardrails"
 ```
 
 ---
@@ -476,8 +476,8 @@ git commit -m "feat(oraculo): brain Groq com guardrails"
 ### Task 5: Bot (auth gate + handle_update + long-polling)
 
 **Files:**
-- Create: `oraculo/bot.py`
-- Test: `tests/test_oraculo_bot.py`
+- Create: `obi-wan/bot.py`
+- Test: `tests/test_obi-wan_bot.py`
 
 **Interfaces:**
 - Consumes: `Config` (T1), `Rag` (T2), `context.gather` (T3), `brain.answer` (T4).
@@ -489,10 +489,10 @@ git commit -m "feat(oraculo): brain Groq com guardrails"
 - [ ] **Step 1: Write the failing test**
 
 ```python
-# tests/test_oraculo_bot.py
+# tests/test_obi-wan_bot.py
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent / "oraculo"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "obi-wan"))
 
 import bot
 
@@ -535,14 +535,14 @@ def test_handle_update_answers_authorized():
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `python -m pytest tests/test_oraculo_bot.py -v`
+Run: `python -m pytest tests/test_obi-wan_bot.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'bot'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# oraculo/bot.py
-"""Oráculo do Universo — bot Telegram conversacional (long-polling) na Polaris."""
+# obi-wan/bot.py
+"""Obi-Wan do Universo — bot Telegram conversacional (long-polling) na Polaris."""
 import sys
 import time
 import logging
@@ -559,7 +559,7 @@ import context
 import brain
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s — %(message)s", level=logging.INFO)
-log = logging.getLogger("oraculo")
+log = logging.getLogger("obi-wan")
 
 KNOWLEDGE_PATHS = ["planets", "docs/ecossistema", "CHANGELOG.md", "CLAUDE.md"]
 
@@ -591,7 +591,7 @@ def main():
     cfg = Config()
     tok = gh_token()
     rag = Rag.from_paths(KNOWLEDGE_PATHS)
-    log.info("Oráculo online. Indexados %d chunks. Long-polling iniciado.", len(rag.chunks))
+    log.info("Obi-Wan online. Indexados %d chunks. Long-polling iniciado.", len(rag.chunks))
 
     def context_fn(t):
         try:
@@ -614,7 +614,7 @@ def main():
                     reply = handle_update(upd, cfg, rag, tok, brain_fn, context_fn)
                 except Exception:
                     log.exception("falha ao responder")
-                    reply = "Oráculo indisponível, tenta de novo."
+                    reply = "Obi-Wan indisponível, tenta de novo."
                 if reply:
                     _send(cfg.telegram_token, cfg.sol_chat_id, reply)
         except Exception:
@@ -628,19 +628,19 @@ if __name__ == "__main__":
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `python -m pytest tests/test_oraculo_bot.py -v`
+Run: `python -m pytest tests/test_obi-wan_bot.py -v`
 Expected: PASS (3 passed)
 
-- [ ] **Step 5: Rodar a suíte inteira do Oráculo**
+- [ ] **Step 5: Rodar a suíte inteira do Obi-Wan**
 
-Run: `python -m pytest tests/test_oraculo_*.py -v`
+Run: `python -m pytest tests/test_obi-wan_*.py -v`
 Expected: PASS (13 passed: 2+4+2+2+3)
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add oraculo/bot.py tests/test_oraculo_bot.py
-git commit -m "feat(oraculo): bot long-polling + auth gate + orquestracao"
+git add obi-wan/bot.py tests/test_obi-wan_bot.py
+git commit -m "feat(obi-wan): bot long-polling + auth gate + orquestracao"
 ```
 
 ---
@@ -648,43 +648,43 @@ git commit -m "feat(oraculo): bot long-polling + auth gate + orquestracao"
 ### Task 6: Requirements + systemd + deploy
 
 **Files:**
-- Create: `oraculo/requirements.txt`
-- Create: `oraculo/oraculo.service`
-- Create: `oraculo/deploy.sh`
+- Create: `obi-wan/requirements.txt`
+- Create: `obi-wan/obi-wan.service`
+- Create: `obi-wan/deploy.sh`
 
 **Interfaces:**
 - Consumes: tudo de T1-T5.
-- Produces: ambiente instalável e serviço systemd que roda `oraculo/bot.py` de dentro de `/opt/theuniverse`.
+- Produces: ambiente instalável e serviço systemd que roda `obi-wan/bot.py` de dentro de `/opt/theuniverse`.
 
 > Sem teste unitário — é configuração/deploy. Validação real é o `workflow`/SSH contra a Polaris (pré-requisitos `[PENDENTE SOL]` ao fim).
 
 - [ ] **Step 1: requirements.txt**
 
 ```
-# oraculo/requirements.txt
+# obi-wan/requirements.txt
 rank-bm25==0.2.2
 httpx>=0.27
 ```
 
-- [ ] **Step 2: oraculo.service**
+- [ ] **Step 2: obi-wan.service**
 
 ```ini
-# oraculo/oraculo.service
+# obi-wan/obi-wan.service
 [Unit]
-Description=Oráculo do Universo — bot Telegram conversacional
+Description=Obi-Wan do Universo — bot Telegram conversacional
 After=network.target
 
 [Service]
 Type=simple
 User=root
 WorkingDirectory=/opt/theuniverse
-EnvironmentFile=/opt/oraculo/.env
-ExecStart=/opt/oraculo/venv/bin/python /opt/theuniverse/oraculo/bot.py
+EnvironmentFile=/opt/obi-wan/.env
+ExecStart=/opt/obi-wan/venv/bin/python /opt/theuniverse/obi-wan/bot.py
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=oraculo
+SyslogIdentifier=obi-wan
 
 [Install]
 WantedBy=multi-user.target
@@ -693,9 +693,9 @@ WantedBy=multi-user.target
 - [ ] **Step 3: deploy.sh**
 
 ```bash
-# oraculo/deploy.sh
+# obi-wan/deploy.sh
 #!/usr/bin/env bash
-# Deploy do Oráculo do Universo na Polaris
+# Deploy do Obi-Wan do Universo na Polaris
 set -euo pipefail
 
 POLARIS="root@2.25.163.125"
@@ -713,21 +713,21 @@ ssh $SSH_OPTS "$POLARIS" "
 
 echo "=== venv + deps ==="
 ssh $SSH_OPTS "$POLARIS" "
-  mkdir -p /opt/oraculo
-  python3 -m venv /opt/oraculo/venv
-  /opt/oraculo/venv/bin/pip install -q -r /opt/theuniverse/oraculo/requirements.txt
+  mkdir -p /opt/obi-wan
+  python3 -m venv /opt/obi-wan/venv
+  /opt/obi-wan/venv/bin/pip install -q -r /opt/theuniverse/obi-wan/requirements.txt
 "
 
 echo "=== systemd ==="
 ssh $SSH_OPTS "$POLARIS" "
-  cp /opt/theuniverse/oraculo/oraculo.service /etc/systemd/system/
+  cp /opt/theuniverse/obi-wan/obi-wan.service /etc/systemd/system/
   systemctl daemon-reload
-  if [ -f /opt/oraculo/.env ]; then
-    systemctl enable oraculo.service
-    systemctl restart oraculo.service
-    systemctl status oraculo.service --no-pager | head -10
+  if [ -f /opt/obi-wan/.env ]; then
+    systemctl enable obi-wan.service
+    systemctl restart obi-wan.service
+    systemctl status obi-wan.service --no-pager | head -10
   else
-    echo 'AVISO: /opt/oraculo/.env ausente — serviço NÃO iniciado. Criar .env e: systemctl enable --now oraculo.service'
+    echo 'AVISO: /opt/obi-wan/.env ausente — serviço NÃO iniciado. Criar .env e: systemctl enable --now obi-wan.service'
   fi
 "
 echo "=== Done ==="
@@ -735,21 +735,21 @@ echo "=== Done ==="
 
 - [ ] **Step 4: Validar sintaxes**
 
-Run: `bash -n oraculo/deploy.sh && echo "deploy.sh ok"`
+Run: `bash -n obi-wan/deploy.sh && echo "deploy.sh ok"`
 Expected: `deploy.sh ok` (sem erro de sintaxe shell)
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add oraculo/requirements.txt oraculo/oraculo.service oraculo/deploy.sh
-git commit -m "feat(oraculo): requirements + systemd + deploy"
+git add obi-wan/requirements.txt obi-wan/obi-wan.service obi-wan/deploy.sh
+git commit -m "feat(obi-wan): requirements + systemd + deploy"
 ```
 
 ---
 
 ## Pré-requisitos do Sol antes do deploy — `[PENDENTE SOL]`
 
-Criar `/opt/oraculo/.env` na Polaris (chmod 600, **nunca** no git):
+Criar `/opt/obi-wan/.env` na Polaris (chmod 600, **nunca** no git):
 
 ```
 TELEGRAM_TOKEN=<token do guardiao_universo_bot (mesmo do B)>
@@ -766,7 +766,7 @@ GITHUB_TOKEN=<PAT read-only — pro contexto ao vivo>
 
 ## Validação fim-a-fim (após deploy)
 
-1. `journalctl -u oraculo -f` → ver "Oráculo online. Indexados N chunks."
+1. `journalctl -u obi-wan -f` → ver "Obi-Wan online. Indexados N chunks."
 2. Mandar do seu Telegram: *"qual repo está há mais de 30 dias sem commit?"* → resposta usando o contexto ao vivo.
 3. Mandar: *"o que é a estrela Polaris?"* → resposta via RAG (ficha/frota).
 4. Mandar: *"a VPS está com disco cheio?"* → deve responder que **isso é com o SHELDON** (escopo).
@@ -780,7 +780,7 @@ GITHUB_TOKEN=<PAT read-only — pro contexto ao vivo>
 - Receita SHELDON (Groq+BM25+contexto) → T2 (RAG), T3 (contexto), T4 (Groq) ✓
 - Mesmo bot do B, long-polling → T5 ✓
 - Whitelist 1 chat_id → T5 `is_authorized` ✓
-- Código em `theuniverse/oraculo/`, roda de `/opt/theuniverse` → File Structure + T6 systemd ✓
+- Código em `theuniverse/obi-wan/`, roda de `/opt/theuniverse` → File Structure + T6 systemd ✓
 - RAG sobre planets/docs/CHANGELOG/CLAUDE → T5 `KNOWLEDGE_PATHS` ✓
 - Contexto vivo via gh.py + idle → T3 ✓
 - Guardrails 3 camadas + estado-nunca-comando → T4 `SYSTEM_PROMPT` ✓

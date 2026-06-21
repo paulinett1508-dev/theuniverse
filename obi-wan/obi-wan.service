@@ -1,18 +1,18 @@
 [Unit]
-Description=Oráculo do Universo — bot Telegram conversacional
+Description=Obi-Wan — conselheiro conversacional do TheUniverse
 After=network.target
 
 [Service]
 Type=simple
 User=root
 WorkingDirectory=/opt/theuniverse
-EnvironmentFile=/opt/oraculo/.env
-ExecStart=/opt/oraculo/venv/bin/python /opt/theuniverse/oraculo/bot.py
+EnvironmentFile=/opt/obi-wan/.env
+ExecStart=/opt/obi-wan/venv/bin/python /opt/theuniverse/obi-wan/bot.py
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=oraculo
+SyslogIdentifier=obi-wan
 
 [Install]
 WantedBy=multi-user.target

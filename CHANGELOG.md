@@ -31,7 +31,7 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 - TheGod é notificado via Telegram em dois momentos: 🛸 lançamento ("Artoo em rota para {repo}") e ✅ entrega confirmada ("Artoo chegou · issue #N aberta" + link direto).
 - Falha na entrega → ❌ "Artoo perdido na órbita" com diagnóstico.
 - Label `observatory-alert` (vermelho escuro) criada automaticamente no repo destino.
-- `ARTOO_TOKEN` separado na Polaris (`/opt/oraculo/.env`) — master PAT com `repo` scope. Token fine-grained do Oráculo não tem permissão de escrita em outros repos.
+- `ARTOO_TOKEN` separado na Polaris (`/opt/obi-wan/.env`) — master PAT com `repo` scope. Token fine-grained do Obi-Wan não tem permissão de escrita em outros repos.
 - Integrado ao `sentinel.py`: todo evento `ci_falhou` dispara Artoo automaticamente.
 - **Testado ao vivo:** `sbrgestao` · issue #6 aberta · Telegrams de lançamento e entrega recebidos. Órbita atravessada. ✅
 
@@ -46,9 +46,9 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 ### 🌙 luna-base (ex-botclinop)
 - Repo renomeado no GitHub via API REST (`PATCH /repos/paulinett1508-dev/botclinop`).
 - `planets/luna-base.md` criada, `planets/botclinop.md` removida.
-- `SPECIAL_BODIES` e `detect_planet` (Oráculo) atualizados para `luna-base`.
+- `SPECIAL_BODIES` e `detect_planet` (Obi-Wan) atualizados para `luna-base`.
 
-### 🤖 Oráculo v3.2 — sticker + emoji-only fix
+### 🤖 Obi-Wan v3.2 — sticker + emoji-only fix
 - Reply a notificação agora dispara sticker `orbit_confirmed` (🌌) antes de responder.
 - Mensagem com só emoji (ex: 🚀) usa query implícita `"status de {repo}"` em vez de mandar o emoji como pergunta ao LLM.
 
@@ -118,11 +118,11 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 ### 🔭 Favicon inline SVG — sem 404.
 
-## 2026-06-20 — Oráculo v3: fluxo de órbita + digitando
+## 2026-06-20 — Obi-Wan v3: fluxo de órbita + digitando
 
 ### 🪐 Fluxo de órbita — TheGod pede permissão antes de entrar
 - `bot.py`: `detect_planet()` — detecta nome de planeta na mensagem (match direto + parcial por segmento).
-- Mensagem solta com planeta detectado → Oráculo propõe: "🌍 Identifico relação com **nexus-labsobral**. Entro na órbita para investigar?"
+- Mensagem solta com planeta detectado → Obi-Wan propõe: "🌍 Identifico relação com **nexus-labsobral**. Entro na órbita para investigar?"
 - `SOVEREIGN_PLANETS` (ex: `the-matrix`) → aviso especial: "tem governança própria. Adentro como observador externo?"
 - Confirmações: `sim / s / pode / entra / vai / ok / bora`. Negações: `não / nao / n / cancela / voltar`.
 - Reply em notificação → entra na órbita direto (gesto já é o consentimento).
@@ -132,26 +132,26 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 - `_typing()` — chama `sendChatAction` com `action=typing` imediatamente ao receber mensagem, antes de processar.
 - `_send()` atualizado para HTML parse_mode (alinhado com webhook/sentinel).
 
-## 2026-06-20 — Oráculo v2: reply contextual, multi-turn, estética Telegram
+## 2026-06-20 — Obi-Wan v2: reply contextual, multi-turn, estética Telegram
 
-### 💬 Reply contextual — Oráculo entende a notificação sendo respondida
-- `oraculo/bot.py`: `extract_reply_context()` — extrai `reply_to_message.text` do update Telegram.
-- `oraculo/brain.py`: `reply_context` injetado antes do bloco RAG. `_parse_notification()` extrai fatos estruturados (repo, branch, horário, commits). Fatos apresentados em `<dados_notificacao>` para o model não reproduzir metadados brutos.
+### 💬 Reply contextual — Obi-Wan entende a notificação sendo respondida
+- `obi-wan/bot.py`: `extract_reply_context()` — extrai `reply_to_message.text` do update Telegram.
+- `obi-wan/brain.py`: `reply_context` injetado antes do bloco RAG. `_parse_notification()` extrai fatos estruturados (repo, branch, horário, commits). Fatos apresentados em `<dados_notificacao>` para o model não reproduzir metadados brutos.
 - Regra 4 no system prompt: usa fatos extraídos literalmente. "Q hrs foi?" → lê `horario=` e responde direto.
 
-### 🧠 Histórico multi-turn — Oráculo lembra o contexto da conversa
-- `oraculo/bot.py`: `_history = []` em `main()`. `brain_fn` guarda os últimos 5 turnos (10 mensagens) e passa para `brain.answer`.
-- `oraculo/brain.py`: `build_messages` aceita `history` — injeta como turnos anteriores antes do user message atual.
+### 🧠 Histórico multi-turn — Obi-Wan lembra o contexto da conversa
+- `obi-wan/bot.py`: `_history = []` em `main()`. `brain_fn` guarda os últimos 5 turnos (10 mensagens) e passa para `brain.answer`.
+- `obi-wan/brain.py`: `build_messages` aceita `history` — injeta como turnos anteriores antes do user message atual.
 - Follow-ups como "e o plano 1?" chegam com contexto do repo anterior no histórico.
 
 ### 🎯 ctx_repo — RAG filtrado pelo repo ativo
 - `_ctx_repo` em `main()` — atualizado a cada reply_context detectado.
 - `brain.py`: quando `ctx_repo` definido e sem reply_context, filtra chunks do RAG por source. Sem chunks do repo → model responde "não tenho informação sobre [repo] no contexto atual".
-- Evita que "plano 1" recupere doc do Oráculo em vez do repo da conversa.
+- Evita que "plano 1" recupere doc do Obi-Wan em vez do repo da conversa.
 
 ### 🎨 Estética Telegram
 - Notificações multi-commit: strip de prefixos convencionais (`feat(scope):`, `docs:`, `fix:`). Truncação por palavra (não no meio). Bullets sem indentação.
-- Respostas do Oráculo: regra 5 — bullets curtos, máx 3-4 linhas. Respostas negativas = 1 linha sem bullet.
+- Respostas do Obi-Wan: regra 5 — bullets curtos, máx 3-4 linhas. Respostas negativas = 1 linha sem bullet.
 - Regra 1 refinada: não dispara em commits que mencionam Zabbix/disco — só recusa perguntas diretas sobre infra.
 
 ## 2026-06-20 — Subsistema C implementado (Escudos + Secrets Scan)
@@ -191,14 +191,14 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 ### 💥 Planetas sumidos
 - **agnvendas-painelsbr** — não consta mais no GitHub (ficha arquivada)
 - **pedidomobile** — não consta mais no GitHub (ficha arquivada)
-## 2026-06-20 — Subsistema A no ar (Hermes-Oráculo, deploy na Polaris)
+## 2026-06-20 — Subsistema A no ar (Obi-Wan, deploy na Polaris)
 
-### 🔮 Oráculo respondendo no Telegram
-- Deploy concluído na **Polaris** (`195.200.5.145`, porta 22) — VPS do universo (não confundir com o Oráculo da Matrix `2.25.163.125`).
-- Serviço systemd `oraculo.service` ativo, restart automático, 227 chunks BM25 indexados.
+### 🔮 Obi-Wan respondendo no Telegram
+- Deploy concluído na **Polaris** (`195.200.5.145`, porta 22) — VPS do universo (não confundir com o Obi-Wan da Matrix `2.25.163.125`).
+- Serviço systemd `obi-wan.service` ativo, restart automático, 227 chunks BM25 indexados.
 - Chave de acesso: `~/.ssh/vscode_key` (cadastrada via extensão Hostinger do VS Code).
 - Token GitHub fine-grained read-only (`Contents: read`) — se vazar, só lê o theuniverse.
-- Validado ao vivo: Sol perguntou no Telegram, Oráculo respondeu com contexto real da API.
+- Validado ao vivo: Sol perguntou no Telegram, Obi-Wan respondeu com contexto real da API.
 - Universo remapeado nesta sessão: `Lab-Sobral-Dev` incluído, `the-matrix`/`matrix-core` excluídos. 31 planetas.
 
 ## 2026-06-20 — Censo automático
@@ -206,14 +206,14 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 ### 💥 Planetas sumidos
 - **matrix-core** — não consta mais no GitHub (ficha arquivada)
 - **the-matrix** — não consta mais no GitHub (ficha arquivada)
-## 2026-06-19 — Subsistema A implementado (Hermes-Oráculo, receita SHELDON)
+## 2026-06-19 — Subsistema A implementado (Obi-Wan, receita SHELDON)
 
-### 🔮 O Oráculo que pensa — código vivo
+### 🔮 O Obi-Wan que pensa — código vivo
 - Redesenho v2: de RAG-puro (Ollama/Qdrant) → **receita do SHELDON** (Groq Llama 70B + RAG BM25 + injeção de contexto ao vivo). Não reinventou a roda.
-- `theuniverse/oraculo/`: `config.py`, `rag.py` (BM25), `context.py` (estado vivo via `gh.py`), `brain.py` (Groq + guardrails), `bot.py` (long-polling, auth gate) + `oraculo.service` + `deploy.sh`.
+- `theuniverse/obi-wan/`: `config.py`, `rag.py` (BM25), `context.py` (estado vivo via `gh.py`), `brain.py` (Groq + guardrails), `bot.py` (long-polling, auth gate) + `obi-wan.service` + `deploy.sh`.
 - Um bot, duas bocas: o `guardiao_universo_bot` serve A (inbound) e B (outbound) — sem conflito de polling.
 - Responde "qual repo >30 dias?" (contexto vivo) e "repo X roda em qual banco?" (RAG). Infra de lab → federa com SHELDON.
-- 13 testes do oráculo passando (26 no total). Spec + plano v2 em `docs/ecossistema/A-*`. Falta só o deploy na Polaris.
+- 13 testes do obi-wan passando (26 no total). Spec + plano v2 em `docs/ecossistema/A-*`. Falta só o deploy na Polaris.
 
 ## 2026-06-19 — Subsistema B implementado (Sistema Nervoso)
 
@@ -232,10 +232,10 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 - **Vega** (labtools01-150) — a vigia: monitoramento (coexiste com Mira/Zabbix).
 - Censo validado em dry-run: 31 planetas, 0 drift, auth local via `.vault` OK.
 
-## 2026-06-19 — Plano do Hermes-Oráculo (subsistema A)
+## 2026-06-19 — Plano do Obi-Wan (subsistema A)
 
 ### 📋 Plano de implementação escrito
-- `docs/ecossistema/A-hermes-oraculo-plan.md` — 6 tasks TDD, código completo, executável no `nexus-labsobral`.
+- `docs/ecossistema/A-hermes-obi-wan-plan.md` — 6 tasks TDD, código completo, executável no `nexus-labsobral`.
 - Baseado na leitura do código real do `hermes/` (rag_server.py, ingest.py, deploy.sh, systemd) via API.
 - Decisões: `rag.py` reusa embed/busca do MCP + chat Ollama; `ingest.py` ganha `--source-dir` repetível (2ª fonte = fichas do theuniverse); `deploy.sh` espelha theuniverse em `/opt/theuniverse`.
 - Guardião escreveu o plano (doc, em casa); execução roda no `nexus-labsobral` (regra de ouro: não codar fora).
@@ -246,7 +246,7 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 - Criado `ESTADO.md` — handoff auto-suficiente (frentes abertas + ponto de retomada). Não exige colar nada da sessão anterior.
 - Hook SessionStart injeta o `ESTADO.md` no contexto automaticamente toda nova sessão.
 - `CLAUDE.md` aponta `ESTADO.md` como leitura inicial. Memórias atualizadas (project + user Sol).
-- Spec do **Hermes-Oráculo** (subsistema A) materializado em `docs/ecossistema/A-hermes-oraculo-spec.md` (design aprovado, pronto pra plano).
+- Spec do **Obi-Wan** (subsistema A) materializado em `docs/ecossistema/A-hermes-obi-wan-spec.md` (design aprovado, pronto pra plano).
 
 ## 2026-06-19 — Censo automático
 
@@ -257,9 +257,9 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 ### ⭐ A Frota batizada — estrelas do universo
 - Taxonomia: **servidor = estrela** (a fornalha que sustenta os planetas em deploy). Registrada em `docs/ecossistema/frota.md` (sem IPs).
-- VPS: **Polaris** (Oráculo/Hermes), **Antares** (Zion/prod Sobral), **Sirius** (Hostinger/SCM).
+- VPS: **Polaris** (Obi-Wan/Hermes), **Antares** (Zion/prod Sobral), **Sirius** (Hostinger/SCM).
 - Aglomerado do Lab: **Atlas** (arquivos), **Mira** (Zabbix), **Rigel**, **Bellatrix**, **Vega** (3 últimas: função a confirmar).
-- Fronteira: **Heliopausa** (pfsense). Designações Matrix anteriores (Zion/Oráculo) preservadas como histórico.
+- Fronteira: **Heliopausa** (pfsense). Designações Matrix anteriores (Zion/Obi-Wan) preservadas como histórico.
 
 ## 2026-06-18
 
@@ -267,7 +267,7 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 - Definida a constituição macro SOL ↔ Universo em 3 camadas (`docs/ecossistema/00-blueprint.md`).
 - Princípio fundador: **separar transporte de inteligência** (federação, não anexação — ADR-001 the-matrix).
 - Regra de ouro: compartilha-se trilho + protocolo + gravidade; **nunca o motor**. Satélite orbita um planeta só.
-- Decomposição em 4 subsistemas (A→B→C→D). Motor Hermes (RAG/MCP na VPS Oráculo) será o núcleo. Próximo ciclo: subsistema A (Hermes-Bot).
+- Decomposição em 4 subsistemas (A→B→C→D). Motor Hermes (RAG/MCP na VPS Obi-Wan) será o núcleo. Próximo ciclo: subsistema A (Hermes-Bot).
 
 ### 💥 Explosões (deleções)
 - **escalaIA** — esqueleto abandonado (só CLAUDE.md + LICENSE + README, 3KB, parado desde abr/26). Nunca virou código. Decisão do sol: não fazia mais sentido na órbita.
