@@ -1874,6 +1874,41 @@ function _galInitScene(planets){
       });
       _legendEl.appendChild(row);
     });
+    // Separador
+    const _legSep=document.createElement('div');
+    _legSep.style.cssText='height:1px;background:rgba(255,255,255,.06);margin:8px 4px;';
+    _legendEl.appendChild(_legSep);
+    // Entrada Obi-Wan
+    const _obiRow=document.createElement('div');
+    _obiRow.className='leg-row';
+    _obiRow.dataset.id='agnostic-core';
+    _obiRow.style.opacity='.7';
+    _obiRow.style.display='flex';
+    _obiRow.style.alignItems='center';
+    _obiRow.style.justifyContent='space-between';
+    _obiRow.style.padding='3px 6px';
+    _obiRow.style.cursor='pointer';
+    const _obiLabel=document.createElement('span');
+    _obiLabel.className='leg-label';
+    _obiLabel.style.cssText='color:rgba(170,187,210,.55);font-style:italic;font-size:7px;letter-spacing:.28em;';
+    _obiLabel.textContent='Estação Obi-Wan';
+    const _obiDot=document.createElement('div');
+    _obiDot.style.cssText='width:7px;height:7px;border:1px solid rgba(170,187,210,.5);border-radius:1px;background:rgba(136,153,170,.2);flex-shrink:0;';
+    _obiRow.appendChild(_obiLabel);_obiRow.appendChild(_obiDot);
+    _obiRow.addEventListener('mouseenter',()=>_obiRow.style.opacity='1');
+    _obiRow.addEventListener('mouseleave',()=>_obiRow.style.opacity='.7');
+    _obiRow.addEventListener('click',()=>{
+      focusMesh=_obiWanISS;
+      cam.radiusGoal=45;
+      cam.phi=0.4;
+    });
+    _legendEl.appendChild(_obiRow);
+    // Status dinâmico
+    const _obiStatusEl=document.createElement('div');
+    _obiStatusEl.id='leg-obi-status';
+    _obiStatusEl.style.cssText='font-size:7px;letter-spacing:.2em;color:rgba(255,200,80,.35);text-align:right;padding:0 6px 4px;text-transform:uppercase;';
+    _obiStatusEl.textContent='em exílio';
+    _legendEl.appendChild(_obiStatusEl);
   }
 
   buildPlanetMeshes(planets);
@@ -2026,21 +2061,26 @@ function _galInitScene(planets){
     g.userData={id:'agnostic-core',name:'agnostic-core',colorHex:'#aabbcc',cluster:'exílio',status:'active',radius:.9};
     return g;
   }
+  // _obiWanPivot mantido por compatibilidade (não adicionado à cena)
   const _obiWanPivot=new THREE.Object3D();
   _obiWanPivot.setRotationFromEuler(new THREE.Euler(Math.PI/4,Math.random()*Math.PI*2,0));
+  const _OBI_ORBIT=240; // mantido por compatibilidade interna
+  const _OBI_HOME=new THREE.Vector3(80,120,60);
   const _obiWanISS=_buildObiWanISS();
-  const _OBI_ORBIT=240;
-  _obiWanISS.position.set(_OBI_ORBIT,0,0);
-  _obiWanPivot.add(_obiWanISS);
-  scene.add(_obiWanPivot);
-  // trilha orbital — quase invisível
-  {const _oOrbPts=[];for(let i=0;i<=96;i++){const a=i/96*Math.PI*2;_oOrbPts.push(new THREE.Vector3(Math.cos(a)*_OBI_ORBIT,0,Math.sin(a)*_OBI_ORBIT));}const _oOrbL=new THREE.Line(new THREE.BufferGeometry().setFromPoints(_oOrbPts),new THREE.LineBasicMaterial({color:0xaabbcc,transparent:true,opacity:.03}));_oOrbL.rotation.x=Math.PI/4;scene.add(_oOrbL);}
+  _obiWanISS.position.copy(_OBI_HOME);
+  _obiWanISS.scale.setScalar(3.0);
+  _obiWanISS.add(_galGlow(4,0xaabbdd,.45));
+  _obiWanISS.add(_galGlow(9,0x8899aa,.18));
+  _obiWanISS.add(_galGlow(18,0x667788,.06));
+  const _obiLight=new THREE.PointLight(0x8899cc,.8,20);
+  _obiWanISS.add(_obiLight);
+  scene.add(_obiWanISS);
   actualMeshes.push(_obiWanISS);
 
   // ── Sistema 2: Obi-Wan ISS Messenger ──────────────────────────
   const _OBJ_STATE={state:'idle',target:null,message:null,progress:0,
     origin:new THREE.Vector3(),deliveryTimer:0,queue:[],
-    returnOrigin:new THREE.Vector3(),detached:false};
+    returnOrigin:new THREE.Vector3(),detached:false,path:null};
 
   function _qBezier(p0,p1,p2,t){
     const u=1-t;
@@ -2049,6 +2089,24 @@ function _galInitScene(planets){
       u*u*p0.y+2*u*t*p1.y+t*t*p2.y,
       u*u*p0.z+2*u*t*p1.z+t*t*p2.z
     );
+  }
+  function _cubicBezier(p0,p1,p2,p3,t){
+    const u=1-t;
+    return new THREE.Vector3(
+      u*u*u*p0.x+3*u*u*t*p1.x+3*u*t*t*p2.x+t*t*t*p3.x,
+      u*u*u*p0.y+3*u*u*t*p1.y+3*u*t*t*p2.y+t*t*t*p3.y,
+      u*u*u*p0.z+3*u*u*t*p1.z+3*u*t*t*p2.z+t*t*t*p3.z
+    );
+  }
+  function _buildObiPath(origin,targetMesh){
+    const wp=new THREE.Vector3();targetMesh.getWorldPosition(wp);
+    const tR=wp.length();const oR=origin.length();
+    const entryAngle=Math.atan2(wp.z,wp.x);
+    const entry=new THREE.Vector3(Math.cos(entryAngle)*oR,0,Math.sin(entryAngle)*oR);
+    const spiralR=(oR+tR)/2;
+    const spiralAngle=entryAngle+Math.PI*.3;
+    const spiral=new THREE.Vector3(Math.cos(spiralAngle)*spiralR,8,Math.sin(spiralAngle)*spiralR);
+    return{origin,entry,spiral,target:wp};
   }
   function _easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
 
@@ -2065,6 +2123,13 @@ function _galInitScene(planets){
     log.prepend(e);
     while(log.children.length>5)log.removeChild(log.lastChild);
   }
+  function _updateObiLegendStatus(){
+    const _el=document.getElementById('leg-obi-status');
+    if(!_el)return;
+    const _labels={idle:'em exílio',traveling:'em missão',delivering:'entregando',returning:'retornando'};
+    _el.textContent=_labels[_OBJ_STATE.state]||'';
+    _el.style.color=_OBJ_STATE.state==='idle'?'rgba(255,200,80,.35)':'rgba(100,220,255,.7)';
+  }
   function _showMsgToast(msg,planetName){
     const toast=document.getElementById('msg-toast');
     if(!toast)return;
@@ -2078,6 +2143,16 @@ function _galInitScene(planets){
 
   // Trilha de partículas
   const _trailPool=[];
+  let _routeLine=null;
+  function _showRouteLine(path){
+    if(_routeLine){scene.remove(_routeLine);_routeLine=null;}
+    const pts=[];
+    for(let i=0;i<=60;i++){const t=i/60;pts.push(_cubicBezier(path.origin,path.entry,path.spiral,path.target,t));}
+    const geo=new THREE.BufferGeometry().setFromPoints(pts);
+    _routeLine=new THREE.Line(geo,new THREE.LineDashedMaterial({color:0xaabbdd,transparent:true,opacity:.25,dashSize:2,gapSize:2}));
+    _routeLine.computeLineDistances();scene.add(_routeLine);
+  }
+  function _hideRouteLine(){if(_routeLine){scene.remove(_routeLine);_routeLine=null;}}
   function _spawnTrail(pos,type){
     if(Math.random()>.3)return;
     const col=type==='returning'?0x8899cc:0xffffff;
@@ -2122,13 +2197,17 @@ function _galInitScene(planets){
     _showMsgToast(_OBJ_STATE.message,targetMesh.userData.name||targetMesh.userData.id||'');
   }
 
-  // Recolocar ISS no pivô
+  // Recolocar ISS na posição fixa elevada
   function _scene_reattach_iss(){
     if(!_OBJ_STATE.detached)return;
-    scene.remove(_obiWanISS);
-    _obiWanISS.position.set(_OBI_ORBIT,0,0);
-    _obiWanISS.rotation.set(0,0,0);
-    _obiWanPivot.add(_obiWanISS);
+    _obiWanISS.position.copy(_OBI_HOME);
+    _obiWanISS.scale.setScalar(3.0);
+    scene.add(_obiWanISS); // garantir que está na cena
+    _OBJ_STATE.detached=false;
+  }
+  // Posição home da ISS
+  function _obiHomePos(){
+    return _OBI_HOME.clone();
   }
 
   // Processar fila
@@ -2142,14 +2221,12 @@ function _galInitScene(planets){
     _OBJ_STATE.target=targetMesh;
     _OBJ_STATE.message=text;
     _OBJ_STATE.progress=0;
+    _OBJ_STATE.path=null;
+    _hideRouteLine();
     _OBJ_STATE.state='traveling';
-    _obiWanISS.getWorldPosition(_OBJ_STATE.origin);
-    // Desacoplar a ISS do pivô para animar livremente
-    const wp2=new THREE.Vector3();
-    _obiWanISS.getWorldPosition(wp2);
-    _obiWanPivot.remove(_obiWanISS);
-    scene.add(_obiWanISS);
-    _obiWanISS.position.copy(wp2);
+    // ISS já está na cena diretamente (posição fixa) — capturar origem
+    _OBJ_STATE.origin.copy(_obiWanISS.position);
+    _obiWanISS.scale.setScalar(1.5); // menor em viagem — perspectiva de distância
     _OBJ_STATE.detached=true;
     _showObiStatus(`Viajando para ${targetMesh.userData.name||targetMesh.userData.id}...`);
     _showTravelLog(`Obi-Wan partiu em missão → ${targetMesh.userData.name||targetMesh.userData.id}`);
@@ -2166,35 +2243,47 @@ function _galInitScene(planets){
     if(!_obiWanISS)return;
     _updateTrail(dt);
     if(_OBJ_STATE.state==='idle'){
-      if(_OBJ_STATE.detached){
-        _scene_reattach_iss();
-        _OBJ_STATE.detached=false;
-      }
+      // Flutuação suave — "respiração" da estação
+      const _t=_simYear*1200;
+      _obiWanISS.position.set(
+        _OBI_HOME.x+Math.sin(_t*.08)*3,
+        _OBI_HOME.y+Math.sin(_t*.05)*2,
+        _OBI_HOME.z+Math.cos(_t*.07)*3
+      );
+      _obiWanISS.lookAt(0,0,0);
+      _obiWanISS.rotateY(dt*.05);
       return;
     }
     switch(_OBJ_STATE.state){
       case 'traveling':{
-        _OBJ_STATE.progress+=dt*0.15;
+        // Calcular path na primeira entrada
+        if(!_OBJ_STATE.path){
+          _OBJ_STATE.path=_buildObiPath(_OBJ_STATE.origin.clone(),_OBJ_STATE.target);
+          _showRouteLine(_OBJ_STATE.path);
+        }
+        _OBJ_STATE.progress+=dt*0.08; // ~12s de viagem
         if(_OBJ_STATE.progress>=1){
           _OBJ_STATE.progress=1;_OBJ_STATE.state='delivering';
-          _OBJ_STATE.deliveryTimer=0;
+          _OBJ_STATE.deliveryTimer=0;_OBJ_STATE.path=null;
+          _hideRouteLine();
           _showObiStatus(`Entregando em ${_OBJ_STATE.target.userData.name||_OBJ_STATE.target.userData.id}`);
           _triggerDelivery(_OBJ_STATE.target);
           return;
         }
         const t=_easeIO(_OBJ_STATE.progress);
-        const wp=new THREE.Vector3();
-        _OBJ_STATE.target.getWorldPosition(wp);
-        const mid=new THREE.Vector3().addVectors(_OBJ_STATE.origin,wp).multiplyScalar(.5);
-        const orbitAvg=(_OBJ_STATE.origin.length()+wp.length())/2;
-        mid.normalize().multiplyScalar(orbitAvg*1.25);
-        const pos=_qBezier(_OBJ_STATE.origin,mid,wp,t);
+        const {origin,entry,spiral,target}=_OBJ_STATE.path;
+        const pos=_cubicBezier(origin,entry,spiral,target,t);
         _obiWanISS.position.copy(pos);
-        if(_OBJ_STATE.progress>.02){
-          const ahead=_qBezier(_OBJ_STATE.origin,mid,wp,Math.min(_OBJ_STATE.progress+.02,1));
+        if(_OBJ_STATE.progress<.98){
+          const ahead=_cubicBezier(origin,entry,spiral,target,Math.min(_easeIO(_OBJ_STATE.progress+.02),1));
           _obiWanISS.lookAt(ahead);
         }
-        _spawnTrail(pos.clone(),'traveling');
+        // Rastro
+        if(Math.random()<.6)_spawnTrail(pos.clone(),'traveling');
+        // Status na legenda com progresso
+        const _pct=Math.round(_OBJ_STATE.progress*100);
+        const _sel=document.getElementById('leg-obi-status');
+        if(_sel)_sel.textContent=`em missão ${_pct}%`;
         break;
       }
       case 'delivering':{
@@ -2206,6 +2295,7 @@ function _galInitScene(planets){
         _obiWanISS.position.set(wp.x+Math.cos(ang)*r,wp.y+Math.sin(ang)*.3,wp.z+Math.sin(ang)*r);
         if(_OBJ_STATE.deliveryTimer>=3){
           _OBJ_STATE.state='returning';_OBJ_STATE.progress=0;
+          _hideRouteLine();
           _obiWanISS.getWorldPosition(_OBJ_STATE.returnOrigin);
           _showObiStatus('Retornando ao exílio...');
           _showTravelLog('Mensagem entregue — Obi-Wan retorna');
@@ -2217,14 +2307,13 @@ function _galInitScene(planets){
         if(_OBJ_STATE.progress>=1){
           _OBJ_STATE.progress=0;_OBJ_STATE.state='idle';
           _scene_reattach_iss();
-          _OBJ_STATE.detached=false;
+          _obiWanISS.scale.setScalar(3.0);
           _processNextMsg();
           return;
         }
         const t=_easeIO(_OBJ_STATE.progress);
-        // home = posição atual da ISS no pivô (em coordenadas mundiais)
-        const _homeTemp=new THREE.Vector3();
-        _obiWanPivot.localToWorld(_homeTemp.set(_OBI_ORBIT,0,0));
+        // home = posição fixa elevada
+        const _homeTemp=_OBI_HOME.clone();
         const mid2=new THREE.Vector3().addVectors(_OBJ_STATE.returnOrigin,_homeTemp).multiplyScalar(.5);
         const orbitAvg2=(_OBJ_STATE.returnOrigin.length()+_homeTemp.length())/2;
         mid2.normalize().multiplyScalar(orbitAvg2*1.2);
@@ -2436,12 +2525,10 @@ function _galInitScene(planets){
       // buraco negro — disco gira
       _bhRef.disk1.rotation.z+=dt*.12;
       _bhRef.disk2.rotation.z-=dt*.08;
-      // Obi-Wan — órbita solar lentíssima (só quando não desacoplado para missão)
-      if(!_OBJ_STATE.detached){
-        _obiWanPivot.rotateOnWorldAxis(new THREE.Vector3(0,1,0),dt*.0008*_galState.speed);
-        _obiWanISS.rotation.y+=dt*.08*_galState.speed; // painéis giram
-      }
+      // Obi-Wan — painéis giram levemente (posição fixa, sem pivô orbital)
+      // A flutuação de idle é tratada em _updateObiWan
       _updateObiWan(dt);
+      _updateObiLegendStatus();
       // decay zone — órbitas ao redor do BH
       const _allDecay=[
         ..._ARCHIVED.map((p,i)=>({data:p,mesh:_decayMeshes[i]})),
