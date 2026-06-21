@@ -1621,7 +1621,7 @@ function _galInitScene(planets){
       if(parentName===_GAL_BINARY_KEY){
         // Sistema binário: usar PIVÔ para órbita correta
         const pivot=new THREE.Object3D();
-        pivot.setRotationFromEuler(new THREE.Euler(moon.name==='the-matrix'?0.22:0.35, savedAngles[moon.name+'_m'], 0));
+        pivot.setRotationFromEuler(new THREE.Euler(moon.name==='the-matrix'?0.75:-0.55, savedAngles[moon.name+'_m'], 0,'YXZ'));
         moonMesh.position.set(mOrbit,0,0);
         pivot.add(moonMesh);
         parentGroup.add(pivot);
@@ -1631,7 +1631,7 @@ function _galInitScene(planets){
         trail.rotation.x=moon.name==='the-matrix'?0.22:0.35;
         parentGroup.add(trail);
         const orbitSpd=moon.name==='the-matrix'?1.4:0.9;
-        moonPivots.push({pivot,moonMesh,orbitSpeed:orbitSpd,selfRotSpeed:.3});
+        moonPivots.push({pivot,moonMesh,orbitSpeed:orbitSpd,selfRotSpeed:.3,name:moon.name});
         actualMeshes.push(moonMesh);
       } else {
         // Luas normais
@@ -1678,13 +1678,29 @@ function _galInitScene(planets){
           _sphMesh.userData={...moon,_isMoon:true,colorHex:'#'+new THREE.Color(mCol).getHexString(),cluster:_GAL_CLUSTER_MAP[parentGroup.userData._galRi||0]||'inner'};
           _finalMesh=_sphMesh;
         }
-        const moonGroup=new THREE.Group();
-        moonGroup.userData={...moon,_isMoon:true,_moonOrbit:mOrbit};
-        moonGroup.position.set(Math.cos(savedAngles[moon.name+'_m'])*mOrbit,0,Math.sin(savedAngles[moon.name+'_m'])*mOrbit);
-        moonGroup.add(_finalMesh);
-        if(moon.name!=='luna-base'){moonGroup.add(_galGlow(mRadius*5,mCol,.42));moonGroup.add(_galGlow(mRadius*9,mCol,.18));}
-        parentGroup.add(moonGroup);
-        moonGroups.push(moonGroup);
+        if(moon.name==='luna-base'){
+          // luna-base usa pivot para órbita inclinada (evita plano eclíptico)
+          const _lbPivot=new THREE.Object3D();
+          _lbPivot.setRotationFromEuler(new THREE.Euler(0.65, savedAngles[moon.name+'_m'], 0,'YXZ'));
+          _finalMesh.position.set(mOrbit,0,0);
+          _lbPivot.add(_finalMesh);
+          // trilha orbital tênue
+          const _lbPts=[];for(let i=0;i<=64;i++){const a=i/64*Math.PI*2;_lbPts.push(new THREE.Vector3(Math.cos(a)*mOrbit,0,Math.sin(a)*mOrbit));}
+          const _lbTrail=new THREE.Line(new THREE.BufferGeometry().setFromPoints(_lbPts),new THREE.LineBasicMaterial({color:0x00ff88,transparent:true,opacity:.05}));
+          _lbTrail.rotation.x=0.65;
+          _lbPivot.add(_lbTrail);
+          parentGroup.add(_lbPivot);
+          moonPivots.push({pivot:_lbPivot,moonMesh:_finalMesh,orbitSpeed:.8,selfRotSpeed:.4,name:'luna-base'});
+        } else {
+          const moonGroup=new THREE.Group();
+          moonGroup.userData={...moon,_isMoon:true,_moonOrbit:mOrbit};
+          moonGroup.position.set(Math.cos(savedAngles[moon.name+'_m'])*mOrbit,0,Math.sin(savedAngles[moon.name+'_m'])*mOrbit);
+          moonGroup.add(_finalMesh);
+          moonGroup.add(_galGlow(mRadius*5,mCol,.42));
+          moonGroup.add(_galGlow(mRadius*9,mCol,.18));
+          parentGroup.add(moonGroup);
+          moonGroups.push(moonGroup);
+        }
         actualMeshes.push(_finalMesh);
       }
     });
@@ -2038,9 +2054,20 @@ function _galInitScene(planets){
         } else if(mm){mm.rotateOnAxis(_localY,dt*.8);}
       });
       // pivôs de luas binárias
-      moonPivots.forEach(({pivot,moonMesh,orbitSpeed,selfRotSpeed})=>{
+      moonPivots.forEach(({pivot,moonMesh,orbitSpeed,selfRotSpeed,name})=>{
         pivot.rotateOnWorldAxis(new THREE.Vector3(0,1,0),orbitSpeed*dt);
-        moonMesh.rotateOnAxis(_localY,selfRotSpeed*dt);
+        if(name==='luna-base'){
+          moonMesh.rotation.y+=selfRotSpeed*dt;
+          moonMesh.rotation.x+=.08*dt;
+          moonMesh.rotation.z=Math.sin(_simYear*1200*.3)*.05;
+          moonMesh.children?.forEach(child=>{
+            if(!child.userData?.statusLight)return;
+            const blink=Math.sin(_simYear*1200*3+child.userData.blinkOffset);
+            if(child.material?.color)child.material.color.setHex(blink>.3?child.userData.blinkCol:0x111111);
+          });
+        } else {
+          moonMesh.rotateOnAxis(_localY,selfRotSpeed*dt);
+        }
       });
       // buraco negro — disco gira
       _bhRef.disk1.rotation.z+=dt*.12;
