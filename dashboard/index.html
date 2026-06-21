@@ -111,40 +111,43 @@ body{background:#030308;color:#c8ceff;font-family:'Courier New',monospace;height
   100%{filter:brightness(1)}
 }
 
-/* tooltip */
-#tip{position:fixed;z-index:100;background:rgba(8,8,22,.96);border:1px solid rgba(100,120,255,.25);border-radius:8px;padding:10px 14px;font-size:11.5px;pointer-events:none;opacity:0;transition:opacity .12s;max-width:210px;backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(0,0,0,.6)}
+/* tooltip — hover mínimo */
+#tip{position:fixed;z-index:100;display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.78);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 14px;pointer-events:none;opacity:0;transition:opacity .15s;backdrop-filter:blur(8px);white-space:nowrap}
 #tip.on{opacity:1}
-.tn{font-size:13px;font-weight:bold;color:#fff;margin-bottom:5px}
-.tr{color:#6070a0;margin-bottom:2px}.tr b{color:#c8ceff;font-weight:normal}
-.th{font-size:11px;margin-bottom:4px}
-.th.healthy{color:#00ff88}.th.warning{color:#ffcc00}.th.alert{color:#ff4466}.th.dormant{color:#3a3a60}
+.tt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tt-name{font-size:12px;color:rgba(255,255,255,.85);letter-spacing:.15em}
+.tt-cluster{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.3em;text-transform:uppercase;margin-top:2px}
 
-/* side panel */
-#panel{position:fixed;top:0;right:0;width:270px;height:100%;z-index:200;background:rgba(5,5,16,.96);border-left:1px solid rgba(100,120,255,.18);backdrop-filter:blur(18px);box-shadow:-12px 0 40px rgba(0,0,0,.7);transform:translateX(110%);transition:transform .32s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;overflow:hidden}
-#panel.open{transform:translateX(0)}
-body.panel-open #wrap{padding-right:270px}
+/* side card */
+#panel{position:fixed;top:50%;right:0;width:320px;max-height:80vh;overflow-y:auto;z-index:200;background:rgba(4,4,12,.92);border-left:1px solid rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);border-radius:12px 0 0 12px;backdrop-filter:blur(16px);box-shadow:-8px 0 40px rgba(0,0,0,.8);transform:translateY(-50%) translateX(100%);transition:transform .35s cubic-bezier(.25,.46,.45,.94)}
+#panel.open{transform:translateY(-50%) translateX(0)}
+body.panel-open #wrap{padding-right:0}
 #panel-handle{display:none}
-#panel-close{position:absolute;top:14px;right:16px;background:none;border:none;color:#4a5080;font-size:18px;cursor:pointer;line-height:1;transition:color .15s;z-index:5}
-#panel-close:hover{color:#c8ceff}
-#panel-body{flex:1;overflow-y:auto;padding:0 0 24px}
-#panel-body::-webkit-scrollbar{width:4px}
-#panel-body::-webkit-scrollbar-thumb{background:rgba(100,120,200,.25);border-radius:2px}
+#panel::-webkit-scrollbar{width:3px}
+#panel::-webkit-scrollbar-track{background:transparent}
+#panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+#panel-close{position:absolute;top:16px;right:16px;background:none;border:none;color:rgba(255,255,255,.22);font-size:14px;cursor:pointer;line-height:1;transition:color .2s;z-index:5;padding:2px 6px}
+#panel-close:hover{color:rgba(255,255,255,.7)}
+#panel-body{padding:28px 24px 28px}
+/* hide canvas in galactic mode */
+#planet-wrap{display:none}
 
-/* planet canvas in panel */
-#planet-wrap{position:relative;width:100%;background:#000008;overflow:hidden;flex-shrink:0}
-#planet-wrap canvas{display:block;width:100%;height:auto}
-
-/* panel text */
-.pn-info{padding:16px 22px}
-.pn-name{font-size:15px;font-weight:bold;color:#fff;letter-spacing:1px;margin-bottom:5px;word-break:break-all}
-.pn-health{font-size:11px;margin-bottom:14px}
-.pn-health.healthy{color:#00ff88}.pn-health.warning{color:#ffcc00}.pn-health.alert{color:#ff4466}.pn-health.dormant{color:#3a3a60}
-.pn-sep{border:none;border-top:1px solid rgba(100,120,200,.1);margin:12px 0}
-.pn-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;font-size:12px}
-.pn-label{color:#4a5888}.pn-val{color:#c8ceff;text-align:right}
-.pn-stars{color:#7b8cff;letter-spacing:1px}
-.pn-gh{display:block;margin-top:16px;text-align:center;padding:9px;border:1px solid rgba(100,120,255,.25);border-radius:6px;color:#7b8cff;font-size:11px;text-decoration:none;transition:background .15s,color .15s;letter-spacing:1px}
-.pn-gh:hover{background:rgba(100,120,255,.12);color:#c8ceff}
+/* card content */
+.card-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}
+.card-dot{width:14px;height:14px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.card-name{font-family:Georgia,serif;font-size:18px;color:rgba(255,255,255,.88);letter-spacing:.03em;line-height:1.2;word-break:break-all}
+.card-cluster{font-size:9px;letter-spacing:.35em;color:rgba(255,255,255,.22);text-transform:uppercase;margin-top:4px}
+.card-status{display:flex;align-items:center;gap:7px;margin-bottom:16px}
+.status-dot{width:6px;height:6px;border-radius:50%;animation:pulse-status 2s ease-in-out infinite}
+@keyframes pulse-status{0%,100%{opacity:1}50%{opacity:.4}}
+.card-divider{height:1px;background:rgba(255,255,255,.06);margin:16px 0}
+.card-section-title{font-size:9px;letter-spacing:.4em;color:rgba(255,255,255,.2);text-transform:uppercase;margin-bottom:12px}
+.card-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.card-row:last-child{border:none}
+.card-key{font-size:10px;letter-spacing:.15em;color:rgba(255,255,255,.25);text-transform:uppercase}
+.card-val{font-size:12px;color:rgba(255,200,80,.8);letter-spacing:.05em;text-align:right;max-width:190px;word-break:break-word}
+.card-gh-btn{display:block;margin-top:20px;padding:10px 0;text-align:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:rgba(255,255,255,.5);font-size:11px;letter-spacing:.2em;text-decoration:none;transition:background .2s,color .2s;font-family:'Courier New',monospace}
+.card-gh-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85)}
 
 /* bottom bar */
 #bar{position:relative;z-index:10;background:rgba(3,3,8,.88);border-top:1px solid rgba(100,120,200,.12);padding:7px 20px;font-size:11px;backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px;flex-shrink:0;min-height:30px}
@@ -154,20 +157,14 @@ body.panel-open #wrap{padding-right:270px}
 #loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#3a4060;font-size:12px;z-index:50;letter-spacing:2px}
 
 /* ── responsive ── */
-@media(max-width:900px) and (min-width:601px){
-  #panel{width:230px}
-  body.panel-open #wrap{padding-right:230px}
-}
 @media(max-width:600px){
   .stat-hide-sm{display:none}
   #hdr h1{font-size:12px;letter-spacing:2px}
   #stats{gap:10px;font-size:10px}
-  #panel{width:100%;height:60vh;top:auto;bottom:0;right:0;border-left:none;border-top:1px solid rgba(100,120,255,.2);box-shadow:0 -8px 32px rgba(0,0,0,.7);transform:translateY(110%);border-radius:14px 14px 0 0}
+  #panel{width:100%;max-height:65vh;top:auto;bottom:0;right:0;border-left:none;border-top:1px solid rgba(255,255,255,.08);border-radius:14px 14px 0 0;transform:translateY(100%)}
   #panel.open{transform:translateY(0)}
-  body.panel-open #wrap{padding-right:0 !important;padding-bottom:60vh}
-  #panel-handle{display:block;width:36px;height:4px;background:rgba(100,120,200,.3);border-radius:2px;margin:10px auto 4px;flex-shrink:0}
-  #panel-body{padding:0 0 24px}
-  .pn-info{padding:12px 18px}
+  #panel-handle{display:block;width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:10px auto 0;flex-shrink:0}
+  #panel-body{padding:20px 18px 28px}
   #tip{display:none}
   #bar{font-size:10px;padding:5px 14px}
 }
@@ -1023,29 +1020,29 @@ const _GAL_MOON_OF={
 // Ângulo dourado — distribui pontos no círculo sem clustering
 const _GAL_GOLDEN=Math.PI*(3-Math.sqrt(5)); // ≈2.399rad ≈137.5°
 
-// 21 anéis orbitais — cada posição nominal tem um anel específico
+// 21 anéis orbitais — escala logarítmica comprimida (18→182u, era 18→278u)
 const _GAL_RINGS=[
   {orbit: 18, speed:.073},  // 0 — inner / generic
-  {orbit: 28, speed:.058},  // 1 — sigmed / mcp-eventos
-  {orbit: 35, speed:.052},  // 2 — sbrchecks / luna-base
-  {orbit: 48, speed:.044},  // 3 — CertiSYS / supernovas
-  {orbit: 58, speed:.040},  // 4 — sicefsus-sistema
-  {orbit: 72, speed:.036},  // 5 — contabilplus
-  {orbit: 82, speed:.034},  // 6 — FinanceFlow
-  {orbit: 92, speed:.032},  // 7 — hqplus
-  {orbit:104, speed:.030},  // 8 — tokentown
-  {orbit:116, speed:.029},  // 9 — flowdigitalstudio / vibegaminghub
-  {orbit:135, speed:.026},  // 10 — baricentro nexus+sbrgestao
-  {orbit:160, speed:.024},  // 11 — SuperCartola (Júpiter)
-  {orbit:185, speed:.023},  // 12 — centroculturalsbr
-  {orbit:205, speed:.021},  // 13 — AlgodaoAtelie
-  {orbit:215, speed:.021},  // 14 — florianorun
-  {orbit:225, speed:.020},  // 15 — GessoExpress
-  {orbit:237, speed:.020},  // 16 — imersaobitrix24
-  {orbit:248, speed:.019},  // 17 — lp-ellenpedrosa
-  {orbit:258, speed:.019},  // 18 — lp-restauranteflutuante
-  {orbit:268, speed:.019},  // 19 — lpjaraujoinfo
-  {orbit:278, speed:.018},  // 20 — temperodemamae
+  {orbit: 22, speed:.065},  // 1 — sigmed / mcp-eventos
+  {orbit: 30, speed:.056},  // 2 — sbrchecks / luna-base
+  {orbit: 40, speed:.049},  // 3 — CertiSYS / supernovas
+  {orbit: 50, speed:.043},  // 4 — sicefsus-sistema
+  {orbit: 60, speed:.040},  // 5 — contabilplus
+  {orbit: 68, speed:.037},  // 6 — FinanceFlow
+  {orbit: 76, speed:.035},  // 7 — hqplus
+  {orbit: 84, speed:.034},  // 8 — tokentown
+  {orbit: 92, speed:.032},  // 9 — flowdigitalstudio / vibegaminghub
+  {orbit:105, speed:.030},  // 10 — baricentro nexus+sbrgestao
+  {orbit:118, speed:.028},  // 11 — SuperCartola (Júpiter)
+  {orbit:130, speed:.027},  // 12 — centroculturalsbr
+  {orbit:140, speed:.026},  // 13 — AlgodaoAtelie
+  {orbit:146, speed:.025},  // 14 — florianorun
+  {orbit:152, speed:.025},  // 15 — GessoExpress
+  {orbit:158, speed:.024},  // 16 — imersaobitrix24
+  {orbit:164, speed:.024},  // 17 — lp-ellenpedrosa
+  {orbit:170, speed:.023},  // 18 — lp-restauranteflutuante
+  {orbit:176, speed:.023},  // 19 — lpjaraujoinfo
+  {orbit:182, speed:.023},  // 20 — temperodemamae
 ];
 
 // Achatamento polar por tipo de superfície (do guia do dev sênior)
@@ -1057,6 +1054,43 @@ const _galState={speed:1.0,paused:false,atmosphere:true,showOrbits:true};
 // Centro (v=50) = 1×; v=0 = 0.01×; v=100 = 100×
 function _sliderToSpeed(v){return Math.pow(10,(v-50)/30);}
 function _fmtSpeed(v){const s=_sliderToSpeed(v);if(s<0.1)return s.toFixed(3)+'×';if(s<1)return s.toFixed(2)+'×';if(s<10)return s.toFixed(1)+'×';return Math.round(s)+'×';}
+
+// ── cluster por índice de anel ──
+const _GAL_CLUSTER_MAP={
+  0:'inner',1:'sobral-core',2:'sobral-core',
+  3:'gov-público',4:'gov-público',
+  5:'produtos',6:'produtos',7:'produtos',8:'produtos',9:'produtos',
+  10:'sistema binário',11:'super-cartola',12:'sobral-core',
+  13:'landing',14:'landing',15:'landing',16:'landing',
+  17:'landing',18:'landing',19:'landing',20:'landing',
+};
+
+// converte HSL (persona) para hex — usado no card e tooltip
+function _hslToHex(h,s,l){
+  s/=100;l/=100;
+  const a=s*Math.min(l,1-l);
+  const f=n=>{const k=(n+h/30)%12;const c=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*c).toString(16).padStart(2,'0');};
+  return`#${f(0)}${f(8)}${f(4)}`;
+}
+function _galColorHex(p){
+  const pn=_GAL_PERSONA[p.name];
+  return pn?_hslToHex(pn.hue,pn.sat,pn.lit):'#8090c0';
+}
+function _galStatus(p){
+  if(p.bodyType==='supernova')return'supernova';
+  if(p.health==='dormant')return'archived';
+  if(p.health==='alert')return'alert';
+  if((p.daysSincePush||999)<=7)return'recent';
+  return'active';
+}
+// monta userData enriquecido com campos para o card
+function _buildUD(p,ri,orbit,extra){
+  return{...p,_galRi:ri,_galOrbit:orbit,
+    cluster:_GAL_CLUSTER_MAP[ri]||'inner',
+    colorHex:_galColorHex(p),
+    status:_galStatus(p),
+    ...extra};
+}
 
 function _galInitScene(planets){
   const canvas=document.getElementById('gal-canvas');
@@ -1070,7 +1104,7 @@ function _galInitScene(planets){
   const _localY=new THREE.Vector3(0,1,0); // reusado a cada frame
 
   // ── camera orbit ──
-  let sph={th:.3,ph:1.1,r:340},tSph={...sph};
+  let sph={th:.3,ph:1.1,r:260},tSph={...sph};
   let _dragStart={x:0,y:0},_dragged=false,focusGroup=null;
 
   function applyCam(){
@@ -1308,7 +1342,7 @@ function _galInitScene(planets){
 
       if(bt==='satellite'){
         actualMesh=new THREE.Mesh(new THREE.OctahedronGeometry(radius),new THREE.MeshStandardMaterial({color:baseCol,metalness:.8,roughness:.2}));
-        actualMesh.userData={...p,_galRi:ri,_galOrbit:orbit};
+        actualMesh.userData=_buildUD(p,ri,orbit);
 
       } else if(bt==='nebula'){
         const nr=_rng(p.name.charCodeAt(0)||7);
@@ -1321,7 +1355,7 @@ function _galInitScene(planets){
         const ngeo=new THREE.BufferGeometry();ngeo.setAttribute('position',new THREE.BufferAttribute(npos,3));ngeo.setAttribute('color',new THREE.BufferAttribute(ncol,3));
         orbitGroup.add(new THREE.Points(ngeo,new THREE.PointsMaterial({size:0.55,sizeAttenuation:true,vertexColors:true,transparent:true,opacity:.82,depthWrite:false})));
         const nCore=new THREE.Mesh(new THREE.SphereGeometry(radius*.55,16,16),new THREE.MeshBasicMaterial({color:0x9040e0,transparent:true,opacity:.18,depthWrite:false}));
-        nCore.userData={...p,_galRi:ri,_galOrbit:orbit};
+        nCore.userData=_buildUD(p,ri,orbit);
         orbitGroup.add(nCore);
         orbitGroup.add(_galGlow(radius*3.2,0x8030d0,.22));
         orbitGroup.add(_galGlow(radius*5.5,0x5018a0,.08));
@@ -1335,7 +1369,7 @@ function _galInitScene(planets){
       } else {
         const {mesh,dna}=_buildPlanetMesh(p,bt,radius);
         actualMesh=mesh;
-        actualMesh.userData={...p,_galRi:ri,_galOrbit:orbit};
+        actualMesh.userData=_buildUD(p,ri,orbit);
         // anéis de Saturno para planetas com persona.rings=true
         const persona=_GAL_PERSONA[p.name];
         if(persona?.rings){
@@ -1403,7 +1437,7 @@ function _galInitScene(planets){
         const atmCol=_galAtmCol(p);
         const baseCol=_galBaseCol(p);
         const{mesh:actualMesh,dna}=_buildPlanetMesh(p,bt,radius);
-        actualMesh.userData={...p,_inBinary:true,_binaryOffset:side*BINARY_SEP};
+        actualMesh.userData=_buildUD(p,BINARY_RI,BINARY_ORBIT,{_inBinary:true,_binaryOffset:side*BINARY_SEP});
         actualMesh.position.set(side*BINARY_SEP,0,0);
         // anéis de Saturno
         const persona=_GAL_PERSONA[p.name];
@@ -1446,7 +1480,7 @@ function _galInitScene(planets){
         new THREE.SphereGeometry(mRadius,22,22),
         new THREE.MeshStandardMaterial({color:mCol,roughness:.85,metalness:.12,emissive:new THREE.Color(mEmit),emissiveIntensity:.45})
       );
-      moonMesh.userData={...moon,_isMoon:true};
+      moonMesh.userData={...moon,_isMoon:true,cluster:'sistema binário',colorHex:moon.name==='the-matrix'?'#4a6a5a':'#4a5a7a',status:_galStatus(moon)};
       // outline ring — identificável mesmo no escuro
       const mRing=new THREE.Mesh(
         new THREE.RingGeometry(mRadius*1.1,mRadius*1.25,32),
@@ -1469,7 +1503,7 @@ function _galInitScene(planets){
       stGroup.userData={...station,_isStation:true};
       stGroup.position.set(14,0,0);
       const stMesh=new THREE.Mesh(new THREE.CylinderGeometry(1.8,1.8,1.1,6),new THREE.MeshPhongMaterial({color:stCol,emissive:new THREE.Color(stCol).multiplyScalar(.15),shininess:80}));
-      stMesh.userData={...station,_isStation:true};
+      stMesh.userData={...station,_isStation:true,cluster:'gravitação central',colorHex:'#9ab2d0',status:'active'};
       stGroup.add(stMesh);
       stGroup.add(_galGlow(4,stCol,.3));
       scene.add(stGroup);
@@ -1646,7 +1680,7 @@ function _galInitScene(planets){
       _galState.showOrbits=on;
       orbitLines.forEach(l=>{l.visible=on;});
     },
-    resetCam(){Object.assign(tSph,{th:Math.PI/2,ph:.38,r:185});},
+    resetCam(){Object.assign(tSph,{th:Math.PI/2,ph:.38,r:230});},
   };
 }
 
@@ -1735,108 +1769,104 @@ function switchView(v){
 // TOOLTIP
 // ═══════════════════════════════════════════════════════
 const tip=document.getElementById('tip');
-const healthLabel={healthy:'🟢 saudável',warning:'🟡 atenção',alert:'🔴 Estrela da Morte',dormant:'⚫ dormente'};
-const bodyTypeLabel={'station':'🛸 estação espacial','satellite':'🛰 satélite artificial','observatory':'🌙 observatório lunar','supernova':'💥 supernova iminente','nebula':'🌌 nebulosa de ideias'};
+const bodyTypeLabel={'station':'estação espacial','satellite':'satélite','observatory':'observatório','supernova':'supernova','nebula':'nebulosa','moon':'lua'};
 function daysStr(d){
   if(d===999)return'nunca'; if(d===0)return'hoje'; if(d===1)return'ontem'; return`${d}d atrás`;
 }
 function showTip(e,p){
-  const mag='★'.repeat(p.magnitude||1)+'☆'.repeat(5-(p.magnitude||1));
-  const btLabel=bodyTypeLabel[p.bodyType]||'';
-  tip.innerHTML=`
-    <div class="tn">${esc(p.name)}</div>
-    ${btLabel?`<div class="tr" style="color:#8890b0;font-size:10px;margin-bottom:3px">${btLabel}</div>`:''}
-    <div class="th ${p.health}">${healthLabel[p.health]||p.health}</div>
-    <div class="tr">magnitude: <b>${mag}</b></div>
-    <div class="tr">commits: <b>${(p.commits||0).toLocaleString()}</b></div>
-    <div class="tr">último push: <b>${daysStr(p.daysSincePush)}</b></div>
-    <div class="tr">issues: <b>${p.issues}</b></div>
-    ${p.ci?`<div class="tr">CI: <b>${p.ci}</b></div>`:''}
-    <div class="tr" style="margin-top:5px;color:#3a4060;font-size:10px">clique para fixar</div>`;
+  const col=p.colorHex||'#8090c0';
+  const cluster=p.cluster||(bodyTypeLabel[p.bodyType]||'');
+  tip.innerHTML=`<div class="tt-dot" style="background:${col};box-shadow:0 0 6px ${col}99"></div><div><div class="tt-name">${esc(p.name)}</div>${cluster?`<div class="tt-cluster">${cluster}</div>`:''}</div>`;
   tip.classList.add('on'); moveTip(e);
 }
 function moveTip(e){
-  tip.style.left=Math.min(e.clientX+16,innerWidth-225)+'px';
-  tip.style.top=Math.max(4,e.clientY-10)+'px';
+  tip.style.left=Math.min(e.clientX+16,innerWidth-260)+'px';
+  tip.style.top=Math.max(4,e.clientY-8)+'px';
 }
 function hideTip(){tip.classList.remove('on')}
 
 // ═══════════════════════════════════════════════════════
-// SIDE / BOTTOM PANEL
+// SIDE CARD
 // ═══════════════════════════════════════════════════════
 const panel=document.getElementById('panel');
 const panelBody=document.getElementById('panel-body');
 let panelOpen=false, selectedWrapper=null;
 
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const safeHex=c=>/^#[0-9a-fA-F]{3,8}$/.test(c)?c:'#8b949e';
+
+const _CARD_STATUS={
+  active:  {label:'ativo',         color:'#22cc66'},
+  recent:  {label:'push recente',  color:'#88cc22'},
+  supernova:{label:'encerrando',   color:'#ff4400'},
+  archived:{label:'arquivado',     color:'#888866'},
+  alert:   {label:'alerta',        color:'#ff2244'},
+};
+const _SURFACE_LABEL={giant:'Gigante Gasoso',banded:'Anelado',continental:'Continental',rocky:'Rochoso',smooth:'Gasoso'};
+
+function buildCardHTML(p){
+  const col=p.colorHex||'#8090c0';
+  const st=_CARD_STATUS[p.status]||_CARD_STATUS.active;
+  const cluster=p.cluster||'';
+  const persona=_GAL_PERSONA[p.name];
+  const surface=_SURFACE_LABEL[persona?.surface]||(bodyTypeLabel[p.bodyType]||'planeta');
+  const hasRings=!!(persona?.rings);
+  const hasAtm=!(persona?.noAtm);
+  const orbit=p._galOrbit;
+  const lang=p.lang?.name||null;
+  const ghUrl=`https://github.com/paulinett1508-dev/${esc(p.name)}`;
+  return`
+    <div class="card-header">
+      <div class="card-dot" style="background:${col};box-shadow:0 0 12px 4px ${col}44"></div>
+      <div class="card-title-block">
+        <div class="card-name">${esc(p.name)}</div>
+        ${cluster?`<div class="card-cluster">${cluster}</div>`:''}
+      </div>
+    </div>
+    <div class="card-status">
+      <span class="status-dot" style="background:${st.color}"></span>
+      <span style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:${st.color}">${st.label}</span>
+    </div>
+    <div class="card-divider"></div>
+    <div class="card-section">
+      <div class="card-section-title">Características</div>
+      <div class="card-row"><span class="card-key">Tipo</span><span class="card-val">${surface}</span></div>
+      <div class="card-row"><span class="card-key">Anéis</span><span class="card-val">${hasRings?'sim':'não'}</span></div>
+      <div class="card-row"><span class="card-key">Atmosfera</span><span class="card-val">${hasAtm?'presente':'ausente'}</span></div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="card-section">
+      <div class="card-section-title">Repositório</div>
+      <div class="card-row"><span class="card-key">Último push</span><span class="card-val">${daysStr(p.daysSincePush)}</span></div>
+      ${lang?`<div class="card-row"><span class="card-key">Linguagem</span><span class="card-val">${esc(lang)}</span></div>`:''}
+      <div class="card-row"><span class="card-key">Issues</span><span class="card-val">${p.issues||0}</span></div>
+      <div class="card-row"><span class="card-key">Commits</span><span class="card-val">${(p.commits||0).toLocaleString()}</span></div>
+      ${p.ci?`<div class="card-row"><span class="card-key">CI</span><span class="card-val">${esc(p.ci)}</span></div>`:''}
+    </div>
+    ${orbit?`<div class="card-divider"></div>
+    <div class="card-section">
+      <div class="card-section-title">Órbita</div>
+      <div class="card-row"><span class="card-key">Raio</span><span class="card-val">${orbit} u</span></div>
+    </div>`:''}
+    <a class="card-gh-btn" href="${ghUrl}" target="_blank" rel="noopener">Ver no GitHub ↗</a>`;
+}
 
 function openPanel(p,wrapper){
   hideTip();
   if(selectedWrapper)selectedWrapper.classList.remove('selected');
   selectedWrapper=wrapper; if(wrapper) wrapper.classList.add('selected');
 
-  const mag='★'.repeat(p.magnitude||1)+'☆'.repeat(5-(p.magnitude||1));
-  const diskMB=p.diskKB>1024?(p.diskKB/1024).toFixed(1)+' MB':(p.diskKB||0)+' KB';
-  const ghUrl=`https://github.com/paulinett1508-dev/${esc(p.name)}`;
-
-  const langRow=p.lang
-    ?`<div class="pn-row"><span class="pn-label">linguagem</span><span class="pn-val"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${safeHex(p.lang.color)};margin-right:5px;vertical-align:middle"></span>${esc(p.lang.name)}</span></div>`
-    :'';
-  const contrRow=p.contributors>0
-    ?`<div class="pn-row"><span class="pn-label">contribuidores</span><span class="pn-val">${p.contributors|0}</span></div>`
-    :'';
-  let prRow='';
-  if(p.lastPR){
-    const pr=p.lastPR;
-    const prTitle=esc(pr.title.length>30?pr.title.slice(0,28)+'…':pr.title);
-    const prDate=new Date(pr.mergedAt||pr.createdAt);
-    const prAgo=Math.floor((Date.now()-prDate.getTime())/86400000);
-    const prDateStr=prAgo===0?'hoje':prAgo===1?'ontem':`${prAgo}d atrás`;
-    // stateColor is hardcoded, not from API — safe to interpolate directly
-    const stateColor=pr.state==='MERGED'?'#a371f7':pr.state==='OPEN'?'#3fb950':'#f85149';
-    const stateLabel=pr.state==='MERGED'?'merged':pr.state==='OPEN'?'aberto':'fechado';
-    prRow=`<div class="pn-row" style="align-items:flex-start"><span class="pn-label">último PR</span><span class="pn-val" style="max-width:155px;text-align:right"><span style="color:${stateColor};font-size:10px;margin-right:3px">●${stateLabel}</span><br><span style="font-size:10.5px;opacity:.8">${prTitle}</span><br><span style="font-size:10px;color:#4a5888">${prDateStr}</span></span></div>`;
-  }
-
-  const btLabel=bodyTypeLabel[p.bodyType]||'';
-  panelBody.innerHTML=`
-    <div class="pn-info">
-      <div class="pn-name">${esc(p.name)}</div>
-      ${btLabel?`<div style="font-size:10px;color:#6870a8;margin-bottom:4px;letter-spacing:.5px">${btLabel}</div>`:''}
-      <div class="pn-health ${p.health}">${healthLabel[p.health]||p.health}</div>
-      <hr class="pn-sep">
-      <div class="pn-row"><span class="pn-label">magnitude</span><span class="pn-val pn-stars">${mag}</span></div>
-      <div class="pn-row"><span class="pn-label">commits</span><span class="pn-val">${(p.commits||0).toLocaleString()}</span></div>
-      <div class="pn-row"><span class="pn-label">tamanho</span><span class="pn-val">${diskMB}</span></div>
-      ${langRow}${contrRow}
-      <hr class="pn-sep">
-      <div class="pn-row"><span class="pn-label">último push</span><span class="pn-val">${daysStr(p.daysSincePush)}</span></div>
-      <div class="pn-row"><span class="pn-label">issues abertas</span><span class="pn-val">${p.issues}</span></div>
-      ${p.ci?`<div class="pn-row"><span class="pn-label">CI</span><span class="pn-val">${p.ci}</span></div>`:''}
-      ${prRow}
-      <a class="pn-gh" href="${ghUrl}" target="_blank" rel="noopener">↗ abrir no GitHub</a>
-    </div>`;
-
+  panelBody.innerHTML=buildCardHTML(p);
   panel.classList.add('open');
   document.body.classList.add('panel-open');
   panelOpen=true;
-
-  // start planet animation after transition completes
-  setTimeout(()=>{
-    if(currentView==='orbital') resizeOrbit();
-    startPlanetAnim(p);
-  },340);
 }
 
 function closePanel(){
   stopPlanetAnim();
-  document.getElementById('planet-wrap').innerHTML='';
   panel.classList.remove('open');
   document.body.classList.remove('panel-open');
   panelOpen=false;
   if(selectedWrapper){selectedWrapper.classList.remove('selected');selectedWrapper=null;}
-  setTimeout(()=>{ if(currentView==='orbital') resizeOrbit(); },340);
 }
 
 document.getElementById('panel-close').addEventListener('click',closePanel);
