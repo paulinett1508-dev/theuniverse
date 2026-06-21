@@ -826,8 +826,14 @@ function _initThree(){
 
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,1,8000);
-  camera.position.set(0,252,644); // 21° elevação — 30% mais perto para preencher o monitor
-  camera.lookAt(0,0,0);
+  // distância responsiva: 644 no 16:9 desktop, recua em telas estreitas
+  function _posCamera(){
+    const asp=innerWidth/innerHeight;
+    const d=Math.round(644*Math.max(1,Math.min(2.2,1.45/asp)));
+    camera.position.set(0,d*.358,d*.934); // 21° elevação fixa
+    camera.lookAt(0,0,0);
+  }
+  _posCamera();
 
   scene.add(new THREE.PointLight(0xffeebb,3.5,2800,1.5));
   scene.add(new THREE.AmbientLight(0x0a1428,0.7));
@@ -997,7 +1003,7 @@ function _initThree(){
     canvas.style.cursor=raycaster.intersectObjects(getMeshes()).length?'pointer':'default';
   });
 
-  _thr={renderer,scene,camera,buildPlanets,step};
+  _thr={renderer,scene,camera,buildPlanets,step,posCamera:_posCamera};
 }
 
 function buildGalactic(planets){
@@ -1015,6 +1021,7 @@ function resizeGalactic(){
   _thr.camera.aspect=innerWidth/innerHeight;
   _thr.camera.updateProjectionMatrix();
   _thr.renderer.setSize(innerWidth,innerHeight);
+  _thr.posCamera();
 }
 
 function switchView(v){
