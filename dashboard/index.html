@@ -195,8 +195,8 @@ body.panel-open #wrap{padding-right:270px}
 .body-satellite .pd{clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);border-radius:0;background:linear-gradient(135deg,#b8c8d8 0%,#6888a0 100%);box-shadow:0 0 5px rgba(160,185,210,.5)}
 .body-supernova .pd{background:radial-gradient(circle,#fff8e0 0%,#ffa000 40%,#ff3300 80%,#660000 100%)!important;box-shadow:0 0 12px #ff8800,0 0 36px rgba(255,100,0,.7),0 0 70px rgba(255,40,0,.3)!important;animation:supernova-throb .65s ease-in-out infinite!important}
 @keyframes supernova-throb{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.6);filter:brightness(1.8)}}
-.body-toys .pd{background:linear-gradient(135deg,#ff70b8 0%,#a070ff 50%,#70b8ff 100%);box-shadow:0 0 10px #a070ff,0 0 26px rgba(160,112,255,.38);animation:toys-shift 4s ease-in-out infinite}
-@keyframes toys-shift{0%,100%{filter:hue-rotate(0deg) brightness(1)}50%{filter:hue-rotate(45deg) brightness(1.25)}}
+.body-nebula .pd{background:radial-gradient(circle,rgba(180,100,255,.55) 0%,rgba(100,60,200,.35) 45%,rgba(40,20,80,.18) 100%);box-shadow:0 0 14px rgba(160,80,255,.6),0 0 36px rgba(120,60,220,.3);animation:nebula-pulse 5s ease-in-out infinite;border-radius:50%;filter:blur(.5px)}
+@keyframes nebula-pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.18);opacity:1}}
 .body-observatory .pd{background:#c8d8f8!important;box-shadow:0 0 6px rgba(180,200,255,.7),0 0 18px rgba(140,170,255,.35)!important}
 .body-observatory .pd::before{content:'';position:absolute;width:calc(100% + 14px);height:calc(100% + 14px);border:1px dashed rgba(180,210,255,.45);border-radius:50%;top:-7px;left:-7px;pointer-events:none}
 </style>
@@ -402,7 +402,7 @@ const THEMES={
     bands:['#400000','#8a1800','#c03000','#e06000','#ff9000','#d05000','#a02000','#6a1000'],
     atm:'rgba(255,120,0,.45)', glow:'#ff8800',
   },
-  toys:{
+  nebula:{
     base:['#2a0a40','#6020c0','#c060ff'],
     bands:['#3a1060','#8030e0','#6020c0','#a040f0','#4a1880','#9038d8','#5018a0','#7828c8'],
     atm:'rgba(180,100,255,.25)', glow:'#c060ff',
@@ -588,7 +588,7 @@ function drawPlanet(pc,W,H,planet,seed,rot,hasRings){
   const cx=W/2, cy=H/2;
   const R=Math.min(W,H)*(hasRings?.30:.38);
   const bt=planet.bodyType||'planet';
-  const thKey=bt==='station'?'station':bt==='satellite'?'satellite':bt==='supernova'?'supernova':bt==='toys'?'toys':bt==='observatory'?'observatory':planet.health;
+  const thKey=bt==='station'?'station':bt==='satellite'?'satellite':bt==='supernova'?'supernova':bt==='nebula'?'nebula':bt==='observatory'?'observatory':planet.health;
   const th=THEMES[thKey]||THEMES.dormant;
 
   // ── atmosphere glow ──
@@ -812,7 +812,7 @@ function _galBaseCol(p){
   if(bt==='station')     return 0x5080b0;
   if(bt==='satellite')   return 0x8090a8;
   if(bt==='supernova')   return 0xff4400;
-  if(bt==='toys')        return 0xa050e0;
+  if(bt==='nebula')        return 0xa050e0;
   if(bt==='observatory') return 0x6090e0;
   const h=p.health;
   if(h==='alert')        return 0xcc2233;
@@ -824,7 +824,7 @@ function _galAtmCol(p){
   const bt=p.bodyType;
   if(bt==='satellite')   return null;
   if(bt==='supernova')   return '#ff8800';
-  if(bt==='toys')        return '#c060ff';
+  if(bt==='nebula')        return '#c060ff';
   if(bt==='station')     return '#6090e0';
   if(bt==='observatory') return '#88aaff';
   const h=p.health;
@@ -838,7 +838,7 @@ function _galRadius(p){
   if(bt==='station')     return 1.8;
   if(bt==='satellite')   return 1.0;
   if(bt==='supernova')   return 2.2;
-  if(bt==='toys')        return 2.0;
+  if(bt==='nebula')        return 2.0;
   if(bt==='observatory') return 1.4;
   return 0.6+((p.magnitude||3)/5)*1.2;
 }
@@ -994,13 +994,11 @@ function _galInitScene(planets){
   // ── planets ──
   const planetMeshes=[];
   const atmospheres=[];
-  const toysMeshes=[];
 
   function buildPlanetMeshes(pList){
     planetMeshes.forEach(m=>scene.remove(m));
     planetMeshes.length=0;
     atmospheres.length=0;
-    toysMeshes.length=0;
 
     const station=pList.find(p=>p.bodyType==='station');
     const orbital=pList.filter(p=>p.bodyType!=='station');
@@ -1027,18 +1025,28 @@ function _galInitScene(planets){
 
         if(bt==='satellite'){
           mesh=new THREE.Mesh(new THREE.OctahedronGeometry(radius),new THREE.MeshStandardMaterial({color:baseCol,metalness:.8,roughness:.2}));
-        } else if(bt==='toys'){
-          const toyCanvas=document.createElement('canvas');toyCanvas.width=256;toyCanvas.height=128;
-          const toyCtx=toyCanvas.getContext('2d');
-          const toyTex=new THREE.CanvasTexture(toyCanvas);toyTex.wrapS=THREE.RepeatWrapping;
-          mesh=new THREE.Mesh(new THREE.SphereGeometry(radius,40,40),new THREE.MeshStandardMaterial({map:toyTex,roughness:.7,metalness:.05}));
-          mesh.userData.toyCanvas=toyCanvas;mesh.userData.toyCtx=toyCtx;mesh.userData.toyTex=toyTex;
-          toysMeshes.push(mesh);
-          // rings for toys (like Saturn)
-          const rGeo=new THREE.RingGeometry(radius*1.35,radius*2.7,120);
-          const uvs=rGeo.attributes.uv,posA=rGeo.attributes.position;
-          for(let k=0;k<posA.count;k++){const x=posA.getX(k),z=posA.getZ(k),d=Math.sqrt(x*x+z*z),t=(d-radius*1.35)/(radius*2.7-radius*1.35);uvs.setXY(k,t,.5);}
-          mesh.add(new THREE.Mesh(rGeo,new THREE.MeshBasicMaterial({map:_galSaturnRingTex(),side:THREE.DoubleSide,transparent:true,opacity:.7,depthWrite:false})));
+        } else if(bt==='nebula'){
+          // nuvem de partículas — sem forma sólida, matéria-prima não condensada
+          const group=new THREE.Group();
+          const nr=_rng(p.name.charCodeAt(0)||7);
+          const N=320,pos=new Float32Array(N*3),col=new Float32Array(N*3);
+          for(let k=0;k<N;k++){
+            const d=radius*(0.5+nr()*1.2),th2=nr()*Math.PI*2,ph2=Math.acos(2*nr()-1);
+            pos[k*3]=d*Math.sin(ph2)*Math.cos(th2);pos[k*3+1]=d*Math.sin(ph2)*Math.sin(th2);pos[k*3+2]=d*Math.cos(ph2);
+            const br=.4+nr()*.6;col[k*3]=.55*br;col[k*3+1]=.25*br;col[k*3+2]=br;
+          }
+          const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+          group.add(new THREE.Points(geo,new THREE.PointsMaterial({size:0.55,sizeAttenuation:true,vertexColors:true,transparent:true,opacity:.82,depthWrite:false})));
+          // núcleo difuso central
+          group.add(new THREE.Mesh(new THREE.SphereGeometry(radius*.55,16,16),new THREE.MeshBasicMaterial({color:0x9040e0,transparent:true,opacity:.18,depthWrite:false})));
+          group.add(_galGlow(radius*3.2,0x8030d0,.22));
+          group.add(_galGlow(radius*5.5,0x5018a0,.08));
+          mesh=group;
+          mesh.userData={...p,_galRi:ri,_galOrbit:orbit};
+          mesh.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
+          scene.add(mesh);
+          planetMeshes.push(mesh);
+          continue;
         } else {
           const col=new THREE.Color(baseCol);
           const tex=_galCanvasTex(256,(ctx,sz)=>{
@@ -1151,13 +1159,9 @@ function _galInitScene(planets){
       if(p.health==='alert'){mesh.material.emissiveIntensity=.03+.07*Math.abs(Math.sin(t3*3));}
     });
 
-    _galToysHue=(_galToysHue+.5)%360;
-    toysMeshes.forEach(mesh=>{
-      const {toyCtx,toyTex}=mesh.userData;if(!toyCtx)return;
-      const g=toyCtx.createLinearGradient(0,0,256,128);const h=_galToysHue;
-      g.addColorStop(0,`hsl(${h},100%,65%)`);g.addColorStop(.4,`hsl(${(h+60)%360},100%,55%)`);
-      g.addColorStop(.8,`hsl(${(h+140)%360},100%,60%)`);g.addColorStop(1,`hsl(${(h+200)%360},100%,65%)`);
-      toyCtx.fillStyle=g;toyCtx.fillRect(0,0,256,128);toyTex.needsUpdate=true;
+    // nebula: rotação lenta da nuvem de partículas
+    planetMeshes.forEach(mesh=>{
+      if(mesh.userData.bodyType==='nebula') mesh.rotation.y+=.003;
     });
 
     cometAngle+=.002;
@@ -1229,7 +1233,7 @@ function switchView(v){
 // ═══════════════════════════════════════════════════════
 const tip=document.getElementById('tip');
 const healthLabel={healthy:'🟢 saudável',warning:'🟡 atenção',alert:'🔴 Estrela da Morte',dormant:'⚫ dormente'};
-const bodyTypeLabel={'station':'🛸 estação espacial','satellite':'🛰 satélite artificial','observatory':'🌙 observatório lunar','supernova':'💥 supernova iminente','toys':'🎮 planeta toys'};
+const bodyTypeLabel={'station':'🛸 estação espacial','satellite':'🛰 satélite artificial','observatory':'🌙 observatório lunar','supernova':'💥 supernova iminente','nebula':'🌌 nebulosa de ideias'};
 function daysStr(d){
   if(d===999)return'nunca'; if(d===0)return'hoje'; if(d===1)return'ontem'; return`${d}d atrás`;
 }

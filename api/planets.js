@@ -6,7 +6,7 @@ const SPECIAL_BODIES = {
   'luna-base':      'observatory',
   'bolaocopa2026':  'supernova',
   'f1-pulse':       'supernova',
-  'vibegaminghub':  'toys',
+  'vibegaminghub':  'nebula',
 };
 
 const EXCLUDE = new Set([
