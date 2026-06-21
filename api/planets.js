@@ -7,10 +7,11 @@ const SPECIAL_BODIES = {
   'bolaocopa2026':  'supernova',
   'f1-pulse':       'supernova',
   'vibegaminghub':  'nebula',
+  'the-matrix':     'moon',
+  'matrix-core':    'moon',
 };
 
 const EXCLUDE = new Set([
-  'the-matrix', 'matrix-core',
   'baileys-whatsapp-server', 'bitrix-buddy-chat',
   'agnvendas-painelsbr', 'pedidomobile',
   'theuniverse',

@@ -257,9 +257,7 @@ input.gc-range::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9p
     <span class="gc-val" id="gc-speed-val">1×</span>
   </div>
   <div class="gc-row">
-    <span class="gc-lbl">atmosfera</span>
-    <input class="gc-range" type="range" id="gc-atm" min="0" max="2" step="0.05" value="1">
-    <span class="gc-val" id="gc-atm-val">1×</span>
+    <button class="gc-btn gc-tog active" id="gc-atm" title="Mostrar/ocultar atmosferas (A)">🌫 atmosfera</button>
   </div>
   <div class="gc-row">
     <span class="gc-lbl">órbitas</span>
@@ -840,20 +838,23 @@ let _gal=null, _galLastPlanets=null, _galToysHue=0;
 const _ATM_VERT=`varying vec3 vNormal;varying vec3 vViewDir;void main(){vNormal=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);vViewDir=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}`;
 const _ATM_FRAG=`uniform vec3 uColor;uniform float uIntensity;varying vec3 vNormal;varying vec3 vViewDir;void main(){float rim=1.0-abs(dot(vNormal,vViewDir));rim=pow(rim,2.8);gl_FragColor=vec4(uColor,rim*uIntensity);}`;
 
-// DNA única por planeta — cor + tipo de superfície derivados do nome
+// DNA única por planeta — 100% derivada do nome, zero influência de saúde/commits
 function _galPlanetDNA(p){
   let h=0;for(let i=0;i<p.name.length;i++)h=(Math.imul(31,h)+p.name.charCodeAt(i))|0;
   const hue=((h>>>0)%360);
-  const kb=p.diskKB||0,days=p.daysSincePush||999;
-  let surface;
-  if(kb>4000&&days<90)  surface='giant';
-  else if(days<30)       surface='continental';
-  else if(kb>2000)       surface='banded';
-  else if(days>365)      surface='rocky';
-  else                   surface='smooth';
+  // persona tem prioridade total sobre qualquer derivação
+  const persona=_GAL_PERSONA[p.name];
+  function hslHex(hh,s,l){s/=100;l/=100;const a=s*Math.min(l,1-l);const f=n=>{const k=(n+hh/30)%12;const c=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*c)|0;};return(f(0)<<16)|(f(8)<<8)|f(4);}
+  if(persona){
+    const col=hslHex(persona.hue,persona.sat,persona.lit);
+    const tilt=.04+(((h>>>0)%100)/100)*.4;
+    return{col,surface:persona.surface,tilt,hue:persona.hue,seed:(h>>>0)%99999};
+  }
+  // superfície derivada puramente do hash do nome (5 tipos uniformes)
+  const surfaces=['giant','banded','continental','rocky','smooth'];
+  const surface=surfaces[((h>>>0)%5)];
   const satMap={giant:55,continental:62,banded:50,rocky:28,smooth:52};
   const litMap={giant:48,continental:50,banded:44,rocky:33,smooth:52};
-  function hslHex(h,s,l){s/=100;l/=100;const a=s*Math.min(l,1-l);const f=n=>{const k=(n+h/30)%12;const c=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*c)|0;};return(f(0)<<16)|(f(8)<<8)|f(4);}
   const col=hslHex(hue,satMap[surface]||50,litMap[surface]||48);
   const tilt=.05+(((h>>>0)%100)/100)*.55;
   const seed=(h>>>0)%99999;
@@ -885,13 +886,16 @@ function _galAtmCol(p){
   return `hsl(${hue},70%,72%)`;
 }
 function _galRadius(p){
+  // persona pode definir tamanho absoluto
+  if(_GAL_PERSONA[p.name]?.radius) return _GAL_PERSONA[p.name].radius;
   const bt=p.bodyType;
   if(bt==='station')     return 1.8;
   if(bt==='satellite')   return 1.0;
+  if(bt==='moon')        return 0.65;
   if(bt==='supernova')   return 2.2;
-  if(bt==='nebula')        return 2.0;
+  if(bt==='nebula')      return 2.0;
   if(bt==='observatory') return 1.4;
-  return 0.6+((p.magnitude||3)/5)*1.2;
+  return 0.7+((p.magnitude||3)/5)*1.4;
 }
 
 // seeded RNG helper
@@ -918,28 +922,67 @@ function _galMakeAtm(radius,hexColor,intensity){
   return new THREE.Mesh(new THREE.SphereGeometry(radius*1.18,32,32),mat);
 }
 
-function _galSaturnRingTex(){
+function _galSaturnRingTex(ringHue=45){
+  // converte hue+variações para rgb para poder variar pelo planeta
+  function h2rgb(h,s,l){s/=100;l/=100;const a=s*Math.min(l,1-l);const f=n=>{const k=(n+h/30)%12;const c=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*c)|0;};return[f(0),f(8),f(4)];}
+  const [r1,g1,b1]=h2rgb(ringHue,70,55);
+  const [r2,g2,b2]=h2rgb(ringHue+12,60,42);
+  const [r3,g3,b3]=h2rgb(ringHue-8,80,62);
   return _galCanvasTex(512,(ctx,sz)=>{
     const g=ctx.createLinearGradient(0,0,sz,0);
-    g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.05,'rgba(180,160,100,.12)');
-    g.addColorStop(.15,'rgba(210,185,130,.55)');g.addColorStop(.28,'rgba(165,145,95,.60)');
-    g.addColorStop(.42,'rgba(130,110,72,.22)');g.addColorStop(.50,'rgba(200,175,120,.45)');
-    g.addColorStop(.62,'rgba(160,140,95,.30)');g.addColorStop(.85,'rgba(90,78,50,.04)');
+    g.addColorStop(0,'rgba(0,0,0,0)');
+    g.addColorStop(.05,`rgba(${r3},${g3},${b3},.10)`);
+    g.addColorStop(.15,`rgba(${r1},${g1},${b1},.60)`);
+    g.addColorStop(.28,`rgba(${r2},${g2},${b2},.65)`);
+    g.addColorStop(.40,`rgba(${r3},${g3},${b3},.20)`);
+    g.addColorStop(.50,`rgba(${r1},${g1},${b1},.50)`);
+    g.addColorStop(.65,`rgba(${r2},${g2},${b2},.28)`);
+    g.addColorStop(.85,`rgba(${r3},${g3},${b3},.04)`);
     g.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=g;ctx.fillRect(0,0,sz,sz);
   });
 }
 
-const _GAL_RINGS=[{orbit:35,speed:.26},{orbit:58,speed:.165},{orbit:85,speed:.105},{orbit:118,speed:.067}];
+// ── Identidade única por planeta — cores e superfície fixas por nome ──
+const _GAL_PERSONA={
+  'nexus-labsobral':     {surface:'banded', hue:44,  sat:82, lit:56, radius:5.5, rings:true,  ringHue:40,  ringAlpha:.90},
+  'sbrgestao':           {surface:'banded', hue:197, sat:68, lit:57, radius:5.0, rings:true,  ringHue:192, ringAlpha:.80},
+  'supercartolamanager': {surface:'giant',  hue:28,  sat:85, lit:48, radius:4.5, rings:false},
+  'luna-base':           {surface:'rocky',  hue:218, sat:22, lit:72, radius:1.8, rings:false},
+  'bolaocopa2026':       {surface:'smooth', hue:335, sat:88, lit:52, radius:2.0, rings:false},
+  'f1-pulse':            {surface:'smooth', hue:350, sat:92, lit:48, radius:2.0, rings:false},
+};
+
+// Anel forçado (0=35, 1=58, 2=85, 3=118) — nexus+sbrgestao lado a lado no anel 1
+const _GAL_FORCED_RING={
+  'nexus-labsobral':     1,
+  'sbrgestao':           1,
+  'supercartolamanager': 0,
+};
+// Ângulo inicial forçado — nexus e sbrgestao lado a lado (~22° de distância)
+const _GAL_FORCED_ANGLE={
+  'nexus-labsobral':     1.60,
+  'sbrgestao':           1.98,
+  'supercartolamanager': 0.80,
+};
+
+// Luas: nome → nome do planeta-pai
+const _GAL_MOON_OF={
+  'the-matrix':  'sbrgestao',
+  'matrix-core': 'nexus-labsobral',
+};
+
+const _GAL_RINGS=[{orbit:35,speed:.052},{orbit:58,speed:.033},{orbit:85,speed:.021},{orbit:118,speed:.0134}];
 
 // Achatamento polar por tipo de superfície (do guia do dev sênior)
 const _GAL_OB={giant:.065,banded:.035,continental:.015,smooth:.008,rocky:.003};
 
 // Estado central — fonte de verdade para controles UI
-const _galState={speed:1.0,paused:false,atmosphere:1.0,showOrbits:true};
+const _galState={speed:1.0,paused:false,atmosphere:true,showOrbits:true};
 
-function _sliderToSpeed(v){return v===0?0:Math.pow(10,(v/100)*3);}
-function _fmtSpeed(v){if(v===0)return'0×';if(v<2)return v.toFixed(2)+'×';if(v<10)return v.toFixed(1)+'×';if(v<100)return Math.round(v)+'×';return(v/1000).toFixed(1)+'k×';}
+// Centro (v=50) = 1×; v=0 = 0.01×; v=100 = 100×
+function _sliderToSpeed(v){return Math.pow(10,(v-50)/30);}
+function _fmtSpeed(v){const s=_sliderToSpeed(v);if(s<0.1)return s.toFixed(3)+'×';if(s<1)return s.toFixed(2)+'×';if(s<10)return s.toFixed(1)+'×';return Math.round(s)+'×';}
 
 function _galInitScene(planets){
   const canvas=document.getElementById('gal-canvas');
@@ -1063,146 +1106,222 @@ function _galInitScene(planets){
   })();
 
   // ── planets ──
-  // planetGroups: orbit groups (posição, userData)
-  // actualMeshes: renderables reais (raycaster)
-  const planetGroups=[];
-  const actualMeshes=[];
-  const atmospheres=[];
+  const planetGroups=[];   // orbit groups
+  const actualMeshes=[];   // raycaster targets
+  const atmospheres=[];    // atmosphere meshes (toggle visibility)
+  const moonGroups=[];     // moon local-orbit groups
+  const parentGroupMap={}; // name → orbitGroup (para parenting de luas)
+
+  // ── helper: constrói mesh de planeta sólido ──
+  function _buildPlanetMesh(p,bt,radius){
+    const dna=_galPlanetDNA(p);
+    const col=new THREE.Color(bt==='supernova'?0xff4400:bt==='observatory'?0x6090e0:dna.col);
+    const sr=_rng(dna.seed);
+    const tex=_galCanvasTex(256,(ctx,sz)=>{
+      const g=ctx.createRadialGradient(sz*.38,sz*.32,0,sz/2,sz/2,sz*.62);
+      const lc=col.clone().lerp(new THREE.Color(0xffffff),.28);
+      const dc=col.clone().lerp(new THREE.Color(0x000000),.5);
+      g.addColorStop(0,`#${lc.getHexString()}`);g.addColorStop(.55,`#${col.getHexString()}`);g.addColorStop(1,`#${dc.getHexString()}`);
+      ctx.fillStyle=g;ctx.fillRect(0,0,sz,sz);
+      if(bt==='supernova'){
+        for(let k=0;k<9;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,18+sr()*38);rg.addColorStop(0,'rgba(255,255,180,.55)');rg.addColorStop(1,'rgba(255,100,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-60,y-60,120,120);}
+      } else if(bt==='observatory'){
+        for(let k=0;k<6;k++){const x=sr()*sz,y=sr()*sz,cr=8+sr()*22,cg=ctx.createRadialGradient(x,y,0,x,y,cr);cg.addColorStop(0,'rgba(180,210,255,.18)');cg.addColorStop(1,'rgba(0,0,30,.08)');ctx.fillStyle=cg;ctx.beginPath();ctx.arc(x,y,cr,0,Math.PI*2);ctx.fill();}
+      } else if(dna.surface==='giant'||dna.surface==='banded'){
+        // bandas horizontais com contraste mais dramático
+        const nBands=dna.surface==='giant'?12:9;
+        for(let kb=0;kb<nBands;kb++){
+          const ypos=(kb/nBands)*sz;
+          const darkness=sr()>.45?0xffffff:0x000000;
+          const strength=.15+sr()*.35;
+          const bc=col.clone().lerp(new THREE.Color(darkness),strength);
+          ctx.fillStyle=`rgba(${Math.round(bc.r*255)},${Math.round(bc.g*255)},${Math.round(bc.b*255)},.55)`;
+          ctx.fillRect(0,ypos,sz,sz*(.025+sr()*.06));
+        }
+        // tempestade (spot único para giant — tipo Grande Mancha Vermelha)
+        if(dna.surface==='giant'){
+          const sx=sz*.35,sy=sz*.55,sw=sz*.22,sh=sz*.10;
+          const sg=ctx.createRadialGradient(sx,sy,0,sx,sy,sw);
+          sg.addColorStop(0,'rgba(220,120,60,.72)');sg.addColorStop(.5,'rgba(180,80,40,.45)');sg.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle=sg;ctx.save();ctx.beginPath();ctx.ellipse(sx,sy,sw,sh,-.2,0,Math.PI*2);ctx.fill();ctx.restore();
+        }
+      } else if(dna.surface==='continental'){
+        for(let k=0;k<6;k++){
+          const x=sr()*sz,y=sr()*sz,a=sr()*Math.PI*2,w=18+sr()*48,h2=10+sr()*28;
+          const cg=ctx.createRadialGradient(x,y,0,x,y,Math.max(w,h2));
+          cg.addColorStop(0,`rgba(${Math.round(lc.r*255)},${Math.round(lc.g*255)},${Math.round(lc.b*255)},.52)`);
+          cg.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle=cg;ctx.save();ctx.beginPath();ctx.ellipse(x,y,w,h2,a,0,Math.PI*2);ctx.fill();ctx.restore();
+        }
+      } else if(dna.surface==='rocky'){
+        for(let k=0;k<11;k++){
+          const x=sr()*sz,y=sr()*sz,cr=3+sr()*14;
+          const cg=ctx.createRadialGradient(x,y,0,x,y,cr);
+          cg.addColorStop(0,'rgba(0,0,0,.55)');cg.addColorStop(.65,'rgba(0,0,0,.15)');cg.addColorStop(1,'rgba(255,255,255,.04)');
+          ctx.fillStyle=cg;ctx.fillRect(x-cr*1.6,y-cr*1.6,cr*3.2,cr*3.2);
+        }
+      } else {
+        for(let k=0;k<4;k++){
+          const x=sr()*sz,y=sr()*sz,cg=ctx.createRadialGradient(x,y,0,x,y,25+sr()*55);
+          cg.addColorStop(0,'rgba(255,255,255,.09)');cg.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle=cg;ctx.fillRect(x-85,y-85,170,170);
+        }
+      }
+      // saúde afeta APENAS glow externo, não a textura
+    });
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(radius,40,40),new THREE.MeshStandardMaterial({
+      map:tex,roughness:.82,metalness:.03,
+      emissive:new THREE.Color(bt==='supernova'?0xff4400:dna.col),
+      emissiveIntensity:bt==='supernova'?.5:.03
+    }));
+    mesh.rotation.z=dna.tilt;
+    const ob=_GAL_OB[dna.surface]||0;
+    if(ob>0) mesh.scale.y=1-ob;
+    return{mesh,dna};
+  }
+
+  // ── helper: constrói e registra um orbit group ──
+  function _addOrbitGroup(p,ri,ang,orbit){
+    const orbitGroup=new THREE.Group();
+    orbitGroup.userData={...p,_galRi:ri,_galOrbit:orbit};
+    orbitGroup.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
+    return orbitGroup;
+  }
 
   function buildPlanetMeshes(pList){
     planetGroups.forEach(g=>scene.remove(g));
     planetGroups.length=0;
     actualMeshes.length=0;
     atmospheres.length=0;
+    moonGroups.length=0;
+    Object.keys(parentGroupMap).forEach(k=>delete parentGroupMap[k]);
 
     const station=pList.find(p=>p.bodyType==='station');
-    const orbital=pList.filter(p=>p.bodyType!=='station');
-    const sorted=[...orbital].sort((a,b)=>a.daysSincePush-b.daysSincePush);
+    const allOrbital=pList.filter(p=>p.bodyType!=='station');
+    // separar luas das planetas normais
+    const moonList=allOrbital.filter(p=>_GAL_MOON_OF[p.name]);
+    const orbital=allOrbital.filter(p=>!_GAL_MOON_OF[p.name]);
+
+    // planetas com anel forçado e planetas normais
+    const forcedPlanets=orbital.filter(p=>_GAL_FORCED_RING[p.name]!==undefined);
+    const normalOrbital=orbital.filter(p=>_GAL_FORCED_RING[p.name]===undefined);
+
+    // distribuir planetas normais pelos 4 anéis
+    const sorted=[...normalOrbital].sort((a,b)=>a.daysSincePush-b.daysSincePush);
     const satIdx=sorted.findIndex(p=>p.bodyType==='satellite');
     if(satIdx>0){const[s]=sorted.splice(satIdx,1);sorted.unshift(s);}
     const total=sorted.length;
     const splits=[Math.round(total*.18),Math.round(total*.26),Math.round(total*.30)];
-    splits.push(total-splits[0]-splits[1]-splits[2]);
+    splits.push(Math.max(0,total-splits[0]-splits[1]-splits[2]));
 
-    let pi=0;
-    for(let ri=0;ri<_GAL_RINGS.length;ri++){
-      const count=splits[ri];
-      for(let j=0;j<count&&pi<sorted.length;j++,pi++){
-        const p=sorted[pi];
-        if(savedAngles[p.name]===undefined) savedAngles[p.name]=(j/count)*Math.PI*2;
-        const bt=p.bodyType||'planet';
-        const baseCol=_galBaseCol(p);
-        const atmCol=_galAtmCol(p);
-        const radius=_galRadius(p);
-        const ang=savedAngles[p.name];
-        const orbit=_GAL_RINGS[ri].orbit;
-        // ── orbit group: move na órbita, carrega userData ──
-        const orbitGroup=new THREE.Group();
-        orbitGroup.userData={...p,_galRi:ri,_galOrbit:orbit};
-        orbitGroup.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
+    // ── função interna que constrói um planeta e adiciona à cena ──
+    function addPlanet(p,ri,totalInRing,jInRing){
+      const bt=p.bodyType||'planet';
+      const baseCol=_galBaseCol(p);
+      const atmCol=_galAtmCol(p);
+      const radius=_galRadius(p);
+      if(savedAngles[p.name]===undefined) savedAngles[p.name]=(jInRing/Math.max(1,totalInRing))*Math.PI*2;
+      const ang=savedAngles[p.name];
+      const orbit=_GAL_RINGS[ri].orbit;
+      const orbitGroup=_addOrbitGroup(p,ri,ang,orbit);
+      let actualMesh;
 
-        let actualMesh; // renderable real (raycaster)
+      if(bt==='satellite'){
+        actualMesh=new THREE.Mesh(new THREE.OctahedronGeometry(radius),new THREE.MeshStandardMaterial({color:baseCol,metalness:.8,roughness:.2}));
+        actualMesh.userData={...p,_galRi:ri,_galOrbit:orbit};
 
-        if(bt==='satellite'){
-          actualMesh=new THREE.Mesh(new THREE.OctahedronGeometry(radius),new THREE.MeshStandardMaterial({color:baseCol,metalness:.8,roughness:.2}));
-          actualMesh.userData={...p,_galRi:ri,_galOrbit:orbit};
-
-        } else if(bt==='nebula'){
-          // nuvem de partículas — orbit group direto, sem mesh sólido
-          const nr=_rng(p.name.charCodeAt(0)||7);
-          const N=320,npos=new Float32Array(N*3),ncol=new Float32Array(N*3);
-          for(let k=0;k<N;k++){
-            const d=radius*(0.5+nr()*1.2),th2=nr()*Math.PI*2,ph2=Math.acos(2*nr()-1);
-            npos[k*3]=d*Math.sin(ph2)*Math.cos(th2);npos[k*3+1]=d*Math.sin(ph2)*Math.sin(th2);npos[k*3+2]=d*Math.cos(ph2);
-            const br=.4+nr()*.6;ncol[k*3]=.55*br;ncol[k*3+1]=.25*br;ncol[k*3+2]=br;
-          }
-          const ngeo=new THREE.BufferGeometry();ngeo.setAttribute('position',new THREE.BufferAttribute(npos,3));ngeo.setAttribute('color',new THREE.BufferAttribute(ncol,3));
-          orbitGroup.add(new THREE.Points(ngeo,new THREE.PointsMaterial({size:0.55,sizeAttenuation:true,vertexColors:true,transparent:true,opacity:.82,depthWrite:false})));
-          const nCore=new THREE.Mesh(new THREE.SphereGeometry(radius*.55,16,16),new THREE.MeshBasicMaterial({color:0x9040e0,transparent:true,opacity:.18,depthWrite:false}));
-          nCore.userData={...p,_galRi:ri,_galOrbit:orbit};
-          orbitGroup.add(nCore);
-          orbitGroup.add(_galGlow(radius*3.2,0x8030d0,.22));
-          orbitGroup.add(_galGlow(radius*5.5,0x5018a0,.08));
-          actualMesh=nCore; // proxy para raycaster
-          scene.add(orbitGroup);
-          planetGroups.push(orbitGroup);
-          actualMeshes.push(actualMesh);
-          continue;
-
-        } else {
-          const dna=_galPlanetDNA(p);
-          const col=new THREE.Color(bt==='supernova'?0xff4400:bt==='observatory'?0x6090e0:dna.col);
-          const sr=_rng(dna.seed);
-          const tex=_galCanvasTex(256,(ctx,sz)=>{
-            const g=ctx.createRadialGradient(sz*.38,sz*.32,0,sz/2,sz/2,sz*.62);
-            const lc=col.clone().lerp(new THREE.Color(0xffffff),.28);
-            const dc=col.clone().lerp(new THREE.Color(0x000000),.5);
-            g.addColorStop(0,`#${lc.getHexString()}`);g.addColorStop(.55,`#${col.getHexString()}`);g.addColorStop(1,`#${dc.getHexString()}`);
-            ctx.fillStyle=g;ctx.fillRect(0,0,sz,sz);
-            if(bt==='supernova'){
-              for(let k=0;k<9;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,18+sr()*38);rg.addColorStop(0,'rgba(255,255,180,.55)');rg.addColorStop(1,'rgba(255,100,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-60,y-60,120,120);}
-            } else if(bt==='observatory'){
-              for(let k=0;k<6;k++){const x=sr()*sz,y=sr()*sz,cr=8+sr()*22,cg=ctx.createRadialGradient(x,y,0,x,y,cr);cg.addColorStop(0,'rgba(180,210,255,.18)');cg.addColorStop(1,'rgba(0,0,30,.08)');ctx.fillStyle=cg;ctx.beginPath();ctx.arc(x,y,cr,0,Math.PI*2);ctx.fill();}
-            } else if(dna.surface==='giant'||dna.surface==='banded'){
-              [.10,.20,.30,.40,.50,.60,.70,.80,.88].forEach(y=>{
-                const bc=col.clone().lerp(new THREE.Color(sr()>.5?0xffffff:0x000000),.12+sr()*.22);
-                ctx.fillStyle=`rgba(${Math.round(bc.r*255)},${Math.round(bc.g*255)},${Math.round(bc.b*255)},.38)`;
-                ctx.fillRect(0,y*sz,sz,sz*(.03+sr()*.045));
-              });
-              for(let k=0;k<3;k++){const x=sr()*sz,y=sr()*sz;ctx.save();ctx.globalAlpha=.12;ctx.beginPath();ctx.ellipse(x,y,40+sr()*60,8+sr()*12,0,0,Math.PI*2);ctx.fillStyle=`#${lc.getHexString()}`;ctx.fill();ctx.restore();}
-            } else if(dna.surface==='continental'){
-              for(let k=0;k<6;k++){
-                const x=sr()*sz,y=sr()*sz,a=sr()*Math.PI*2,w=18+sr()*48,h2=10+sr()*28;
-                const cg=ctx.createRadialGradient(x,y,0,x,y,Math.max(w,h2));
-                cg.addColorStop(0,`rgba(${Math.round(lc.r*255)},${Math.round(lc.g*255)},${Math.round(lc.b*255)},.52)`);
-                cg.addColorStop(1,'rgba(0,0,0,0)');
-                ctx.fillStyle=cg;ctx.save();ctx.beginPath();ctx.ellipse(x,y,w,h2,a,0,Math.PI*2);ctx.fill();ctx.restore();
-              }
-            } else if(dna.surface==='rocky'){
-              for(let k=0;k<9;k++){
-                const x=sr()*sz,y=sr()*sz,cr=3+sr()*13;
-                const cg=ctx.createRadialGradient(x,y,0,x,y,cr);
-                cg.addColorStop(0,'rgba(0,0,0,.45)');cg.addColorStop(.65,'rgba(0,0,0,.12)');cg.addColorStop(1,'rgba(255,255,255,.04)');
-                ctx.fillStyle=cg;ctx.fillRect(x-cr*1.6,y-cr*1.6,cr*3.2,cr*3.2);
-              }
-            } else {
-              for(let k=0;k<4;k++){
-                const x=sr()*sz,y=sr()*sz,cg=ctx.createRadialGradient(x,y,0,x,y,25+sr()*55);
-                cg.addColorStop(0,'rgba(255,255,255,.07)');cg.addColorStop(1,'rgba(0,0,0,0)');
-                ctx.fillStyle=cg;ctx.fillRect(x-85,y-85,170,170);
-              }
-            }
-            if(p.health==='alert'){for(let k=0;k<5;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,10+sr()*18);rg.addColorStop(0,'rgba(255,130,20,.5)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-30,y-30,60,60);}}
-            else if(p.health==='warning'){for(let k=0;k<3;k++){const x=sr()*sz,y=sr()*sz,rg=ctx.createRadialGradient(x,y,0,x,y,14+sr()*22);rg.addColorStop(0,'rgba(255,220,40,.25)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(x-38,y-38,76,76);}}
-          });
-          actualMesh=new THREE.Mesh(new THREE.SphereGeometry(radius,40,40),new THREE.MeshStandardMaterial({
-            map:tex,roughness:.82,metalness:.03,
-            emissive:new THREE.Color(bt==='supernova'?0xff4400:dna.col),
-            emissiveIntensity:bt==='supernova'?.5:.03
-          }));
-          // inclinação axial no MESH (não no group) — group orbita reto
-          actualMesh.rotation.z=dna.tilt;
-          // achatamento polar: aplicado ao eixo Y do mesh
-          const ob=_GAL_OB[dna.surface]||0;
-          if(ob>0) actualMesh.scale.y=1-ob;
-          actualMesh.userData={...p,_galRi:ri,_galOrbit:orbit};
+      } else if(bt==='nebula'){
+        const nr=_rng(p.name.charCodeAt(0)||7);
+        const N=320,npos=new Float32Array(N*3),ncol=new Float32Array(N*3);
+        for(let k=0;k<N;k++){
+          const d=radius*(0.5+nr()*1.2),th2=nr()*Math.PI*2,ph2=Math.acos(2*nr()-1);
+          npos[k*3]=d*Math.sin(ph2)*Math.cos(th2);npos[k*3+1]=d*Math.sin(ph2)*Math.sin(th2);npos[k*3+2]=d*Math.cos(ph2);
+          const br=.4+nr()*.6;ncol[k*3]=.55*br;ncol[k*3+1]=.25*br;ncol[k*3+2]=br;
         }
-
-        orbitGroup.add(actualMesh);
-        // atmosfera é filha do mesh (rota/inclina junto)
-        if(atmCol){const atm=_galMakeAtm(radius,atmCol,1.0);actualMesh.add(atm);atmospheres.push(atm);}
-        // glows no group (não giram com o mesh)
-        orbitGroup.add(_galGlow(radius*2.5,baseCol,.12));
-        if(p.health==='alert')  orbitGroup.add(_galGlow(radius*3.5,0xff2200,.22));
-        if(p.health==='warning')orbitGroup.add(_galGlow(radius*3.0,0xffaa00,.16));
-
+        const ngeo=new THREE.BufferGeometry();ngeo.setAttribute('position',new THREE.BufferAttribute(npos,3));ngeo.setAttribute('color',new THREE.BufferAttribute(ncol,3));
+        orbitGroup.add(new THREE.Points(ngeo,new THREE.PointsMaterial({size:0.55,sizeAttenuation:true,vertexColors:true,transparent:true,opacity:.82,depthWrite:false})));
+        const nCore=new THREE.Mesh(new THREE.SphereGeometry(radius*.55,16,16),new THREE.MeshBasicMaterial({color:0x9040e0,transparent:true,opacity:.18,depthWrite:false}));
+        nCore.userData={...p,_galRi:ri,_galOrbit:orbit};
+        orbitGroup.add(nCore);
+        orbitGroup.add(_galGlow(radius*3.2,0x8030d0,.22));
+        orbitGroup.add(_galGlow(radius*5.5,0x5018a0,.08));
+        actualMesh=nCore;
         scene.add(orbitGroup);
         planetGroups.push(orbitGroup);
         actualMeshes.push(actualMesh);
+        parentGroupMap[p.name]=orbitGroup;
+        return;
+
+      } else {
+        const {mesh,dna}=_buildPlanetMesh(p,bt,radius);
+        actualMesh=mesh;
+        actualMesh.userData={...p,_galRi:ri,_galOrbit:orbit};
+        // anéis de Saturno para planetas com persona.rings=true
+        const persona=_GAL_PERSONA[p.name];
+        if(persona?.rings){
+          const ringTex=_galSaturnRingTex(persona.ringHue||45);
+          const ringMesh=new THREE.Mesh(
+            new THREE.RingGeometry(radius*1.35,radius*2.6,96),
+            new THREE.MeshBasicMaterial({map:ringTex,side:THREE.DoubleSide,transparent:true,opacity:persona.ringAlpha||.85,depthWrite:false})
+          );
+          ringMesh.rotation.x=Math.PI*.5+dna.tilt*.4;
+          actualMesh.add(ringMesh);
+        }
       }
+
+      orbitGroup.add(actualMesh);
+      if(atmCol){const atm=_galMakeAtm(radius,atmCol,1.0);actualMesh.add(atm);atmospheres.push(atm);}
+      orbitGroup.add(_galGlow(radius*2.5,baseCol,.12));
+      if(p.health==='alert')  orbitGroup.add(_galGlow(radius*3.5,0xff2200,.22));
+      if(p.health==='warning')orbitGroup.add(_galGlow(radius*3.0,0xffaa00,.16));
+
+      scene.add(orbitGroup);
+      planetGroups.push(orbitGroup);
+      actualMeshes.push(actualMesh);
+      parentGroupMap[p.name]=orbitGroup;
     }
 
-    // station — também usa group para consistência
+    // planetas normais distribuídos
+    let pi=0;
+    for(let ri=0;ri<_GAL_RINGS.length;ri++){
+      const count=splits[ri];
+      for(let j=0;j<count&&pi<sorted.length;j++,pi++) addPlanet(sorted[pi],ri,count,j);
+    }
+
+    // planetas com anel forçado (nexus, sbrgestao, supercartolamanager)
+    forcedPlanets.forEach(p=>{
+      const ri=_GAL_FORCED_RING[p.name];
+      if(_GAL_FORCED_ANGLE[p.name]!==undefined) savedAngles[p.name]=_GAL_FORCED_ANGLE[p.name];
+      addPlanet(p,ri,1,0);
+    });
+
+    // luas — parenteadas ao grupo do planeta-pai
+    moonList.forEach(moon=>{
+      const parentName=_GAL_MOON_OF[moon.name];
+      const parentGroup=parentGroupMap[parentName];
+      if(!parentGroup)return; // pai não encontrado (pode não estar na lista)
+      const mRadius=_galRadius(moon);
+      const parentData=parentGroup.userData;
+      const parentRadius=_galRadius(parentData)||2;
+      const mOrbit=parentRadius*3.5+5;
+      if(savedAngles[moon.name+'_m']===undefined) savedAngles[moon.name+'_m']=Math.PI*(moon.name.length%10)/5;
+      const mAng=savedAngles[moon.name+'_m'];
+      const moonGroup=new THREE.Group();
+      moonGroup.userData={...moon,_isMoon:true,_moonOrbit:mOrbit};
+      moonGroup.position.set(Math.cos(mAng)*mOrbit,0,Math.sin(mAng)*mOrbit);
+      const moonMesh=new THREE.Mesh(
+        new THREE.SphereGeometry(mRadius,22,22),
+        new THREE.MeshStandardMaterial({color:0x1a2030,roughness:.95,metalness:.05,emissive:new THREE.Color(0x080c18),emissiveIntensity:.4})
+      );
+      moonMesh.userData={...moon,_isMoon:true};
+      moonGroup.add(moonMesh);
+      moonGroup.add(_galGlow(mRadius*4,0x2030a0,.15));
+      parentGroup.add(moonGroup);
+      moonGroups.push(moonGroup);
+      actualMeshes.push(moonMesh);
+    });
+
+    // station
     if(station){
       const stCol=_galBaseCol(station);
       const stGroup=new THREE.Group();
@@ -1314,10 +1433,22 @@ function _galInitScene(planets){
       });
     }
 
-    // nebula: nuvem gira sempre (ignoramos pausa pra efeito visual)
+    // nebula: nuvem gira sempre (independente de pausa)
     planetGroups.forEach(group=>{
       if(group.userData.bodyType==='nebula') group.rotation.y+=.001;
     });
+
+    // luas: orbitam o planeta-pai em coordenadas locais
+    if(!_galState.paused){
+      moonGroups.forEach(mg=>{
+        const r=mg.userData._moonOrbit||8;
+        savedAngles[mg.userData.name+'_m']=(savedAngles[mg.userData.name+'_m']||0)+0.06*dt;
+        const a=savedAngles[mg.userData.name+'_m'];
+        mg.position.set(Math.cos(a)*r,0,Math.sin(a)*r);
+        const mm=mg.children[0];
+        if(mm)mm.rotateOnAxis(_localY,dt*0.8);
+      });
+    }
 
     cometAngle+=dt*.2||.0004;
     cometGroup.position.set(Math.cos(cometAngle)*160,Math.sin(cometAngle*.4)*22,Math.sin(cometAngle)*65);
@@ -1344,7 +1475,7 @@ function _galInitScene(planets){
     stop(){if(animId3){cancelAnimationFrame(animId3);animId3=null;}},
     resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);},
     rebuild(pList){this.stop();buildPlanetMeshes(pList);this.start();},
-    updateAtm(v){atmospheres.forEach(a=>{if(a.material.uniforms?.uIntensity)a.material.uniforms.uIntensity.value=v;});},
+    updateAtm(on){atmospheres.forEach(a=>{a.visible=on;});},
     togglePause(){
       _galState.paused=!_galState.paused;
       const btn=document.getElementById('gc-pause');
@@ -1355,9 +1486,9 @@ function _galInitScene(planets){
       const lbl=document.getElementById('gc-speed-val');
       if(lbl)lbl.textContent=_fmtSpeed(v);
     },
-    setAtm(v){
-      _galState.atmosphere=v;
-      this.updateAtm(v);
+    setAtm(on){
+      _galState.atmosphere=on;
+      this.updateAtm(on);
     },
     toggleOrbits(on){
       _galState.showOrbits=on;
@@ -1409,18 +1540,20 @@ function switchView(v){
 (function(){
   const pauseBtn=document.getElementById('gc-pause');
   const speedSlider=document.getElementById('gc-speed');
-  const atmSlider=document.getElementById('gc-atm');
+  const atmBtn=document.getElementById('gc-atm');
   const orbitsBtn=document.getElementById('gc-orbits');
 
   if(pauseBtn) pauseBtn.addEventListener('click',()=>{if(_gal)_gal.togglePause();});
   if(speedSlider){
-    speedSlider.value=50; // inicia no meio (1×)
+    speedSlider.value=50; // centro = 1×
     speedSlider.addEventListener('input',e=>{if(_gal)_gal.setSpeed(+e.target.value);});
   }
-  if(atmSlider){
-    atmSlider.value=100;
-    atmSlider.addEventListener('input',e=>{if(_gal)_gal.setAtm(+e.target.value/100);});
-  }
+  if(atmBtn) atmBtn.addEventListener('click',()=>{
+    if(!_gal)return;
+    _galState.atmosphere=!_galState.atmosphere;
+    _gal.setAtm(_galState.atmosphere);
+    atmBtn.classList.toggle('active',_galState.atmosphere);
+  });
   if(orbitsBtn) orbitsBtn.addEventListener('click',()=>{
     if(!_gal)return;
     _galState.showOrbits=!_galState.showOrbits;
@@ -1440,6 +1573,7 @@ function switchView(v){
       if(speedSlider){speedSlider.value=Math.max(0,+speedSlider.value-5);if(_gal)_gal.setSpeed(+speedSlider.value);}
     }
     else if(e.key==='o'||e.key==='O'){if(orbitsBtn)orbitsBtn.click();}
+    else if(e.key==='a'||e.key==='A'){if(atmBtn)atmBtn.click();}
     else if(e.key==='Escape'){if(_gal){_gal.resetCam();}}
     else if(e.key==='r'||e.key==='R'){if(_gal)_gal.resetCam();}
   });
