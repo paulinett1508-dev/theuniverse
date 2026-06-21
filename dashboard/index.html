@@ -943,29 +943,28 @@ function _initThree(){
   function _mkPlanet(planet,ri){
     const col=_healthCol(planet.health,planet.bodyType);
     const ptype=_classifyPlanetType(planet);
-    const radius=7+((planet.magnitude||3)/5)*10;
+    const radius=4+((planet.magnitude||3)/5)*5;
 
     let geom,mat,tex=null;
     if(ptype==='satellite'){
       geom=new THREE.OctahedronGeometry(radius);
-      mat=new THREE.MeshStandardMaterial({color:col.base,metalness:.8,roughness:.2,emissive:col.emissive,emissiveIntensity:.2});
+      mat=new THREE.MeshStandardMaterial({color:col.base,metalness:.8,roughness:.2,emissive:col.emissive,emissiveIntensity:.15});
     } else {
       geom=new THREE.SphereGeometry(radius,32,16);
       tex=_buildPlanetTex(ptype);
-      const emInt=ptype==='toys'?.0:.04;
-      mat=new THREE.MeshPhongMaterial({map:tex,emissive:col.emissive,emissiveIntensity:emInt,shininess:55,specular:0x334466});
-      if(ptype==='supernova') mat.emissiveIntensity=.9;
+      // saúde como emissive mínimo — textura é a identidade principal
+      const emInt=ptype==='supernova'?.7:ptype==='toys'?.0:.02;
+      mat=new THREE.MeshPhongMaterial({map:tex,emissive:col.emissive,emissiveIntensity:emInt,shininess:60,specular:0x223344});
     }
 
     const mesh=new THREE.Mesh(geom,mat);
-    // glow sprite
-    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:col.glow,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,depthWrite:false}));
-    sp.scale.set(radius*2.2,radius*2.2,1);
-    mesh.add(sp);
-
-    if(ptype==='supernova'){
-      mesh.add(new THREE.Mesh(new THREE.SphereGeometry(radius*2.8,12,12),
-        new THREE.MeshBasicMaterial({color:0xff4400,transparent:true,opacity:.14,side:THREE.BackSide,depthWrite:false})));
+    // anel de alerta: apenas quando warning/alert, sem glow sprite que engole textura
+    if(planet.health==='alert'||planet.health==='warning'){
+      const ringCol=planet.health==='alert'?0xff2200:0xffaa00;
+      mesh.add(new THREE.Mesh(
+        new THREE.TorusGeometry(radius*1.35,.6,6,32),
+        new THREE.MeshBasicMaterial({color:ringCol,transparent:true,opacity:.75,depthWrite:false})
+      ));
     }
     if(ptype==='uranus') mesh.rotation.z=Math.PI*.45; // Urano é deitado
 
