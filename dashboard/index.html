@@ -182,24 +182,9 @@ body.panel-open #wrap{padding-right:270px}
 .vb.active{border-color:rgba(100,120,200,.5);color:#c8ceff;background:rgba(100,120,200,.07)}
 .vb:hover:not(.active){color:#7880a8;border-color:rgba(100,120,200,.3)}
 
-/* ── perspectiva 3D real com preserve-3d ── */
-#wrap.galactic{perspective:680px;perspective-origin:50% 22%}
-/* preserve-3d: cada filho posicionado em profundidade real */
-#wrap.galactic #univ{transform:rotateX(62deg);transform-origin:center 60%;transform-style:preserve-3d}
-/* sem scale manual — perspective cuida da profundidade */
-#wrap.galactic .pw{transform:translate(calc(var(--px) - 50%), calc(var(--py) - 50%));transform-style:preserve-3d}
-/* counter-rotation: .pd encara a câmera → círculo perfeito, não oval */
-#wrap.galactic .pd{transform:rotateX(-62deg)}
-#wrap.galactic .pw:hover .pd,#wrap.galactic .pw:active .pd{transform:rotateX(-62deg) scale(2.2)}
-#wrap.galactic .pw.selected .pd{transform:rotateX(-62deg) scale(1.8)!important}
-/* station/satellite: manter counter-rotate */
-#wrap.galactic .pw.body-station:hover .pd,#wrap.galactic .pw.body-station.selected .pd{transform:rotateX(-62deg) scale(2.2)}
-/* shading esférico: realce especular (luz vindo de cima-esquerda) */
-#wrap.galactic .pd::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse at 33% 27%,rgba(255,255,255,.78) 0%,rgba(255,255,255,.2) 30%,transparent 56%);pointer-events:none;z-index:4}
-/* shading esférico: terminador de sombra (baixo-direita) */
-#wrap.galactic .pd::after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse at 69% 72%,rgba(0,0,0,.62) 0%,rgba(0,0,0,.22) 42%,transparent 66%);pointer-events:none;z-index:3}
-/* sun menor (perspectiva já o amplia) + glow galáxico */
-#wrap.galactic #sun{width:38px;height:38px;box-shadow:0 0 50px #ffd700,0 0 120px rgba(255,175,0,.65),0 0 240px rgba(255,110,0,.35),0 0 460px rgba(255,70,0,.14)}
+/* ── vista galáctica: Three.js toma conta, DOM some ── */
+#three-canvas{position:fixed;top:0;left:0;width:100%;height:100%;display:none;z-index:8;pointer-events:none}
+#wrap.galactic #univ{display:none}
 
 /* ── body types ── */
 .body-station .pd{clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);border-radius:0;background:linear-gradient(135deg,#9ab2d0 0%,#4a6888 55%,#2a3e58 100%);box-shadow:0 0 8px rgba(130,170,220,.7),0 0 24px rgba(70,110,200,.35);animation:station-spin 28s linear infinite}
@@ -217,6 +202,7 @@ body.panel-open #wrap{padding-right:270px}
 <body>
 
 <canvas id="stars"></canvas>
+<canvas id="three-canvas"></canvas>
 
 <div id="hdr">
   <h1>the<em>universe</em> &middot; observatório</h1>
@@ -353,46 +339,7 @@ function drawMeteor(m){
 
 function drawBg(){
   ctx.clearRect(0,0,cnv.width,cnv.height);
-  if(currentView==='galactic'){
-    // glow quente ao redor do sol
-    const gx=cnv.width/2, gy=cnv.height/2;
-    const bg=ctx.createRadialGradient(gx,gy,0,gx,gy,cnv.width*.5);
-    bg.addColorStop(0,'rgba(255,210,80,.06)');
-    bg.addColorStop(.15,'rgba(255,150,40,.03)');
-    bg.addColorStop(.35,'rgba(120,100,200,.015)');
-    bg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=bg; ctx.fillRect(0,0,cnv.width,cnv.height);
-
-    // braços espirais da Via Láctea — nebulosidade difusa
-    const arms=[0, Math.PI*.67, Math.PI*1.33];
-    for(const offset of arms){
-      for(let t=0;t<Math.PI*1.6;t+=0.06){
-        const r=(40+t*58)*Math.min(cnv.width,cnv.height)/900;
-        const angle=t+offset;
-        const nx=gx+r*Math.cos(angle);
-        const ny=gy+r*Math.sin(angle)*0.32; // achatado em Y para perspectiva
-        const spread=6+t*4;
-        const nb=ctx.createRadialGradient(nx,ny,0,nx,ny,spread);
-        nb.addColorStop(0,`rgba(180,160,255,${(0.025-t*0.006).toFixed(3)})`);
-        nb.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.fillStyle=nb; ctx.fillRect(nx-spread,ny-spread,spread*2,spread*2);
-      }
-    }
-
-    // poeiras cósmicas — partículas com deriva lenta
-    for(const d of dustParticles){
-      d.x=(d.x+d.vx+cnv.width)%cnv.width;
-      d.y=(d.y+d.vy+cnv.height)%cnv.height;
-      // densidade maior perto do centro galáctico
-      const dx=d.x-gx, dy=d.y-gy;
-      const distFrac=Math.min(1,Math.hypot(dx,dy)/(cnv.width*.42));
-      const alpha=d.a*(1-distFrac*.6);
-      ctx.beginPath();
-      ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-      ctx.fillStyle=`hsla(${d.hue},${d.sat}%,85%,${alpha.toFixed(3)})`;
-      ctx.fill();
-    }
-  }
+  // em galactic com Three.js ativo, só o starfield de fundo (sem overlay canvas)
 
   // spawn
   if(--cometCd<=0){ comets.push(mkComet()); cometCd=420+Math.random()*480; }
@@ -848,38 +795,204 @@ function resizeOrbit(){
   _placeStation();
 }
 
-// ── PERSPECTIVA 3D (CSS rotateX + perspective no container) ──
-function buildGalactic(planets){
-  buildOrbit(planets); // órbitas circulares normais — CSS faz a projeção 3D
+// ═══════════════════════════════════════════════════════
+// THREE.JS — VISTA GALÁCTICA
+// ═══════════════════════════════════════════════════════
+const THREE_SCALE=480;
+
+function _healthCol(health,bodyType){
+  if(bodyType==='station')    return{base:0x4a6888,emissive:0x1a2a40,glow:0x6090b8};
+  if(bodyType==='satellite')  return{base:0x5a7890,emissive:0x1e2838,glow:0x7090a8};
+  if(bodyType==='supernova')  return{base:0xff6200,emissive:0x661000,glow:0xff9900};
+  if(bodyType==='observatory')return{base:0x8898c8,emissive:0x2a3450,glow:0xaab8e0};
+  if(bodyType==='toys')       return{base:0x8040e0,emissive:0x2a0880,glow:0xb060ff};
+  if(!health||health==='dormant')return{base:0x1e1e38,emissive:0x08081a,glow:0x3a3a60};
+  if(health.startsWith('warning'))return{base:0xcc9900,emissive:0x442a00,glow:0xffcc00};
+  if(health.startsWith('alert'))  return{base:0xcc2233,emissive:0x440010,glow:0xff4466};
+  return{base:0x00aa55,emissive:0x003320,glow:0x00ff88};
 }
 
-function stepGalactic(){
-  const cx=univSz/2, cy=univSz/2;
-  for(let i=0;i<nodes.length;i++){
-    const{el,ri,name}=nodes[i];
-    angles[i]+=RINGS[ri].spd*0.0045;
-    savedAngles[name]=angles[i];
-    const r=RINGS[ri].rf*univSz;
-    const x=cx+r*Math.cos(angles[i]);
-    const y=cy+r*Math.sin(angles[i]); // circular puro — preserve-3d + perspective cuida da projeção
-    const depth=(1+Math.sin(angles[i]))/2; // 0=longe/topo, 1=perto/baixo
-    el.style.setProperty('--px',x+'px');
-    el.style.setProperty('--py',y+'px');
-    // opacidade por profundidade — planetas distantes ficam levemente apagados
-    el.style.opacity=(0.55+0.45*depth).toFixed(3);
+let _thr=null;
+
+function _initThree(){
+  if(_thr||typeof THREE==='undefined') return;
+  const canvas=document.getElementById('three-canvas');
+
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setClearColor(0x000000,0);
+
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,1,6000);
+  camera.position.set(0,600,650);
+  camera.lookAt(0,0,0);
+
+  scene.add(new THREE.PointLight(0xffeebb,3.5,2800,1.5));
+  scene.add(new THREE.AmbientLight(0x0a1428,0.7));
+
+  // sol + camadas de glow
+  scene.add(new THREE.Mesh(
+    new THREE.SphereGeometry(22,32,32),
+    new THREE.MeshStandardMaterial({color:0xffaa22,emissive:0xffcc44,emissiveIntensity:1.5,roughness:.8})
+  ));
+  [[55,0xff9900,.14],[95,0xff6600,.06],[150,0xff3300,.025]].forEach(([r,c,o])=>
+    scene.add(new THREE.Mesh(
+      new THREE.SphereGeometry(r,16,16),
+      new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,side:THREE.BackSide,depthWrite:false})
+    ))
+  );
+
+  // anéis orbitais (torus)
+  RINGS.forEach(ring=>{
+    const m=new THREE.Mesh(
+      new THREE.TorusGeometry(ring.rf*THREE_SCALE,.6,6,180),
+      new THREE.MeshBasicMaterial({color:0x2a3a5a,transparent:true,opacity:.28,depthWrite:false})
+    );
+    m.rotation.x=Math.PI/2;
+    scene.add(m);
+  });
+
+  // poeiras cósmicas — BufferGeometry de pontos
+  const N=3200,dPos=new Float32Array(N*3),dCol=new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const a=Math.random()*Math.PI*2, r=60+Math.pow(Math.random(),.55)*500;
+    dPos[i*3]=Math.cos(a)*r; dPos[i*3+1]=(Math.random()-.5)*28; dPos[i*3+2]=Math.sin(a)*r;
+    const t=Math.random();
+    dCol[i*3]=.5+t*.4; dCol[i*3+1]=.55+t*.15; dCol[i*3+2]=.65+(1-t)*.35;
   }
+  const dustGeo=new THREE.BufferGeometry();
+  dustGeo.setAttribute('position',new THREE.BufferAttribute(dPos,3));
+  dustGeo.setAttribute('color',new THREE.BufferAttribute(dCol,3));
+  const dustPts=new THREE.Points(dustGeo,
+    new THREE.PointsMaterial({size:1.5,vertexColors:true,transparent:true,opacity:.5,depthWrite:false})
+  );
+  scene.add(dustPts);
+
+  const raycaster=new THREE.Raycaster();
+  const mouse=new THREE.Vector2();
+  const byMesh=new WeakMap();
+  let planets3={};
+
+  function _mkPlanet(planet,ri){
+    const col=_healthCol(planet.health,planet.bodyType);
+    const radius=3+((planet.magnitude||3)/5)*9;
+    const mesh=new THREE.Mesh(
+      new THREE.SphereGeometry(radius,32,32),
+      new THREE.MeshPhongMaterial({
+        color:col.base,emissive:col.emissive,emissiveIntensity:.3,shininess:50,specular:0x334466
+      })
+    );
+    mesh.add(new THREE.Mesh(
+      new THREE.SphereGeometry(radius*1.4,16,16),
+      new THREE.MeshBasicMaterial({color:col.glow,transparent:true,opacity:.13,side:THREE.BackSide,depthWrite:false})
+    ));
+    if(planet.bodyType==='supernova'){
+      mesh.add(new THREE.Mesh(
+        new THREE.SphereGeometry(radius*2.3,12,12),
+        new THREE.MeshBasicMaterial({color:0xff4400,transparent:true,opacity:.07,side:THREE.BackSide,depthWrite:false})
+      ));
+      mesh.material.emissiveIntensity=.8;
+    }
+    const r=RINGS[ri].rf*THREE_SCALE;
+    const a=savedAngles[planet.name]||0;
+    mesh.position.set(r*Math.cos(a),0,r*Math.sin(a));
+    scene.add(mesh);
+    planets3[planet.name]={mesh,ri};
+    byMesh.set(mesh,planet);
+  }
+
+  function buildPlanets(planets){
+    Object.values(planets3).forEach(({mesh})=>scene.remove(mesh));
+    planets3={};
+    const station=planets.find(p=>p.bodyType==='station');
+    const orbital=planets.filter(p=>p.bodyType!=='station');
+    const sorted=[...orbital].sort((a,b)=>a.daysSincePush-b.daysSincePush);
+    const si=sorted.findIndex(p=>p.bodyType==='satellite');
+    if(si>0){const[s]=sorted.splice(si,1);sorted.unshift(s);}
+    const t=sorted.length;
+    const sp=[Math.round(t*.18),Math.round(t*.26),Math.round(t*.30)];
+    sp.push(t-sp[0]-sp[1]-sp[2]);
+    let pi=0;
+    for(let ri=0;ri<RINGS.length;ri++)
+      for(let j=0;j<sp[ri]&&pi<sorted.length;j++,pi++) _mkPlanet(sorted[pi],ri);
+    if(station){
+      const col=_healthCol(station.health,'station');
+      const r=4+((station.magnitude||3)/5)*5;
+      const mesh=new THREE.Mesh(
+        new THREE.CylinderGeometry(r,r,r*.6,6),
+        new THREE.MeshPhongMaterial({color:col.base,emissive:col.emissive,emissiveIntensity:.4,shininess:80})
+      );
+      mesh.position.set(0,10,0);
+      scene.add(mesh);
+      planets3[station.name]={mesh,ri:-1};
+      byMesh.set(mesh,station);
+    }
+  }
+
+  function step(){
+    dustPts.rotation.y+=.00015;
+    Object.entries(planets3).forEach(([name,{mesh,ri}])=>{
+      mesh.rotation.y+=.002;
+      if(ri<0){mesh.rotation.y+=.003;return;}
+      savedAngles[name]=(savedAngles[name]||0)+RINGS[ri].spd*.001;
+      const r=RINGS[ri].rf*THREE_SCALE, a=savedAngles[name];
+      mesh.position.set(r*Math.cos(a),0,r*Math.sin(a));
+    });
+    renderer.render(scene,camera);
+  }
+
+  function getMeshes(){return Object.values(planets3).map(p=>p.mesh);}
+
+  canvas.addEventListener('click',e=>{
+    const rc=canvas.getBoundingClientRect();
+    mouse.x=((e.clientX-rc.left)/rc.width)*2-1;
+    mouse.y=-((e.clientY-rc.top)/rc.height)*2+1;
+    raycaster.setFromCamera(mouse,camera);
+    const hits=raycaster.intersectObjects(getMeshes());
+    if(hits.length){const d=byMesh.get(hits[0].object);if(d)openPanel(d,null);}
+  });
+  canvas.addEventListener('mousemove',e=>{
+    const rc=canvas.getBoundingClientRect();
+    mouse.x=((e.clientX-rc.left)/rc.width)*2-1;
+    mouse.y=-((e.clientY-rc.top)/rc.height)*2+1;
+    raycaster.setFromCamera(mouse,camera);
+    canvas.style.cursor=raycaster.intersectObjects(getMeshes()).length?'pointer':'default';
+  });
+
+  _thr={renderer,scene,camera,buildPlanets,step};
 }
 
-function resizeGalactic(){ resizeOrbit(); }
+function buildGalactic(planets){
+  _initThree();
+  if(!_thr) return;
+  _thr.buildPlanets(planets);
+  const tc=document.getElementById('three-canvas');
+  tc.style.display='block'; tc.style.pointerEvents='auto';
+}
+
+function stepGalactic(){if(_thr) _thr.step();}
+
+function resizeGalactic(){
+  if(!_thr) return;
+  _thr.camera.aspect=innerWidth/innerHeight;
+  _thr.camera.updateProjectionMatrix();
+  _thr.renderer.setSize(innerWidth,innerHeight);
+}
 
 function switchView(v){
   if(v===currentView) return;
   currentView=v;
   document.querySelectorAll('.vb').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
   document.getElementById('wrap').classList.toggle('galactic',v==='galactic');
-  if(!allPlanets.length) return;
-  if(v==='orbital'){buildOrbit(allPlanets);resizeOrbit();}
-  else{buildGalactic(allPlanets);}
+  const tc=document.getElementById('three-canvas');
+  if(v==='galactic'){
+    tc.style.display='block'; tc.style.pointerEvents='auto';
+    if(allPlanets.length) buildGalactic(allPlanets);
+  } else {
+    tc.style.display='none'; tc.style.pointerEvents='none';
+    if(allPlanets.length){buildOrbit(allPlanets);resizeOrbit();}
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -925,7 +1038,7 @@ const safeHex=c=>/^#[0-9a-fA-F]{3,8}$/.test(c)?c:'#8b949e';
 function openPanel(p,wrapper){
   hideTip();
   if(selectedWrapper)selectedWrapper.classList.remove('selected');
-  selectedWrapper=wrapper; wrapper.classList.add('selected');
+  selectedWrapper=wrapper; if(wrapper) wrapper.classList.add('selected');
 
   const mag='★'.repeat(p.magnitude||1)+'☆'.repeat(5-(p.magnitude||1));
   const diskMB=p.diskKB>1024?(p.diskKB/1024).toFixed(1)+' MB':(p.diskKB||0)+' KB';
@@ -1121,5 +1234,6 @@ window.addEventListener('resize',()=>{
 });
 main();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" integrity="sha512-vnmn/Qqn6aG0POAc9mIGzjq0IybrvxJXYDafNvp9JSnDGxeF3pbkSqLvf+YGd5ku63pT7sa/jxHn7/d0mU8+tA==" crossorigin="anonymous"></script>
 </body>
 </html>
