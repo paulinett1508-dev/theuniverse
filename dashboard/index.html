@@ -1597,7 +1597,10 @@ function _galInitScene(planets){
       const col=ud.colorHex||'#8090c0';
       const row=document.createElement('div');
       row.className='leg-row';row.dataset.name=pd.name;
-      row.innerHTML=`<span class="leg-lbl">${pd.name}</span><div class="leg-dot" style="background:${col}"></div>`;
+      const _lbl=document.createElement('span');_lbl.className='leg-lbl';_lbl.textContent=pd.name;
+      const _dot=document.createElement('div');_dot.className='leg-dot';
+      if(/^#[0-9a-fA-F]{3,8}$/.test(col))_dot.style.background=col;
+      row.appendChild(_lbl);row.appendChild(_dot);
       row.addEventListener('click',()=>{
         _legendSelected=pd.name;
         _legendEl.querySelectorAll('.leg-row').forEach(r=>r.classList.toggle('active',r.dataset.name===pd.name));
