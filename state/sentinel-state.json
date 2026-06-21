@@ -4,7 +4,6 @@
     "agnvendas-painelsbr",
     "AlgodaoAtelie",
     "bolaocopa2026",
-    "botclinop",
     "centroculturalsbr",
     "CertiSYS",
     "contabilplus",
@@ -30,7 +29,8 @@
     "temperodemamae",
     "the-matrix",
     "tokentown",
-    "vibegaminghub"
+    "vibegaminghub",
+    "luna-base"
   ],
   "last_run_id": {
     "agnostic-core": 27538762728,
@@ -44,7 +44,8 @@
     "pedidomobile": 24175958490,
     "sbrgestao": 27874564272,
     "sicefsus-sistema": 27864068321,
-    "SuperCartolaManagerv5-production": 27812757389
+    "SuperCartolaManagerv5-production": 27812757389,
+    "luna-base": 27888139181
   },
   "last_issue_number": {
     "agnostic-core": 29,
