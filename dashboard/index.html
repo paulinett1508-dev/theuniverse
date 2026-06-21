@@ -831,17 +831,27 @@ function _initThree(){
   scene.add(new THREE.PointLight(0xffeebb,3.5,2800,1.5));
   scene.add(new THREE.AmbientLight(0x0a1428,0.7));
 
+  // textura de glow — canvas radial gradient branco→transparente
+  const _glowC=document.createElement('canvas'); _glowC.width=_glowC.height=128;
+  const _gc=_glowC.getContext('2d');
+  const _gg=_gc.createRadialGradient(64,64,0,64,64,64);
+  _gg.addColorStop(0,'rgba(255,255,255,1)');_gg.addColorStop(.25,'rgba(255,255,255,.5)');
+  _gg.addColorStop(.6,'rgba(255,255,255,.08)');_gg.addColorStop(1,'rgba(255,255,255,0)');
+  _gc.fillStyle=_gg; _gc.fillRect(0,0,128,128);
+  const glowTex=new THREE.CanvasTexture(_glowC);
+
   // sol + camadas de glow
-  scene.add(new THREE.Mesh(
-    new THREE.SphereGeometry(44,32,32),
-    new THREE.MeshStandardMaterial({color:0xffaa22,emissive:0xffcc44,emissiveIntensity:1.5,roughness:.8})
-  ));
+  const sunMat=new THREE.MeshStandardMaterial({color:0xffaa22,emissive:0xffcc44,emissiveIntensity:1.5,roughness:.8});
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(44,32,32),sunMat));
   [[90,0xff9900,.10],[150,0xff6600,.045],[240,0xff3300,.018]].forEach(([r,c,o])=>
     scene.add(new THREE.Mesh(
       new THREE.SphereGeometry(r,16,16),
       new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,side:THREE.BackSide,depthWrite:false})
     ))
   );
+  // glow sprite do sol
+  const sunSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xffdd88,transparent:true,opacity:.55,blending:THREE.AdditiveBlending,depthWrite:false}));
+  sunSprite.scale.set(340,340,1); scene.add(sunSprite);
 
   // anéis orbitais (torus)
   RINGS.forEach(ring=>{
@@ -876,17 +886,24 @@ function _initThree(){
 
   function _mkPlanet(planet,ri){
     const col=_healthCol(planet.health,planet.bodyType);
-    const radius=3+((planet.magnitude||3)/5)*6; // 3–9 unidades — discretos, não sobrepostos
+    const radius=3+((planet.magnitude||3)/5)*6;
     const mesh=new THREE.Mesh(
       new THREE.SphereGeometry(radius,24,24),
       new THREE.MeshPhongMaterial({
         color:col.base,emissive:col.emissive,emissiveIntensity:.5,shininess:60,specular:0x334466
       })
     );
+    // glow sprite — additive blending cria halo colorido sem BackSide sphere
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({
+      map:glowTex,color:col.glow,transparent:true,opacity:.65,
+      blending:THREE.AdditiveBlending,depthWrite:false
+    }));
+    sp.scale.set(radius*7,radius*7,1);
+    mesh.add(sp);
     if(planet.bodyType==='supernova'){
       mesh.add(new THREE.Mesh(
         new THREE.SphereGeometry(radius*2.8,12,12),
-        new THREE.MeshBasicMaterial({color:0xff4400,transparent:true,opacity:.12,side:THREE.BackSide,depthWrite:false})
+        new THREE.MeshBasicMaterial({color:0xff4400,transparent:true,opacity:.14,side:THREE.BackSide,depthWrite:false})
       ));
       mesh.material.emissiveIntensity=.9;
     }
@@ -894,7 +911,7 @@ function _initThree(){
     const a=savedAngles[planet.name]||0;
     mesh.position.set(r*Math.cos(a),0,r*Math.sin(a));
     scene.add(mesh);
-    planets3[planet.name]={mesh,ri};
+    planets3[planet.name]={mesh,ri,health:planet.health,bodyType:planet.bodyType};
     byMesh.set(mesh,planet);
   }
 
@@ -935,11 +952,26 @@ function _initThree(){
   }
 
   function step(){
-    dustPts.rotation.y+=.00015;
-    Object.entries(planets3).forEach(([name,{mesh,ri}])=>{
-      mesh.rotation.y+=.002;
-      if(ri<0){mesh.rotation.y+=.003;return;}
-      savedAngles[name]=(savedAngles[name]||0)+RINGS[ri].spd*.001;
+    const t=performance.now()*.001;
+    dustPts.rotation.y+=.00018;
+    // sol respira — emissive oscila suavemente
+    sunMat.emissiveIntensity=1.3+.35*Math.sin(t*.6);
+    sunSprite.material.opacity=.45+.15*Math.sin(t*.6);
+    Object.entries(planets3).forEach(([name,{mesh,ri,health,bodyType}])=>{
+      mesh.rotation.y+=.004;
+      if(ri<0){mesh.rotation.y+=.005;return;}
+      // planetas doentes pulsam
+      if(health&&health!=='healthy'){
+        const ph=(name.charCodeAt(0)%7)*.9;
+        const pulse=.45+.55*Math.abs(Math.sin(t*2.8+ph));
+        mesh.material.emissiveIntensity=pulse;
+        const sp=mesh.children[0]; if(sp&&sp.isMesh===false) sp.material.opacity=.4+.6*pulse;
+      }
+      if(bodyType==='supernova'){
+        const ph=(name.charCodeAt(1)||5)*.7;
+        mesh.material.emissiveIntensity=.7+.5*Math.abs(Math.sin(t*3.5+ph));
+      }
+      savedAngles[name]=(savedAngles[name]||0)+RINGS[ri].spd*.003;
       const r=RINGS[ri].rf*THREE_SCALE, a=savedAngles[name];
       mesh.position.set(r*Math.cos(a),0,r*Math.sin(a));
     });
