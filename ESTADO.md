@@ -134,7 +134,7 @@ Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após c
 - **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. `POLARIS_SSH_KEY` configurado — cron totalmente autônomo.
 - **C2 (Secrets Scan):** sentinel detecta secrets expostos em qualquer planeta e notifica Telegram.
 
-### 4. Dashboard NOC — ✅ NO AR | v2.1
+### 4. Dashboard NOC — ✅ NO AR | v3
 
 URL: `theuniverse-lake.vercel.app` (Vercel, deploy automático no push).
 Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_TOKEN` no painel Vercel.
@@ -144,6 +144,8 @@ Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_T
 - supernova: `bolaocopa2026`, `f1-pulse` · toys: `vibegaminghub`
 
 Quando `luna-base` for excluído ou outro repo ganhar tipo especial: atualizar `SPECIAL_BODIES`.
+
+**Vista galáctica v3** (2026-06-20): CSS perspective + rotateX = projeção 3D real; poeiras cósmicas + braços espirais no canvas; ângulo 64°. Selecionável pelo botão "━ galáctica" no header.
 
 Próximas evoluções: pack de stickers · `sbrgestao` CI fix.
 

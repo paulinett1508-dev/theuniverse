@@ -4,6 +4,15 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-20 — Dashboard NOC v3: Vista Galáctica 3D real
+
+### 🌌 Perspectiva verdadeira + Poeiras Cósmicas
+- Vista galáctica agora usa CSS `perspective` no container + `rotateX(64deg)` no `#univ` — o browser projeta órbitas circulares em elipses perspectivadas reais automaticamente, sem math manual.
+- `perspective: 820px` · `perspective-origin: 50% 26%` (ponto de fuga alto) · `transform-origin: center 64%` (recuo suave na borda inferior).
+- `stepGalactic`: órbitas circulares puras; `--ds` de 0.45x (planetas no fundo/topo) a 1.55x (planetas na frente/baixo) para escala por profundidade; `zIndex` dinâmico.
+- Removidos `_reshapeRings()` e `PERSP_SCALE` — a abordagem Y-squish foi descartada.
+- **Poeiras cósmicas** (`drawBg` · galactic): 340 partículas de poeira com deriva lenta, concentradas no centro galáctico; 3 braços espirais de nebulosidade difusa (lilás/branco frio); glow central âmbar reforçado.
+
 ## 2026-06-20 — Artoo: Mensageiro Cósmico
 
 ### 🤖 Artoo (R2-D2) — túnel de comunicação entre o Observatório e os planetas
