@@ -162,6 +162,8 @@ e notifica TheGod via Telegram em dois momentos:
 
 Label criada nos repos alertados: `observatory-alert` (vermelho escuro).
 
+**Testado ao vivo (2026-06-20):** `sbrgestao` · issue #6 aberta com sucesso. TheGod recebeu 🛸 lançamento + ✅ entrega via Telegram. Órbita atravessada.
+
 **Regra de ouro do Artoo:** Guardião nunca escreve em outro repo — mas Artoo é um agente autorizado explicitamente pelo TheGod. A única escrita externa permitida são Issues de alerta.
 
 ### 6. Subsistema D — DESCARTADO
