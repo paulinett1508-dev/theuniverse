@@ -1023,6 +1023,8 @@ const _GAL_PERSONA={
   'temperodemamae':     {surface:'rocky',       hue:21,  sat:67,  lit:47, radius:0.8, rings:false},
   // ── ESPECIAIS ────────────────────────────────────────────────────
   'luna-base':          {surface:'rocky',       hue:218, sat:22,  lit:72, radius:0.55, rings:false, moonOrbit:4.2},
+  'the-matrix':         {surface:'rocky',       hue:140, sat:35,  lit:42, radius:1.2,  rings:false, moonOrbit:28},
+  'matrix-core':        {surface:'rocky',       hue:220, sat:55,  lit:40, radius:1.0,  rings:false, moonOrbit:35},
   'bolaocopa2026':      {surface:'smooth',      hue:335, sat:88,  lit:52, radius:2.0, rings:false},
   'f1-pulse':           {surface:'smooth',      hue:350, sat:92,  lit:48, radius:2.0, rings:false},
 };
@@ -1635,22 +1637,42 @@ function _galInitScene(planets){
         // Luas normais
         let _finalMesh;
         if(moon.name==='luna-base'){
-          // ISS-like geometry
-          const _issGrp=new THREE.Group();
-          const _m=new THREE.MeshStandardMaterial({color:0x99aabb,emissive:new THREE.Color(0x223344),emissiveIntensity:.6,roughness:.25,metalness:.85});
-          const _sm=new THREE.MeshStandardMaterial({color:0x1a3a6a,emissive:new THREE.Color(0x0a1a3a),emissiveIntensity:.4,roughness:.4,metalness:.6});
-          const _core=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),_m);_core.rotation.z=Math.PI/2;_issGrp.add(_core);
-          const _truss=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,1.8,6),_m);_truss.rotation.z=Math.PI/2;_issGrp.add(_truss);
-          [[-0.7,-0.25],[-0.7,0.25],[0.7,-0.25],[0.7,0.25]].forEach(([x,z])=>{
-            const p=new THREE.Mesh(new THREE.BoxGeometry(.55,.02,.22),_sm);p.position.set(x,0,z);_issGrp.add(p);
+          // Laboratório experimental — assimétrico, verde-terminal
+          const _labGrp=new THREE.Group();
+          const _labMat=new THREE.MeshStandardMaterial({color:0x1a8a5a,emissive:new THREE.Color(0x00ff88),emissiveIntensity:.6,roughness:.4,metalness:.5});
+          const _warnMat=new THREE.MeshStandardMaterial({color:0x8a4a00,emissive:new THREE.Color(0xff8800),emissiveIntensity:.8,roughness:.3,metalness:.4});
+          const _glassMat=new THREE.MeshStandardMaterial({color:0x88ffcc,emissive:new THREE.Color(0x44ffaa),emissiveIntensity:.4,roughness:0,metalness:.9,transparent:true,opacity:.6});
+          // Módulo central hexagonal
+          const _lc=new THREE.Mesh(new THREE.CylinderGeometry(.12,.10,.4,6),_labMat);_labGrp.add(_lc);
+          // Módulo exp 1 — deslocado e girado
+          const _m1=new THREE.Mesh(new THREE.BoxGeometry(.18,.18,.22),_labMat);_m1.position.set(.2,.05,0);_m1.rotation.y=.3;_labGrp.add(_m1);
+          // Módulo exp 2 — laranja, inclinado
+          const _m2=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.28,5),_warnMat);_m2.position.set(-.18,-.04,.08);_m2.rotation.z=.2;_labGrp.add(_m2);
+          // Câmara de observação — vidro
+          const _m3=new THREE.Mesh(new THREE.SphereGeometry(.06,8,8),_glassMat);_m3.position.set(.05,.25,0);_labGrp.add(_m3);
+          // Antenas
+          [[.08,.2,.05,.2,0],[-.1,.1,-.08,.15,.4],[.15,0,.1,.12,-.3]].forEach(([x,y,z,h,rz])=>{
+            const _a=new THREE.Mesh(new THREE.CylinderGeometry(.005,.005,h,4),new THREE.MeshStandardMaterial({color:0xaaccff,emissive:new THREE.Color(0x4488ff),emissiveIntensity:.5,roughness:.2,metalness:.9}));
+            _a.position.set(x,y+h/2,z);_a.rotation.z=rz;_labGrp.add(_a);
+            const _t=new THREE.Mesh(new THREE.SphereGeometry(.012,6,6),new THREE.MeshBasicMaterial({color:0x00ffff}));
+            _t.position.set(x+Math.sin(rz)*h,y+h,z);_labGrp.add(_t);
           });
-          [-0.15,0,0.15].forEach(z=>{
-            const mod=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.2,8),_m);mod.rotation.z=Math.PI/2;mod.position.z=z;mod.position.y=.06;_issGrp.add(mod);
+          // Painéis solares assimétricos
+          const _p1=new THREE.Mesh(new THREE.BoxGeometry(.45,.01,.16),new THREE.MeshStandardMaterial({color:0x1a3a2a,emissive:new THREE.Color(0x00aa44),emissiveIntensity:.3,roughness:.5,metalness:.5}));
+          _p1.position.set(-.28,.02,0);_labGrp.add(_p1);
+          const _p2=new THREE.Mesh(new THREE.BoxGeometry(.22,.01,.12),new THREE.MeshStandardMaterial({color:0x1a2a3a,emissive:new THREE.Color(0x0044aa),emissiveIntensity:.3,roughness:.5,metalness:.5}));
+          _p2.position.set(.3,-.06,.04);_p2.rotation.z=.15;_labGrp.add(_p2);
+          // Luzes de status piscando (verde, laranja, vermelho, ciano)
+          [0x00ff00,0xff8800,0xff0000,0x00ffff].forEach((col,i)=>{
+            const _sl=new THREE.Mesh(new THREE.SphereGeometry(.018,6,6),new THREE.MeshBasicMaterial({color:col}));
+            _sl.position.set(-.08+i*.05,.21,.08);
+            _sl.userData.statusLight=true;_sl.userData.blinkOffset=i*.7;_sl.userData.blinkCol=col;
+            _labGrp.add(_sl);
           });
-          _issGrp.add(_galGlow(.5,0x4488ff,.55));_issGrp.add(_galGlow(1.2,0x4488ff,.18));
-          _issGrp.add(new THREE.PointLight(0x4488ff,.3,6));
-          _issGrp.userData={...moon,_isMoon:true,colorHex:'#88aacc',cluster:'sobral-core'};
-          _finalMesh=_issGrp;
+          _labGrp.add(_galGlow(.8,0x00ff88,.55));_labGrp.add(_galGlow(1.8,0x00ff88,.18));_labGrp.add(_galGlow(3.0,0x44ffaa,.06));
+          _labGrp.add(new THREE.PointLight(0x00ff88,.4,8));
+          _labGrp.userData={...moon,_isMoon:true,colorHex:'#44ffaa',cluster:'laboratório',radius:mRadius};
+          _finalMesh=_labGrp;
         } else {
           const _sphMesh=new THREE.Mesh(new THREE.SphereGeometry(mRadius,22,22),new THREE.MeshStandardMaterial({color:mCol,roughness:.88,metalness:.05,emissive:new THREE.Color(mEmit),emissiveIntensity:.45}));
           _sphMesh.userData={...moon,_isMoon:true,colorHex:'#'+new THREE.Color(mCol).getHexString(),cluster:_GAL_CLUSTER_MAP[parentGroup.userData._galRi||0]||'inner'};
@@ -1833,6 +1855,39 @@ function _galInitScene(planets){
   const _bhRef=_buildBlackHole();
   const _decayMeshes=_buildDecayZone();
 
+  // ── ESTAÇÃO OBI-WAN (agnostic-core) ──────────────────────────────
+  function _buildObiWanISS(){
+    const grp=new THREE.Group();
+    const _m=new THREE.MeshStandardMaterial({color:0x99aabb,emissive:new THREE.Color(0x223344),emissiveIntensity:.28,roughness:.3,metalness:.8});
+    const _sm=new THREE.MeshStandardMaterial({color:0x1a3a6a,emissive:new THREE.Color(0x0a1a3a),emissiveIntensity:.18,roughness:.5,metalness:.55});
+    // Corpo principal
+    const _oc=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),_m);_oc.rotation.z=Math.PI/2;grp.add(_oc);
+    // Treliça
+    const _ot=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,1.8,6),_m);_ot.rotation.z=Math.PI/2;grp.add(_ot);
+    // 4 painéis solares
+    [[-0.7,-0.25],[-0.7,0.25],[0.7,-0.25],[0.7,0.25]].forEach(([x,z])=>{const _op=new THREE.Mesh(new THREE.BoxGeometry(.55,.02,.22),_sm);_op.position.set(x,0,z);grp.add(_op);});
+    // Módulos habitacionais
+    [-0.15,0,0.15].forEach(z=>{const _om=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.2,8),_m);_om.rotation.z=Math.PI/2;_om.position.z=z;_om.position.y=.06;grp.add(_om);});
+    // Antena de monitoramento apontando para o sol
+    const _oa=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.35,4),new THREE.MeshStandardMaterial({color:0xaaaaaa,emissive:new THREE.Color(0x334455),emissiveIntensity:.3,roughness:.2,metalness:.9}));
+    _oa.rotation.z=Math.PI/2;_oa.position.set(-.2,0,0);grp.add(_oa);
+    // Glow discreto — ele não quer ser encontrado
+    grp.add(_galGlow(.6,0xaabbdd,.25));grp.add(_galGlow(1.4,0x8899aa,.08));
+    grp.add(new THREE.PointLight(0x8899cc,.15,5));
+    grp.userData={id:'agnostic-core',name:'agnostic-core',colorHex:'#aabbcc',cluster:'exílio',isMoon:false,status:'active',radius:.9};
+    return grp;
+  }
+  const _obiWanPivot=new THREE.Object3D();
+  _obiWanPivot.setRotationFromEuler(new THREE.Euler(Math.PI/4,Math.random()*Math.PI*2,0));
+  const _obiWanISS=_buildObiWanISS();
+  const _OBI_ORBIT=210;
+  _obiWanISS.position.set(_OBI_ORBIT,0,0);
+  _obiWanPivot.add(_obiWanISS);
+  scene.add(_obiWanPivot);
+  // trilha orbital — quase invisível
+  {const _oOrbPts=[];for(let i=0;i<=96;i++){const a=i/96*Math.PI*2;_oOrbPts.push(new THREE.Vector3(Math.cos(a)*_OBI_ORBIT,0,Math.sin(a)*_OBI_ORBIT));}const _oOrbL=new THREE.Line(new THREE.BufferGeometry().setFromPoints(_oOrbPts),new THREE.LineBasicMaterial({color:0xaabbcc,transparent:true,opacity:.03}));_oOrbL.rotation.x=Math.PI/4;scene.add(_oOrbL);}
+  actualMeshes.push(_obiWanISS);
+
   // ── comet ──
   const cometGroup=new THREE.Group();
   let cometAngle=0;
@@ -1970,8 +2025,17 @@ function _galInitScene(planets){
         const a=savedAngles[mg.userData.name+'_m'];
         mg.position.set(Math.cos(a)*r,0,Math.sin(a)*r);
         const mm=mg.children[0];
-        if(mm&&mm.userData.name==='luna-base'){mm.rotation.y+=dt*.3;} // ISS gira lentamente
-        else if(mm)mm.rotateOnAxis(_localY,dt*0.8);
+        if(mm&&mm.userData.name==='luna-base'){
+          mm.rotation.y+=dt*.4;
+          mm.rotation.x+=dt*.08;
+          mm.rotation.z=Math.sin(_simYear*1200*.3)*.05;
+          // piscar luzes de status
+          mm.children?.forEach(child=>{
+            if(!child.userData?.statusLight)return;
+            const blink=Math.sin(_simYear*1200*3+child.userData.blinkOffset);
+            if(child.material?.color)child.material.color.setHex(blink>.3?child.userData.blinkCol:0x111111);
+          });
+        } else if(mm){mm.rotateOnAxis(_localY,dt*.8);}
       });
       // pivôs de luas binárias
       moonPivots.forEach(({pivot,moonMesh,orbitSpeed,selfRotSpeed})=>{
@@ -1981,6 +2045,9 @@ function _galInitScene(planets){
       // buraco negro — disco gira
       _bhRef.disk1.rotation.z+=dt*.12;
       _bhRef.disk2.rotation.z-=dt*.08;
+      // Obi-Wan — órbita solar lentíssima
+      _obiWanPivot.rotateOnWorldAxis(new THREE.Vector3(0,1,0),dt*.0008*_galState.speed);
+      _obiWanISS.rotation.y+=dt*.08*_galState.speed; // painéis giram
       // decay zone — órbitas ao redor do BH
       const _allDecay=[
         ..._ARCHIVED.map((p,i)=>({data:p,mesh:_decayMeshes[i]})),
