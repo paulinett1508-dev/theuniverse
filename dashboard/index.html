@@ -1163,36 +1163,100 @@ function _galInitScene(planets){
   const clock=new THREE.Clock();
   const _localY=new THREE.Vector3(0,1,0); // reusado a cada frame
 
-  // ── camera orbit ──
-  let sph={th:.3,ph:1.1,r:220},tSph={...sph};
-  let _dragStart={x:0,y:0},_dragged=false,focusGroup=null;
+  // ── ESTADO DA CÂMERA ──────────────────────────────────────────────
+  const cam={
+    theta:.3, phi:1.1, radius:220, radiusGoal:220,
+    target:new THREE.Vector3(), targetGoal:new THREE.Vector3(),
+  };
   let focusMesh=null;
-  const _focusTarget=new THREE.Vector3();
+  let focusGroup=null;
 
-  function applyCam(){
+  function updateCamera(){
+    if(focusMesh){const _wp=new THREE.Vector3();focusMesh.getWorldPosition(_wp);cam.targetGoal.copy(_wp);}
+    else{cam.targetGoal.set(0,0,0);}
+    cam.target.lerp(cam.targetGoal,.06);
+    cam.radius+=(cam.radiusGoal-cam.radius)*.06;
     camera.position.set(
-      _focusTarget.x+sph.r*Math.sin(sph.ph)*Math.sin(sph.th),
-      _focusTarget.y+sph.r*Math.cos(sph.ph),
-      _focusTarget.z+sph.r*Math.sin(sph.ph)*Math.cos(sph.th)
+      cam.target.x+cam.radius*Math.sin(cam.phi)*Math.sin(cam.theta),
+      cam.target.y+cam.radius*Math.cos(cam.phi),
+      cam.target.z+cam.radius*Math.sin(cam.phi)*Math.cos(cam.theta)
     );
-    camera.lookAt(_focusTarget);
+    camera.lookAt(cam.target);
   }
 
   // ── DRAG DA CÂMERA ──────────────────────────────────────────────
-  let _drag=false,_pm={x:0,y:0};
-  canvas.addEventListener('mousedown',e=>{if(e.target!==canvas)return;_drag=true;_pm={x:e.clientX,y:e.clientY};_dragStart={x:e.clientX,y:e.clientY};_dragged=false;});
-  window.addEventListener('mouseup',()=>{_drag=false;});
+  let _drag=false,_pm={x:0,y:0},_mdp={x:0,y:0};
+  canvas.addEventListener('mousedown',e=>{if(e.target!==canvas)return;_drag=true;_pm={x:e.clientX,y:e.clientY};_mdp={x:e.clientX,y:e.clientY};});
+  window.addEventListener('mouseup',()=>_drag=false);
   window.addEventListener('mousemove',e=>{
     if(!_drag)return;
-    tSph.th-=(e.clientX-_pm.x)*.007;
-    tSph.ph=Math.max(.1,Math.min(Math.PI*.47,tSph.ph+(e.clientY-_pm.y)*.005));
+    cam.theta-=(e.clientX-_pm.x)*.007;
+    cam.phi=Math.max(.08,Math.min(Math.PI*.47,cam.phi+(e.clientY-_pm.y)*.005));
     _pm={x:e.clientX,y:e.clientY};
-    _dragged=true;
   });
-  canvas.addEventListener('wheel',e=>{if(e.target!==canvas)return;tSph.r=Math.max(15,Math.min(700,tSph.r+e.deltaY*.15));e.preventDefault();},{passive:false});
-  canvas.addEventListener('touchstart',e=>{if(e.target!==canvas)return;_drag=true;_pm={x:e.touches[0].clientX,y:e.touches[0].clientY};_dragStart={x:e.touches[0].clientX,y:e.touches[0].clientY};_dragged=false;},{passive:true});
-  canvas.addEventListener('touchmove',e=>{if(!_drag)return;tSph.th-=(e.touches[0].clientX-_pm.x)*.007;tSph.ph=Math.max(.1,Math.min(Math.PI*.47,tSph.ph+(e.touches[0].clientY-_pm.y)*.005));_pm={x:e.touches[0].clientX,y:e.touches[0].clientY};_dragged=true;},{passive:true});
-  canvas.addEventListener('touchend',()=>{_drag=false;});
+  canvas.addEventListener('wheel',e=>{
+    if(e.target!==canvas)return;e.preventDefault();
+    const sens=cam.radius*.001+.05;
+    let minR=8;
+    if(focusMesh){const ud=focusMesh.userData;if(ud.isBH)minR=25;else if(ud._isMoon)minR=Math.max(2,(ud.radius??0.5)*3);else minR=Math.max(5,(ud.radius??1)*2);}
+    cam.radiusGoal=Math.max(minR,Math.min(800,cam.radiusGoal+e.deltaY*sens));
+  },{passive:false});
+  canvas.addEventListener('touchstart',e=>{if(e.target!==canvas)return;_drag=true;_pm={x:e.touches[0].clientX,y:e.touches[0].clientY};_mdp={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+  canvas.addEventListener('touchmove',e=>{
+    if(!_drag)return;
+    cam.theta-=(e.touches[0].clientX-_pm.x)*.007;
+    cam.phi=Math.max(.08,Math.min(Math.PI*.47,cam.phi+(e.touches[0].clientY-_pm.y)*.005));
+    _pm={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  },{passive:true});
+  canvas.addEventListener('touchend',()=>_drag=false);
+
+  // ── CLICK (raycast) ──────────────────────────────────────────────
+  const _clickMouse=new THREE.Vector2();
+  canvas.addEventListener('click',e=>{
+    if(Math.abs(e.clientX-_mdp.x)>5||Math.abs(e.clientY-_mdp.y)>5)return; // foi drag
+    _clickMouse.x=(e.clientX/innerWidth)*2-1;
+    _clickMouse.y=-(e.clientY/innerHeight)*2+1;
+    raycaster.setFromCamera(_clickMouse,camera);
+    const hits=raycaster.intersectObjects(actualMeshes,true);
+    if(hits.length>0){
+      let obj=hits[0].object;
+      while(obj&&!obj.userData?.name&&!obj.userData?.id)obj=obj.parent;
+      if(obj?.userData){
+        focusMesh=obj;
+        const ud=obj.userData;
+        if(ud.isBH){cam.radiusGoal=120;}
+        else{cam.radiusGoal=(_galRadius(ud)||1)*8+20;}
+        const pd=ud.name?planets.find(p=>p.name===ud.name):null;
+        if(pd||ud.name){
+          openPanel(pd||ud,null);
+          _legendEl?.querySelectorAll('.leg-row').forEach(r=>r.classList.toggle('active',r.dataset.name===(ud.name||ud.id)));
+        }
+      }
+    } else {
+      focusMesh=null;cam.radiusGoal=220;
+      closePanel();
+      _legendEl?.querySelectorAll('.leg-row').forEach(r=>r.classList.remove('active'));
+    }
+  });
+
+  // ── TECLADO ──────────────────────────────────────────────────────
+  window.addEventListener('keydown',e=>{
+    if(currentView!=='galactic')return;
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if(e.key==='Escape'){focusMesh=null;cam.radiusGoal=220;cam.targetGoal.set(0,0,0);closePanel();_legendEl?.querySelectorAll('.leg-row').forEach(r=>r.classList.remove('active'));}
+    else if(e.key==='f'||e.key==='F'){if(focusMesh){const r=focusMesh.userData.radius??1;cam.radiusGoal=r*5+10;}}
+    else if(e.key===' '){e.preventDefault();_galState.paused=!_galState.paused;}
+    else if(e.key==='ArrowRight'){_selectNext(1);}
+    else if(e.key==='ArrowLeft'){_selectNext(-1);}
+  });
+  function _selectNext(dir){
+    if(!actualMeshes.length)return;
+    const cur=focusMesh?actualMeshes.indexOf(focusMesh):-1;
+    const nxt=(cur+dir+actualMeshes.length)%actualMeshes.length;
+    focusMesh=actualMeshes[nxt];
+    const ud=focusMesh.userData;
+    if(ud.isBH){cam.radiusGoal=120;}else{cam.radiusGoal=(_galRadius(ud)||1)*8+20;}
+  }
 
   // ── stars ──
   (()=>{
@@ -1660,7 +1724,7 @@ function _galInitScene(planets){
         _legendSelected=pd.name;
         _legendEl.querySelectorAll('.leg-row').forEach(r=>r.classList.toggle('active',r.dataset.name===pd.name));
         const m=actualMeshes.find(x=>x.userData.name===pd.name);
-        if(m){focusMesh=m;if(m.userData.isBH){tSph.r=120;}else{tSph.r=(_galRadius(pd)||2)*8+20;}}
+        if(m){focusMesh=m;if(m.userData.isBH){cam.radiusGoal=120;}else{cam.radiusGoal=(_galRadius(pd)||2)*8+20;}}
       });
       _legendEl.appendChild(row);
     });
@@ -1823,23 +1887,7 @@ function _galInitScene(planets){
     }
   });
   canvas.addEventListener('mouseleave',()=>{_hovId=null;hideTip();});
-  // mouseup distingue click de drag — só abre painel se não arrastou
-  canvas.addEventListener('mouseup',e=>{
-    if(_dragged)return;
-    mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
-    raycaster.setFromCamera(mouse,camera);
-    const hits=raycaster.intersectObjects(actualMeshes,false);
-    if(hits.length){
-      const ud=hits[0].object.userData;
-      const m=hits[0].object;
-      focusMesh=m;
-      if(m.userData.isBH){tSph.r=120;}
-      else{tSph.r=(_galRadius(m.userData)||2)*8+20;}
-      openPanel(ud,null);
-    } else {
-      focusMesh=null;tSph.r=340;
-    }
-  });
+  // click handled by canvas.addEventListener('click',...) above
 
   // ── render loop ──
   let t3=0,animId3=null;
@@ -1849,10 +1897,6 @@ function _galInitScene(planets){
     const dt=_galState.paused?0:Math.min(raw,.05)*_galState.speed;
     t3+=raw; // t3 sempre corre (animações cosméticas independentes de pausa)
     if(!_galState.paused){_simYear+=dt*0.015*_galState.speed;_updateClock();}
-    sph.th+=(tSph.th-sph.th)*.065;sph.ph+=(tSph.ph-sph.ph)*.065;sph.r+=(tSph.r-sph.r)*.065;
-    if(focusMesh){const _wp=new THREE.Vector3();focusMesh.getWorldPosition(_wp);_focusTarget.lerp(_wp,.06);}
-    else{_focusTarget.lerp(new THREE.Vector3(),.06);}
-    applyCam();
 
     // HUD indicador BH
     const _bhScreen=_BH_POS.clone().project(camera);
@@ -1966,6 +2010,7 @@ function _galInitScene(planets){
       if(m.life>=m.maxLife){scene.remove(m.line);meteors3.splice(i,1);}
     }
 
+    updateCamera();
     _composer.render();
   }
   animate3();
@@ -2002,7 +2047,7 @@ function _galInitScene(planets){
       orbitLines.forEach(l=>{l.visible=on;});
     },
     setSunlight(v){if(_sunLight)_sunLight.intensity=v;},
-    resetCam(){Object.assign(tSph,{th:Math.PI/2,ph:.38,r:200});},
+    resetCam(){focusMesh=null;cam.theta=Math.PI/2;cam.phi=.38;cam.radiusGoal=200;cam.targetGoal.set(0,0,0);},
   };
 }
 
@@ -2111,11 +2156,11 @@ function switchView(v){
   });
 
   // ── keyboard shortcuts (só activos na visão galáctica) ──
+  // Space, Escape, F, ArrowRight/Left tratados dentro de _galInitScene
   document.addEventListener('keydown',e=>{
     if(currentView!=='galactic')return;
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
-    if(e.code==='Space'){e.preventDefault();if(_gal)_gal.togglePause();}
-    else if(e.key==='+'||e.key==='='){
+    if(e.key==='+'||e.key==='='){
       if(speedSlider){speedSlider.value=Math.min(100,+speedSlider.value+5);if(_gal)_gal.setSpeed(+speedSlider.value);}
     }
     else if(e.key==='-'){
@@ -2123,7 +2168,6 @@ function switchView(v){
     }
     else if(e.key==='o'||e.key==='O'){if(orbitsBtn)orbitsBtn.click();}
     else if(e.key==='a'||e.key==='A'){if(atmBtn)atmBtn.click();}
-    else if(e.key==='Escape'){if(_gal){_gal.resetCam();}}
     else if(e.key==='r'||e.key==='R'){if(_gal)_gal.resetCam();}
   });
 })();
