@@ -182,11 +182,11 @@ body.panel-open #wrap{padding-right:270px}
 .vb.active{border-color:rgba(100,120,200,.5);color:#c8ceff;background:rgba(100,120,200,.07)}
 .vb:hover:not(.active){color:#7880a8;border-color:rgba(100,120,200,.3)}
 
-/* ── galactic plane ── */
-#galactic-plane{position:absolute;top:50%;left:0;width:100%;pointer-events:none;z-index:2;transform:translateY(-50%)}
-#galactic-plane::before{content:'';display:block;height:1px;background:linear-gradient(to right,transparent 0%,rgba(140,165,255,.10) 12%,rgba(190,210,255,.22) 50%,rgba(140,165,255,.10) 88%,transparent 100%)}
-#galactic-plane::after{content:'';position:absolute;top:-18px;left:8%;width:84%;height:37px;background:radial-gradient(ellipse at center,rgba(120,145,255,.05) 0%,transparent 70%);pointer-events:none}
-#wrap.galactic #univ{width:100%!important;height:100%!important}
+/* ── perspectiva: escala por profundidade ── */
+#wrap.galactic .pw{transform:translate(calc(var(--px) - 50%), calc(var(--py) - 50%)) scale(var(--ds,1))}
+#wrap.galactic .pw:hover .pd,#wrap.galactic .pw:active .pd{transform:scale(2.2)}
+/* sol com glow quente expandido na vista perspectiva */
+#wrap.galactic #sun{box-shadow:0 0 30px #ffd700,0 0 80px rgba(255,180,0,.5),0 0 160px rgba(255,120,0,.25),0 0 300px rgba(255,80,0,.1)}
 
 /* ── body types ── */
 .body-station .pd{clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);border-radius:0;background:linear-gradient(135deg,#9ab2d0 0%,#4a6888 55%,#2a3e58 100%);box-shadow:0 0 8px rgba(130,170,220,.7),0 0 24px rgba(70,110,200,.35);animation:station-spin 28s linear infinite}
@@ -326,30 +326,17 @@ function drawMeteor(m){
   return m.life<m.maxLife;
 }
 
-function _drawSpiralArms(cx,cy){
-  const len=cnv.width*.44;
-  for(const dir of[-1,1]){
-    const g=ctx.createLinearGradient(cx,cy,cx+dir*len,cy);
-    g.addColorStop(0,'rgba(160,175,255,.055)');
-    g.addColorStop(.45,'rgba(130,150,255,.025)');
-    g.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g;
-    ctx.beginPath();
-    ctx.ellipse(cx+dir*len*.5,cy,len*.5,cnv.height*.07,0,0,Math.PI*2);
-    ctx.fill();
-  }
-}
-
 function drawBg(){
   ctx.clearRect(0,0,cnv.width,cnv.height);
   if(currentView==='galactic'){
-    const gx=cnv.width/2,gy=cnv.height/2;
-    const bg=ctx.createRadialGradient(gx,gy,0,gx,gy,cnv.width*.48);
-    bg.addColorStop(0,'rgba(210,220,255,.035)');
-    bg.addColorStop(.35,'rgba(150,165,255,.015)');
+    // glow quente ao redor do sol — como a imagem referência
+    const gx=cnv.width/2, gy=cnv.height/2;
+    const bg=ctx.createRadialGradient(gx,gy,0,gx,gy,cnv.width*.5);
+    bg.addColorStop(0,'rgba(255,210,80,.05)');
+    bg.addColorStop(.15,'rgba(255,150,40,.025)');
+    bg.addColorStop(.35,'rgba(120,100,200,.012)');
     bg.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=bg; ctx.fillRect(0,0,cnv.width,cnv.height);
-    _drawSpiralArms(gx,gy);
   }
 
   // spawn
@@ -695,8 +682,8 @@ let univSz=0, nodes=[], angles=[];
 const univ=document.getElementById('univ');
 const savedAngles={};
 let stationWrapper=null;
-let currentView='orbital', allPlanets=[], galacticNodes=[], galacticT=0;
-const GALACTIC_RINGS=[{min:.08,max:.18},{min:.20,max:.34},{min:.36,max:.50},{min:.52,max:.68}];
+let currentView='orbital', allPlanets=[];
+const PERSP_SCALE=0.42; // elipse: eixo vertical = 42% do horizontal
 
 function isMobile(){return innerWidth<=600}
 function getUnivSz(){
@@ -807,84 +794,42 @@ function resizeOrbit(){
   _placeStation();
 }
 
-// ── GALACTIC VIEW ──
-function getGalacticSz(){
-  const w=document.getElementById('wrap');
-  return{w:w.clientWidth,h:w.clientHeight};
+// ── PERSPECTIVA (vista galáctica = orbital em elipse 3D) ──
+function _reshapeRings(){
+  document.querySelectorAll('#univ .ring').forEach(ring=>{
+    const w=parseFloat(ring.style.width);
+    ring.style.height=(w*PERSP_SCALE)+'px';
+  });
 }
 
 function buildGalactic(planets){
-  univ.innerHTML=''; nodes=[]; angles=[]; galacticNodes=[]; stationWrapper=null;
-  const{w,h}=getGalacticSz();
-  univ.style.width=w+'px'; univ.style.height=h+'px';
-  const cx=w/2,cy=h/2;
-
-  // galactic plane + bulge
-  const plane=document.createElement('div');
-  plane.id='galactic-plane';
-  univ.appendChild(plane);
-  const bulge=document.createElement('div');
-  bulge.style.cssText=`position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:${w*.38}px;height:${h*.55}px;background:radial-gradient(ellipse,rgba(255,215,80,.04) 0%,rgba(100,120,255,.025) 40%,transparent 70%);pointer-events:none;z-index:1`;
-  univ.appendChild(bulge);
-
-  const station=planets.find(p=>p.bodyType==='station');
-  const orbital=planets.filter(p=>p.bodyType!=='station');
-  const sorted=[...orbital].sort((a,b)=>a.daysSincePush-b.daysSincePush);
-  const satIdx=sorted.findIndex(p=>p.bodyType==='satellite');
-  if(satIdx>0){const[s]=sorted.splice(satIdx,1);sorted.unshift(s);}
-  const total=sorted.length;
-  const splits=[Math.round(total*.18),Math.round(total*.26),Math.round(total*.30)];
-  splits.push(total-splits[0]-splits[1]-splits[2]);
-
-  let pi=0;
-  for(let ri=0;ri<RINGS.length;ri++){
-    const count=splits[ri];
-    const gr=GALACTIC_RINGS[ri];
-    for(let j=0;j<count&&pi<sorted.length;j++,pi++){
-      const planet=sorted[pi];
-      const seed=hashStr(planet.name);
-      const side=(seed%2===0)?-1:1;
-      const frac=gr.min+((seed%1000)/1000)*(gr.max-gr.min);
-      const bx=cx+side*frac*w*.9;
-      const by=cy+(((seed>>4)%200)/200-.5)*h*.28;
-      const wrapper=_mkWrapper(planet);
-      wrapper.style.setProperty('--px',bx+'px');
-      wrapper.style.setProperty('--py',by+'px');
-      univ.appendChild(wrapper);
-      galacticNodes.push({el:wrapper,seed,baseX:bx,baseY:by});
-    }
-  }
-
-  if(station){
-    const sw=_mkWrapper(station);
-    stationWrapper=sw;
-    univ.appendChild(sw);
-    _placeStationGalactic(w,h);
-  }
-  const sun=document.createElement('div');
-  sun.id='sun'; univ.appendChild(sun);
-}
-
-function _placeStationGalactic(w,h){
-  if(!stationWrapper) return;
-  const{w:gw,h:gh}=getGalacticSz();
-  const W=w||gw, H=h||gh;
-  stationWrapper.style.setProperty('--px',(W/2+W*.055)+'px');
-  stationWrapper.style.setProperty('--py',(H/2-H*.07)+'px');
+  buildOrbit(planets);  // reutiliza toda a lógica orbital
+  _reshapeRings();      // achata os anéis em elipses
 }
 
 function stepGalactic(){
-  galacticT+=.0007;
-  for(const n of galacticNodes){
-    const dx=Math.sin(galacticT*.9+n.seed*.019)*2.2;
-    const dy=Math.cos(galacticT*.65+n.seed*.027)*1.6;
-    n.el.style.setProperty('--px',(n.baseX+dx)+'px');
-    n.el.style.setProperty('--py',(n.baseY+dy)+'px');
+  const cx=univSz/2, cy=univSz/2;
+  for(let i=0;i<nodes.length;i++){
+    const{el,ri,name}=nodes[i];
+    angles[i]+=RINGS[ri].spd*0.0045;
+    savedAngles[name]=angles[i];
+    const r=RINGS[ri].rf*univSz;
+    const x=cx+r*Math.cos(angles[i]);
+    const y=cy+r*Math.sin(angles[i])*PERSP_SCALE;
+    // profundidade: 0=fundo(topo), 1=frente(baixo)
+    const depth=(1+Math.sin(angles[i]))/2;
+    el.style.setProperty('--px',x+'px');
+    el.style.setProperty('--py',y+'px');
+    el.style.setProperty('--ds',(0.7+0.6*depth).toFixed(3));
+    el.style.zIndex=Math.round(10+depth*20);
   }
+  // station fixed — ajusta zIndex pelo ângulo fixo
+  if(stationWrapper) stationWrapper.style.zIndex=15;
 }
 
 function resizeGalactic(){
-  if(allPlanets.length) buildGalactic(allPlanets);
+  resizeOrbit();
+  _reshapeRings();
 }
 
 function switchView(v){
