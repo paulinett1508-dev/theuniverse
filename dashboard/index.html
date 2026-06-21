@@ -221,8 +221,7 @@ input.gc-range::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9p
 <div id="hdr">
   <h1>the<em>universe</em> &middot; observatório <span style="font-size:.55em;opacity:.45;font-weight:400;letter-spacing:.08em">v3</span></h1>
   <div id="view-btns">
-    <button class="vb active" data-view="orbital" title="Vista orbital">⬡ orbital</button>
-    <button class="vb" data-view="galactic" title="Via Láctea">━ galáctica</button>
+    <button class="vb active" data-view="galactic" title="Via Láctea">━ galáctica</button>
   </div>
   <div id="stats">
     <span>planetas&nbsp;<span class="sv" id="st">—</span></span>
@@ -718,7 +717,7 @@ let univSz=0, nodes=[], angles=[];
 const univ=document.getElementById('univ');
 const savedAngles={};
 let stationWrapper=null;
-let currentView='orbital', allPlanets=[];
+let currentView='', allPlanets=[];
 
 function isMobile(){return innerWidth<=600}
 function getUnivSz(){
@@ -947,7 +946,7 @@ function _galSaturnRingTex(ringHue=45){
 const _GAL_PERSONA={
   'nexus-labsobral':     {surface:'banded', hue:44,  sat:82, lit:56, radius:5.5, rings:true,  ringHue:40,  ringAlpha:.90},
   'sbrgestao':           {surface:'banded', hue:197, sat:68, lit:57, radius:5.0, rings:true,  ringHue:192, ringAlpha:.80},
-  'supercartolamanager': {surface:'giant',  hue:28,  sat:85, lit:48, radius:4.5, rings:false},
+  'SuperCartolaManagerv5-production': {surface:'giant', hue:28, sat:85, lit:48, radius:4.5, rings:false},
   'luna-base':           {surface:'rocky',  hue:218, sat:22, lit:72, radius:1.8, rings:false},
   'bolaocopa2026':       {surface:'smooth', hue:335, sat:88, lit:52, radius:2.0, rings:false},
   'f1-pulse':            {surface:'smooth', hue:350, sat:92, lit:48, radius:2.0, rings:false},
@@ -960,10 +959,10 @@ const _GAL_BINARY_KEY='_binary_nexus_sbrgestao'; // key em parentGroupMap + save
 
 // Anel forçado — apenas supercartolamanager; binário tratado à parte
 const _GAL_FORCED_RING={
-  'supercartolamanager': 0,
+  'SuperCartolaManagerv5-production': 0,
 };
 const _GAL_FORCED_ANGLE={
-  'supercartolamanager': 0.80,
+  'SuperCartolaManagerv5-production': 0.80,
 };
 
 // Luas: nome → chave do grupo-pai
@@ -1848,12 +1847,11 @@ async function loadPlanets(){
 }
 
 async function main(){
-  initStars();
   cometCd=200+Math.floor(Math.random()*300);
   meteorCd=80+Math.floor(Math.random()*120);
-  resizeOrbit();
   const planets=await loadPlanets();
-  if(planets.length){allPlanets=planets;updateStats(planets);buildOrbit(planets);}
+  if(planets.length){allPlanets=planets;updateStats(planets);}
+  switchView('galactic');
   loop();
 
   document.querySelectorAll('.vb').forEach(b=>

@@ -6,9 +6,10 @@ const SPECIAL_BODIES = {
   'luna-base':      'observatory',
   'bolaocopa2026':  'supernova',
   'f1-pulse':       'supernova',
-  'vibegaminghub':  'nebula',
-  'the-matrix':     'moon',
-  'matrix-core':    'moon',
+  'vibegaminghub':               'nebula',
+  'the-matrix':                  'moon',
+  'matrix-core':                 'moon',
+  'SuperCartolaManagerv5-production': 'planet', // persona override via _GAL_PERSONA
 };
 
 const EXCLUDE = new Set([
