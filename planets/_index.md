@@ -1,6 +1,6 @@
 # theuniverse — Mapa dos Planetas
 
-> Atualizado: 2026-06-20 | 27 planetas mapeados (Censo automático)
+> Atualizado: 2026-06-21 | 27 planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
 
@@ -9,7 +9,6 @@
 | 🟢 [agnostic-core](planets/agnostic-core.md) | meta-infra | Shell | 3 |
 | 🟡 [AlgodaoAtelie](planets/AlgodaoAtelie.md) | landing-clientes | TypeScript | 0 |
 | 🟡 [bolaocopa2026](planets/bolaocopa2026.md) | entretenimento | TypeScript | 0 |
-| 🟢 [botclinop](planets/botclinop.md) | landing-clientes | - | 0 |
 | 🟢 [centroculturalsbr](planets/centroculturalsbr.md) | sobral-core | - | 0 |
 | 🟡 [CertiSYS](planets/CertiSYS.md) | gov-publico | TypeScript | 0 |
 | 🟡 [contabilplus](planets/contabilplus.md) | produtos | - | 0 |
@@ -23,10 +22,11 @@
 | 🟡 [lp-ellenpedrosa](planets/lp-ellenpedrosa.md) | landing-clientes | - | 0 |
 | 🟡 [lp-restauranteflutuante](planets/lp-restauranteflutuante.md) | landing-clientes | - | 0 |
 | 🟡 [lpjaraujoinfo](planets/lpjaraujoinfo.md) | landing-clientes | TypeScript | 0 |
+| 🟢 [luna-base](planets/luna-base.md) | observatorio | - | 0 |
 | 🟢🔒 [mcp-eventos](planets/mcp-eventos.md) | mcp-ia | Python | 0 |
 | 🟢🔒 [nexus-labsobral](planets/nexus-labsobral.md) | sobral-core | Python | 0 |
 | 🟢 [sbrchecks](planets/sbrchecks.md) | sobral-core | Python | 0 |
-| 🟢 [sbrgestao](planets/sbrgestao.md) | sobral-core | TypeScript | 0 |
+| 🟢 [sbrgestao](planets/sbrgestao.md) | sobral-core | TypeScript | 1 |
 | 🟢 [sicefsus-sistema](planets/sicefsus-sistema.md) | gov-publico | JavaScript | 0 |
 | 🟢 [sigmed](planets/sigmed.md) | sobral-core | TypeScript | 0 |
 | 🟢 [SuperCartolaManagerv5-production](planets/SuperCartolaManagerv5-production.md) | entretenimento | JavaScript | 0 |
