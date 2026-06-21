@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-21 (Federação M2M: issue de design aberta — theuniverse#1)
+> Última atualização: 2026-06-21 (Dashboard galáctica v5 deployada — Obi-Wan mensageiro + relógio real)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -134,7 +134,7 @@ Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após c
 - **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. `POLARIS_SSH_KEY` configurado — cron totalmente autônomo.
 - **C2 (Secrets Scan):** sentinel detecta secrets expostos em qualquer planeta e notifica Telegram.
 
-### 4. Dashboard NOC — ✅ NO AR | v3
+### 4. Dashboard NOC — ✅ NO AR | v5
 
 URL: `theuniverse-lake.vercel.app` (Vercel, deploy automático no push).
 Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_TOKEN` no painel Vercel.
@@ -143,11 +143,18 @@ Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_T
 - station: `agnostic-core` · satellite: `mcp-eventos` · observatory: `luna-base`
 - supernova: `bolaocopa2026`, `f1-pulse` · toys: `vibegaminghub`
 
-Quando `luna-base` for excluído ou outro repo ganhar tipo especial: atualizar `SPECIAL_BODIES`.
+**Vista galáctica v5** (2026-06-21): Three.js r128 WebGL single-file `dashboard/index.html` (~3000 linhas).
+- Sol raio 7u, coronas [18/32/52/95/180u]
+- 24 anéis orbitais, ring 0 = orbit 20u, ring 23 = orbit 375u
+- **luna-base** como planeta independente orbit 100u (não mais satélite do sbrchecks)
+- **ISS Obi-Wan** em posição fixa elevada `(80,120,60)` — acima do plano eclíptico, scale 3x
+- **Sistema de mensagens**: `sendObiWanMessage(targetId, text)` — ISS viaja em arco cúbico até o destino, linha de rota pontilhada, rastro de partículas, toast de entrega
+- **Relógio real**: `_updateRealClock()` — data/hora do browser, `setInterval` 1s
+- **Câmera**: radius 320, reset 300, zoom max 900u
 
-**Vista galáctica v4** (2026-06-21): Three.js WebGL — planetas 3D reais (SphereGeometry), 4 anéis com torus, poeiras cósmicas como PointCloud, câmera em perspectiva 21°. Planetas 3-9 unidades (magnitude 1-5), distribuição angular uniforme por anel, sem cascas de atmosfera sobrepostas. THREE_SCALE=720. Selecionável pelo botão "━ galáctica" no header.
+**Issues de refinamento abertas:** #2 (Obi-Wan visual) · #3 (luna-base) · #4 (relógio) · #5 (performance/polish)
 
-Próximas evoluções: pack de stickers · `sbrgestao` CI fix.
+Próximas evoluções: pack de stickers · `sbrgestao` CI fix · refinamentos do dashboard (ver issues #2-5).
 
 ### 7. Federação M2M — ⏳ DESIGN (theuniverse#1)
 
