@@ -4,6 +4,17 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-20 — Artoo: Mensageiro Cósmico
+
+### 🤖 Artoo (R2-D2) — túnel de comunicação entre o Observatório e os planetas
+- `scripts/artoo.py` — quando o Observatório detecta uma ameaça, Artoo atravessa a órbita e abre uma Issue no repo afetado. O mundo do planeta é alertado sem precisar do TheGod como intermediário.
+- TheGod é notificado via Telegram em dois momentos: 🛸 lançamento ("Artoo em rota para {repo}") e ✅ entrega confirmada ("Artoo chegou · issue #N aberta" + link direto).
+- Falha na entrega → ❌ "Artoo perdido na órbita" com diagnóstico.
+- Label `observatory-alert` (vermelho escuro) criada automaticamente no repo destino.
+- `ARTOO_TOKEN` separado na Polaris (`/opt/oraculo/.env`) — master PAT com `repo` scope. Token fine-grained do Oráculo não tem permissão de escrita em outros repos.
+- Integrado ao `sentinel.py`: todo evento `ci_falhou` dispara Artoo automaticamente.
+- **Testado ao vivo:** `sbrgestao` · issue #6 aberta · Telegrams de lançamento e entrega recebidos. Órbita atravessada. ✅
+
 ## 2026-06-20 — Dashboard NOC v2.1: canvas especiais por tipo de corpo
 
 ### 🎨 Canvas dedicados no card lateral
