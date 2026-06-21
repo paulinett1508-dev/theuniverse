@@ -824,8 +824,8 @@ function _initThree(){
   renderer.setClearColor(0x000000,0);
 
   const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,1,6000);
-  camera.position.set(0,600,650);
+  const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,1,6000);
+  camera.position.set(0,220,860); // ângulo baixo: 14° de elevação — perspectiva dramática
   camera.lookAt(0,0,0);
 
   scene.add(new THREE.PointLight(0xffeebb,3.5,2800,1.5));
@@ -833,10 +833,10 @@ function _initThree(){
 
   // sol + camadas de glow
   scene.add(new THREE.Mesh(
-    new THREE.SphereGeometry(22,32,32),
+    new THREE.SphereGeometry(52,32,32),
     new THREE.MeshStandardMaterial({color:0xffaa22,emissive:0xffcc44,emissiveIntensity:1.5,roughness:.8})
   ));
-  [[55,0xff9900,.14],[95,0xff6600,.06],[150,0xff3300,.025]].forEach(([r,c,o])=>
+  [[110,0xff9900,.14],[180,0xff6600,.06],[280,0xff3300,.025]].forEach(([r,c,o])=>
     scene.add(new THREE.Mesh(
       new THREE.SphereGeometry(r,16,16),
       new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,side:THREE.BackSide,depthWrite:false})
@@ -846,7 +846,7 @@ function _initThree(){
   // anéis orbitais (torus)
   RINGS.forEach(ring=>{
     const m=new THREE.Mesh(
-      new THREE.TorusGeometry(ring.rf*THREE_SCALE,.6,6,180),
+      new THREE.TorusGeometry(ring.rf*THREE_SCALE,1.8,8,180),
       new THREE.MeshBasicMaterial({color:0x2a3a5a,transparent:true,opacity:.28,depthWrite:false})
     );
     m.rotation.x=Math.PI/2;
@@ -876,7 +876,7 @@ function _initThree(){
 
   function _mkPlanet(planet,ri){
     const col=_healthCol(planet.health,planet.bodyType);
-    const radius=3+((planet.magnitude||3)/5)*9;
+    const radius=8+((planet.magnitude||3)/5)*28; // 8–36 unidades — visível na cena
     const mesh=new THREE.Mesh(
       new THREE.SphereGeometry(radius,32,32),
       new THREE.MeshPhongMaterial({
