@@ -870,6 +870,7 @@ function _galBaseCol(p){
   return _galPlanetDNA(p).col;
 }
 function _galAtmCol(p){
+  if(_GAL_PERSONA[p.name]?.noAtm) return null;
   const bt=p.bodyType;
   if(bt==='satellite')   return null;
   if(bt==='supernova')   return '#ff8800';
@@ -944,22 +945,70 @@ function _galSaturnRingTex(ringHue=45){
 
 // ── Identidade única por planeta — cores e superfície fixas por nome ──
 const _GAL_PERSONA={
-  'nexus-labsobral':     {surface:'banded', hue:44,  sat:82, lit:56, radius:5.5, rings:true,  ringHue:40,  ringAlpha:.90},
-  'sbrgestao':           {surface:'banded', hue:197, sat:68, lit:57, radius:5.0, rings:true,  ringHue:192, ringAlpha:.80},
+  // ── SATURNOS BINÁRIOS ────────────────────────────────────────────
+  'nexus-labsobral':    {surface:'banded',      hue:44,  sat:82,  lit:56, radius:5.5, rings:true, ringHue:40,  ringAlpha:.90},
+  'sbrgestao':          {surface:'banded',      hue:197, sat:68,  lit:57, radius:5.0, rings:true, ringHue:192, ringAlpha:.80},
+  // ── JÚPITER ──────────────────────────────────────────────────────
   'SuperCartolaManagerv5-production': {surface:'giant', hue:28, sat:85, lit:48, radius:4.5, rings:false},
-  'luna-base':           {surface:'rocky',  hue:218, sat:22, lit:72, radius:1.8, rings:false},
-  'bolaocopa2026':       {surface:'smooth', hue:335, sat:88, lit:52, radius:2.0, rings:false},
-  'f1-pulse':            {surface:'smooth', hue:350, sat:92, lit:48, radius:2.0, rings:false},
+  // ── SOBRAL-CORE ──────────────────────────────────────────────────
+  'sigmed':             {surface:'banded',      hue:38,  sat:77,  lit:44, radius:3.0, rings:false},
+  'sbrchecks':          {surface:'continental', hue:20,  sat:56,  lit:40, radius:1.8, rings:false},
+  'centroculturalsbr':  {surface:'banded',      hue:257, sat:68,  lit:32, radius:3.2, rings:true, ringHue:43,  ringAlpha:.55},
+  // ── GOV-PÚBLICO ──────────────────────────────────────────────────
+  'CertiSYS':           {surface:'rocky',       hue:222, sat:56,  lit:23, radius:1.8, rings:false, noAtm:true},
+  'sicefsus-sistema':   {surface:'smooth',      hue:218, sat:45,  lit:33, radius:3.0, rings:true, ringHue:210, ringAlpha:.35},
+  // ── PRODUTOS ─────────────────────────────────────────────────────
+  'contabilplus':       {surface:'rocky',       hue:220, sat:29,  lit:32, radius:0.8, rings:false, noAtm:true},
+  'FinanceFlow':        {surface:'smooth',      hue:150, sat:65,  lit:29, radius:1.8, rings:false},
+  'hqplus':             {surface:'banded',      hue:353, sat:87,  lit:29, radius:1.8, rings:false},
+  'tokentown':          {surface:'banded',      hue:262, sat:100, lit:59, radius:1.8, rings:true, ringHue:275, ringAlpha:.65},
+  'flowdigitalstudio':  {surface:'smooth',      hue:174, sat:92,  lit:49, radius:1.8, rings:true, ringHue:174, ringAlpha:.45},
+  // ── LANDING-CLIENTES ─────────────────────────────────────────────
+  'AlgodaoAtelie':      {surface:'smooth',      hue:43,  sat:41,  lit:85, radius:0.8, rings:false},
+  'florianorun':        {surface:'rocky',       hue:22,  sat:82,  lit:52, radius:0.8, rings:false},
+  'GessoExpress':       {surface:'rocky',       hue:40,  sat:24,  lit:80, radius:0.8, rings:false, noAtm:true},
+  'imersaobitrix24':    {surface:'banded',      hue:222, sat:73,  lit:38, radius:1.8, rings:false},
+  'lp-ellenpedrosa':    {surface:'smooth',      hue:340, sat:54,  lit:62, radius:0.8, rings:false},
+  'lp-restauranteflutuante': {surface:'smooth', hue:188, sat:64,  lit:29, radius:1.8, rings:true, ringHue:185, ringAlpha:.30},
+  'lpjaraujoinfo':      {surface:'continental', hue:108, sat:35,  lit:35, radius:0.8, rings:false},
+  'temperodemamae':     {surface:'rocky',       hue:21,  sat:67,  lit:47, radius:0.8, rings:false},
+  // ── ESPECIAIS ────────────────────────────────────────────────────
+  'luna-base':          {surface:'rocky',       hue:218, sat:22,  lit:72, radius:1.8, rings:false},
+  'bolaocopa2026':      {surface:'smooth',      hue:335, sat:88,  lit:52, radius:2.0, rings:false},
+  'f1-pulse':           {surface:'smooth',      hue:350, sat:92,  lit:48, radius:2.0, rings:false},
 };
 
-// Par binário: nexus + sbrgestao orbitam um baricentro comum (anel 1, orbit=58)
+// Par binário: nexus + sbrgestao orbitam um baricentro comum (anel 10, orbit=135)
 // Os dois ficam dentro do binaryGroup, separados por 16u
 const _GAL_BINARY_PAIR=['nexus-labsobral','sbrgestao'];
 const _GAL_BINARY_KEY='_binary_nexus_sbrgestao'; // key em parentGroupMap + savedAngles
 
-// Anel forçado — apenas supercartolamanager; binário tratado à parte
+// Anel forçado — planetas com posição orbital específica
 const _GAL_FORCED_RING={
-  'SuperCartolaManagerv5-production': 0,
+  'SuperCartolaManagerv5-production': 11,
+  'sigmed':                    1,
+  'sbrchecks':                 2,
+  'CertiSYS':                  3,
+  'sicefsus-sistema':          4,
+  'contabilplus':              5,
+  'FinanceFlow':               6,
+  'hqplus':                    7,
+  'tokentown':                 8,
+  'flowdigitalstudio':         9,
+  'centroculturalsbr':         12,
+  'AlgodaoAtelie':             13,
+  'florianorun':               14,
+  'GessoExpress':              15,
+  'imersaobitrix24':           16,
+  'lp-ellenpedrosa':           17,
+  'lp-restauranteflutuante':   18,
+  'lpjaraujoinfo':             19,
+  'temperodemamae':            20,
+  'bolaocopa2026':             3,
+  'f1-pulse':                  3,
+  'vibegaminghub':             9,
+  'luna-base':                 2,
+  'mcp-eventos':               1,
 };
 const _GAL_FORCED_ANGLE={
   'SuperCartolaManagerv5-production': 0.80,
@@ -971,7 +1020,30 @@ const _GAL_MOON_OF={
   'matrix-core': _GAL_BINARY_KEY,
 };
 
-const _GAL_RINGS=[{orbit:35,speed:.052},{orbit:58,speed:.033},{orbit:85,speed:.021},{orbit:118,speed:.0134}];
+// 21 anéis orbitais — cada posição nominal tem um anel específico
+const _GAL_RINGS=[
+  {orbit: 18, speed:.073},  // 0 — inner / generic
+  {orbit: 28, speed:.058},  // 1 — sigmed / mcp-eventos
+  {orbit: 35, speed:.052},  // 2 — sbrchecks / luna-base
+  {orbit: 48, speed:.044},  // 3 — CertiSYS / supernovas
+  {orbit: 58, speed:.040},  // 4 — sicefsus-sistema
+  {orbit: 72, speed:.036},  // 5 — contabilplus
+  {orbit: 82, speed:.034},  // 6 — FinanceFlow
+  {orbit: 92, speed:.032},  // 7 — hqplus
+  {orbit:104, speed:.030},  // 8 — tokentown
+  {orbit:116, speed:.029},  // 9 — flowdigitalstudio / vibegaminghub
+  {orbit:135, speed:.026},  // 10 — baricentro nexus+sbrgestao
+  {orbit:160, speed:.024},  // 11 — SuperCartola (Júpiter)
+  {orbit:185, speed:.023},  // 12 — centroculturalsbr
+  {orbit:205, speed:.021},  // 13 — AlgodaoAtelie
+  {orbit:215, speed:.021},  // 14 — florianorun
+  {orbit:225, speed:.020},  // 15 — GessoExpress
+  {orbit:237, speed:.020},  // 16 — imersaobitrix24
+  {orbit:248, speed:.019},  // 17 — lp-ellenpedrosa
+  {orbit:258, speed:.019},  // 18 — lp-restauranteflutuante
+  {orbit:268, speed:.019},  // 19 — lpjaraujoinfo
+  {orbit:278, speed:.018},  // 20 — temperodemamae
+];
 
 // Achatamento polar por tipo de superfície (do guia do dev sênior)
 const _GAL_OB={giant:.065,banded:.035,continental:.015,smooth:.008,rocky:.003};
@@ -995,7 +1067,7 @@ function _galInitScene(planets){
   const _localY=new THREE.Vector3(0,1,0); // reusado a cada frame
 
   // ── camera orbit ──
-  let sph={th:.3,ph:1.1,r:185},tSph={...sph};
+  let sph={th:.3,ph:1.1,r:340},tSph={...sph};
   let _dragStart={x:0,y:0},_dragged=false,focusGroup=null;
 
   function applyCam(){
@@ -1205,7 +1277,7 @@ function _galInitScene(planets){
     const forcedPlanets=orbital.filter(p=>_GAL_FORCED_RING[p.name]!==undefined);
     const normalOrbital=orbital.filter(p=>!_GAL_BINARY_PAIR.includes(p.name)&&_GAL_FORCED_RING[p.name]===undefined);
 
-    // distribuir planetas normais pelos 4 anéis
+    // distribuir planetas genéricos nos 4 anéis internos (índices 0-3)
     const sorted=[...normalOrbital].sort((a,b)=>a.daysSincePush-b.daysSincePush);
     const satIdx=sorted.findIndex(p=>p.bodyType==='satellite');
     if(satIdx>0){const[s]=sorted.splice(satIdx,1);sorted.unshift(s);}
@@ -1299,7 +1371,7 @@ function _galInitScene(planets){
     // Os dois planetas ficam dentro dele, separados por 16u.
     // As matrix orbitam o baricentro.
     if(binaryPlanetList.length>0){
-      const BINARY_RI=1, BINARY_ORBIT=_GAL_RINGS[BINARY_RI].orbit;
+      const BINARY_RI=10, BINARY_ORBIT=_GAL_RINGS[BINARY_RI].orbit;
       const BINARY_SEP=8; // distância de cada planeta ao centro do baricentro
       if(savedAngles[_GAL_BINARY_KEY]===undefined) savedAngles[_GAL_BINARY_KEY]=1.8;
       const bAng=savedAngles[_GAL_BINARY_KEY];
@@ -1436,7 +1508,7 @@ function _galInitScene(planets){
       focusMesh=hits[0].object;tSph.r=_galRadius(ud)*8+20;
       openPanel(ud,null);
     } else {
-      focusMesh=null;tSph.r=185;
+      focusMesh=null;tSph.r=340;
     }
   });
 
