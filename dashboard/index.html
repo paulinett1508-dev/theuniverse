@@ -303,6 +303,9 @@ body.panel-open #gal-legend{display:none!important}
   <div class="lbl">Ano simulado</div>
   <div class="yr" id="gc-year">2024.000</div>
   <div class="dt" id="gc-date">01 Jan 2024</div>
+  <div class="lbl" style="margin-top:8px">Tempo real</div>
+  <div class="yr" id="clock-year" style="font-size:16px">—</div>
+  <div class="dt" id="clock-date">—</div>
 </div>
 
 <div id="gal-legend"></div>
@@ -1107,6 +1110,39 @@ const _GAL_OB={giant:.065,banded:.035,continental:.015,smooth:.008,rocky:.003};
 
 // Estado central — fonte de verdade para controles UI
 const _galState={speed:1.0,paused:false,atmosphere:true,showOrbits:true};
+
+// ── Sistema 1: Relógio em tempo real ──────────────────────────
+function _getEarthOrbitAngle(){
+  const now=new Date();
+  const start=new Date(now.getFullYear(),0,1);
+  const elapsed=now-start;
+  const yearMs=365.25*24*60*60*1000;
+  const fraction=elapsed/yearMs;
+  const perihelionOffset=(3/365.25)*Math.PI*2;
+  return fraction*Math.PI*2-perihelionOffset;
+}
+function _getRealTimeAngle(){
+  const now=new Date();
+  const hours=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
+  const dayFraction=hours/24;
+  return _getEarthOrbitAngle()+dayFraction*(Math.PI*2/365.25);
+}
+function _updateRealClock(){
+  const now=new Date();
+  const MONTHS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const d=String(now.getDate()).padStart(2,'0');
+  const m=MONTHS[now.getMonth()];
+  const y=now.getFullYear();
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mm=String(now.getMinutes()).padStart(2,'0');
+  const ss=String(now.getSeconds()).padStart(2,'0');
+  const yrEl=document.getElementById('clock-year');
+  const dtEl=document.getElementById('clock-date');
+  if(yrEl)yrEl.textContent=y;
+  if(dtEl)dtEl.textContent=`${d} ${m} ${y}  ${hh}:${mm}:${ss}`;
+}
+setInterval(_updateRealClock,1000);
+_updateRealClock(); // chamada imediata para não ficar "—" até o primeiro segundo
 
 // Centro (v=50) = 1×; v=0 = 0.01×; v=100 = 100×
 function _sliderToSpeed(v){return Math.pow(10,(v-50)/30);}
@@ -2000,6 +2036,225 @@ function _galInitScene(planets){
   {const _oOrbPts=[];for(let i=0;i<=96;i++){const a=i/96*Math.PI*2;_oOrbPts.push(new THREE.Vector3(Math.cos(a)*_OBI_ORBIT,0,Math.sin(a)*_OBI_ORBIT));}const _oOrbL=new THREE.Line(new THREE.BufferGeometry().setFromPoints(_oOrbPts),new THREE.LineBasicMaterial({color:0xaabbcc,transparent:true,opacity:.03}));_oOrbL.rotation.x=Math.PI/4;scene.add(_oOrbL);}
   actualMeshes.push(_obiWanISS);
 
+  // ── Sistema 2: Obi-Wan ISS Messenger ──────────────────────────
+  const _OBJ_STATE={state:'idle',target:null,message:null,progress:0,
+    origin:new THREE.Vector3(),deliveryTimer:0,queue:[],
+    returnOrigin:new THREE.Vector3(),detached:false};
+
+  function _qBezier(p0,p1,p2,t){
+    const u=1-t;
+    return new THREE.Vector3(
+      u*u*p0.x+2*u*t*p1.x+t*t*p2.x,
+      u*u*p0.y+2*u*t*p1.y+t*t*p2.y,
+      u*u*p0.z+2*u*t*p1.z+t*t*p2.z
+    );
+  }
+  function _easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+
+  function _showObiStatus(txt){
+    const el=document.getElementById('obiwan-status');
+    if(el)el.textContent=txt;
+  }
+  function _showTravelLog(txt){
+    const log=document.getElementById('travel-log');
+    if(!log)return;
+    const e=document.createElement('div');
+    e.className='log-entry';
+    e.textContent=`${new Date().toLocaleTimeString()} — ${txt}`;
+    log.prepend(e);
+    while(log.children.length>5)log.removeChild(log.lastChild);
+  }
+  function _showMsgToast(msg,planetName){
+    const toast=document.getElementById('msg-toast');
+    if(!toast)return;
+    const pl=document.getElementById('toast-planet');
+    const ml=document.getElementById('toast-msg');
+    if(pl)pl.textContent=planetName;
+    if(ml)ml.textContent=msg;
+    toast.style.opacity='1';toast.style.transform='translateY(0)';
+    setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateY(8px)';},4000);
+  }
+
+  // Trilha de partículas
+  const _trailPool=[];
+  function _spawnTrail(pos,type){
+    if(Math.random()>.3)return;
+    const col=type==='returning'?0x8899cc:0xffffff;
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({
+      color:col,transparent:true,depthWrite:false,
+      blending:THREE.AdditiveBlending,opacity:.5
+    }));
+    sp.position.copy(pos);
+    sp.scale.setScalar(.4+Math.random()*.3);
+    sp.userData.life=0;sp.userData.maxLife=.8+Math.random()*.4;
+    scene.add(sp);_trailPool.push(sp);
+  }
+  function _updateTrail(dt){
+    for(let i=_trailPool.length-1;i>=0;i--){
+      const s=_trailPool[i];
+      s.userData.life+=dt;
+      const fade=1-s.userData.life/s.userData.maxLife;
+      s.material.opacity=Math.max(0,fade*.5);
+      s.scale.setScalar(.4+s.userData.life*.5);
+      if(s.userData.life>=s.userData.maxLife){scene.remove(s);_trailPool.splice(i,1);}
+    }
+  }
+
+  // Efeito de entrega
+  function _triggerDelivery(targetMesh){
+    const wp=new THREE.Vector3();
+    targetMesh.getWorldPosition(wp);
+    const ring=new THREE.Mesh(
+      new THREE.RingGeometry(.1,.15,32),
+      new THREE.MeshBasicMaterial({color:0xffffaa,transparent:true,opacity:.8,
+        side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending})
+    );
+    ring.rotation.x=Math.PI/2;ring.position.copy(wp);scene.add(ring);
+    const r=targetMesh.userData.radius??2;
+    let prog=0;
+    const iv=setInterval(()=>{
+      prog+=.05;
+      ring.scale.setScalar(r+prog*r*3);
+      ring.material.opacity=.8*(1-prog);
+      if(prog>=1){clearInterval(iv);scene.remove(ring);}
+    },30);
+    _showMsgToast(_OBJ_STATE.message,targetMesh.userData.name||targetMesh.userData.id||'');
+  }
+
+  // Recolocar ISS no pivô
+  function _scene_reattach_iss(){
+    if(!_OBJ_STATE.detached)return;
+    scene.remove(_obiWanISS);
+    _obiWanISS.position.set(_OBI_ORBIT,0,0);
+    _obiWanISS.rotation.set(0,0,0);
+    _obiWanPivot.add(_obiWanISS);
+  }
+
+  // Processar fila
+  function _processNextMsg(){
+    if(!_OBJ_STATE.queue.length){_OBJ_STATE.state='idle';_showObiStatus('Em exílio — aguardando');return;}
+    const {targetId,text}=_OBJ_STATE.queue.shift();
+    let targetMesh=null;
+    for(const m of actualMeshes){if(m.userData.id===targetId||m.userData.name===targetId){targetMesh=m;break;}}
+    if(!targetMesh){for(const g of planetGroups){if(g.userData.id===targetId||g.userData.name===targetId){targetMesh=g;break;}}}
+    if(!targetMesh){_processNextMsg();return;}
+    _OBJ_STATE.target=targetMesh;
+    _OBJ_STATE.message=text;
+    _OBJ_STATE.progress=0;
+    _OBJ_STATE.state='traveling';
+    _obiWanISS.getWorldPosition(_OBJ_STATE.origin);
+    // Desacoplar a ISS do pivô para animar livremente
+    const wp2=new THREE.Vector3();
+    _obiWanISS.getWorldPosition(wp2);
+    _obiWanPivot.remove(_obiWanISS);
+    scene.add(_obiWanISS);
+    _obiWanISS.position.copy(wp2);
+    _OBJ_STATE.detached=true;
+    _showObiStatus(`Viajando para ${targetMesh.userData.name||targetMesh.userData.id}...`);
+    _showTravelLog(`Obi-Wan partiu em missão → ${targetMesh.userData.name||targetMesh.userData.id}`);
+  }
+
+  // Expor globalmente
+  window.sendObiWanMessage=function(targetId,text){
+    _OBJ_STATE.queue.push({targetId,text});
+    if(_OBJ_STATE.state==='idle')_processNextMsg();
+  };
+
+  // Atualização da ISS no loop
+  function _updateObiWan(dt){
+    if(!_obiWanISS)return;
+    _updateTrail(dt);
+    if(_OBJ_STATE.state==='idle'){
+      if(_OBJ_STATE.detached){
+        _scene_reattach_iss();
+        _OBJ_STATE.detached=false;
+      }
+      return;
+    }
+    switch(_OBJ_STATE.state){
+      case 'traveling':{
+        _OBJ_STATE.progress+=dt*0.15;
+        if(_OBJ_STATE.progress>=1){
+          _OBJ_STATE.progress=1;_OBJ_STATE.state='delivering';
+          _OBJ_STATE.deliveryTimer=0;
+          _showObiStatus(`Entregando em ${_OBJ_STATE.target.userData.name||_OBJ_STATE.target.userData.id}`);
+          _triggerDelivery(_OBJ_STATE.target);
+          return;
+        }
+        const t=_easeIO(_OBJ_STATE.progress);
+        const wp=new THREE.Vector3();
+        _OBJ_STATE.target.getWorldPosition(wp);
+        const mid=new THREE.Vector3().addVectors(_OBJ_STATE.origin,wp).multiplyScalar(.5);
+        const orbitAvg=(_OBJ_STATE.origin.length()+wp.length())/2;
+        mid.normalize().multiplyScalar(orbitAvg*1.25);
+        const pos=_qBezier(_OBJ_STATE.origin,mid,wp,t);
+        _obiWanISS.position.copy(pos);
+        if(_OBJ_STATE.progress>.02){
+          const ahead=_qBezier(_OBJ_STATE.origin,mid,wp,Math.min(_OBJ_STATE.progress+.02,1));
+          _obiWanISS.lookAt(ahead);
+        }
+        _spawnTrail(pos.clone(),'traveling');
+        break;
+      }
+      case 'delivering':{
+        _OBJ_STATE.deliveryTimer+=dt;
+        const wp=new THREE.Vector3();
+        _OBJ_STATE.target.getWorldPosition(wp);
+        const r=(_OBJ_STATE.target.userData.radius??2)+3;
+        const ang=_OBJ_STATE.deliveryTimer*1.5;
+        _obiWanISS.position.set(wp.x+Math.cos(ang)*r,wp.y+Math.sin(ang)*.3,wp.z+Math.sin(ang)*r);
+        if(_OBJ_STATE.deliveryTimer>=3){
+          _OBJ_STATE.state='returning';_OBJ_STATE.progress=0;
+          _obiWanISS.getWorldPosition(_OBJ_STATE.returnOrigin);
+          _showObiStatus('Retornando ao exílio...');
+          _showTravelLog('Mensagem entregue — Obi-Wan retorna');
+        }
+        break;
+      }
+      case 'returning':{
+        _OBJ_STATE.progress+=dt*0.12;
+        if(_OBJ_STATE.progress>=1){
+          _OBJ_STATE.progress=0;_OBJ_STATE.state='idle';
+          _scene_reattach_iss();
+          _OBJ_STATE.detached=false;
+          _processNextMsg();
+          return;
+        }
+        const t=_easeIO(_OBJ_STATE.progress);
+        // home = posição atual da ISS no pivô (em coordenadas mundiais)
+        const _homeTemp=new THREE.Vector3();
+        _obiWanPivot.localToWorld(_homeTemp.set(_OBI_ORBIT,0,0));
+        const mid2=new THREE.Vector3().addVectors(_OBJ_STATE.returnOrigin,_homeTemp).multiplyScalar(.5);
+        const orbitAvg2=(_OBJ_STATE.returnOrigin.length()+_homeTemp.length())/2;
+        mid2.normalize().multiplyScalar(orbitAvg2*1.2);
+        const pos2=_qBezier(_OBJ_STATE.returnOrigin,mid2,_homeTemp,t);
+        _obiWanISS.position.copy(pos2);
+        _obiWanISS.lookAt(new THREE.Vector3(0,0,0));
+        _spawnTrail(pos2.clone(),'returning');
+        break;
+      }
+    }
+  }
+
+  // Popular select do Obi-Wan após construção dos meshes
+  (function(){
+    const sel=document.getElementById('msg-target');
+    if(!sel)return;
+    actualMeshes.forEach(m=>{
+      if(!m.userData.id&&!m.userData.name)return;
+      const id=m.userData.id||m.userData.name;
+      const label=m.userData.name||m.userData.id;
+      if(id==='agnostic-core')return; // não enviar para si mesmo
+      const opt=document.createElement('option');
+      opt.value=id;
+      opt.textContent=label;
+      sel.appendChild(opt);
+    });
+    // mostrar HUD
+    const hud=document.getElementById('obiwan-hud');
+    if(hud)hud.style.display='block';
+  })();
+
   // ── comet ──
   const cometGroup=new THREE.Group();
   let cometAngle=0;
@@ -2180,9 +2435,12 @@ function _galInitScene(planets){
       // buraco negro — disco gira
       _bhRef.disk1.rotation.z+=dt*.12;
       _bhRef.disk2.rotation.z-=dt*.08;
-      // Obi-Wan — órbita solar lentíssima
-      _obiWanPivot.rotateOnWorldAxis(new THREE.Vector3(0,1,0),dt*.0008*_galState.speed);
-      _obiWanISS.rotation.y+=dt*.08*_galState.speed; // painéis giram
+      // Obi-Wan — órbita solar lentíssima (só quando não desacoplado para missão)
+      if(!_OBJ_STATE.detached){
+        _obiWanPivot.rotateOnWorldAxis(new THREE.Vector3(0,1,0),dt*.0008*_galState.speed);
+        _obiWanISS.rotation.y+=dt*.08*_galState.speed; // painéis giram
+      }
+      _updateObiWan(dt);
       // decay zone — órbitas ao redor do BH
       const _allDecay=[
         ..._ARCHIVED.map((p,i)=>({data:p,mesh:_decayMeshes[i]})),
@@ -2279,6 +2537,7 @@ function switchView(v){
   const gui=document.getElementById('gal-ui');
   const clk=document.getElementById('gal-clock');
   const leg=document.getElementById('gal-legend');
+  const obiHud=document.getElementById('obiwan-hud');
   if(v==='galactic'){
     gc.style.display='block';gc.style.pointerEvents='auto';
     if(gui)gui.classList.add('visible');
@@ -2286,6 +2545,8 @@ function switchView(v){
     if(leg)leg.classList.add('visible');
     document.getElementById('stars').style.display='none';
     if(allPlanets.length)buildGalactic(allPlanets);
+    // HUD só fica visível se o gal já foi init (select já foi populado)
+    if(obiHud&&obiHud.querySelector('#msg-target')?.children.length>0)obiHud.style.display='block';
   } else {
     gc.style.display='none';gc.style.pointerEvents='none';
     if(gui)gui.classList.remove('visible');
@@ -2293,6 +2554,7 @@ function switchView(v){
     if(leg)leg.classList.remove('visible');
     document.getElementById('stars').style.display='block';
     if(_gal)_gal.stop();
+    if(obiHud)obiHud.style.display='none';
     if(allPlanets.length){buildOrbit(allPlanets);resizeOrbit();}
   }
 }
@@ -2609,5 +2871,69 @@ window.addEventListener('resize',()=>{
 main();
 </script>
 <div id="bh-arrow" style="position:fixed;display:none;color:rgba(255,100,0,.7);font-size:11px;letter-spacing:.2em;pointer-events:none;text-shadow:0 0 8px rgba(255,80,0,.5);transform-origin:center center">⟶ buraco negro</div>
+
+<!-- ── OBI-WAN HUD ──────────────────────────────────────────── -->
+<div id="obiwan-hud" style="
+  position:fixed;bottom:160px;right:24px;
+  background:rgba(0,0,0,.75);
+  border:1px solid rgba(170,180,200,.18);
+  border-radius:10px;padding:14px 16px;
+  min-width:220px;max-width:280px;
+  font-family:monospace;font-size:11px;
+  color:rgba(200,220,240,.8);
+  pointer-events:none;
+  z-index:20;
+  display:none;
+">
+  <div style="font-size:9px;letter-spacing:.35em;color:rgba(170,190,220,.45);
+    text-transform:uppercase;margin-bottom:6px">Estação Obi-Wan</div>
+  <div id="obiwan-status" style="color:rgba(170,190,255,.9);margin-bottom:10px">Em exílio — aguardando</div>
+  <div id="msg-composer" style="pointer-events:auto;display:flex;flex-direction:column;gap:6px">
+    <select id="msg-target" style="
+      background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.12);
+      color:rgba(200,220,240,.9);padding:5px 8px;border-radius:5px;
+      font-family:monospace;font-size:10px;
+    "></select>
+    <input type="text" id="msg-text" maxlength="120" placeholder="Mensagem..." style="
+      background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);
+      color:rgba(200,220,240,.9);padding:5px 8px;border-radius:5px;
+      font-family:monospace;font-size:10px;outline:none;
+    ">
+    <button id="msg-send-btn" onclick="(function(){
+      const t=document.getElementById('msg-target').value;
+      const txt=document.getElementById('msg-text').value.trim();
+      if(!t||!txt)return;
+      sendObiWanMessage(t,txt);
+      document.getElementById('msg-text').value='';
+      document.getElementById('obiwan-status').textContent='Missão recebida — partindo...';
+    })()" style="
+      background:rgba(50,70,120,.7);border:1px solid rgba(100,130,200,.3);
+      color:rgba(200,220,255,.9);padding:5px 10px;border-radius:5px;
+      font-family:monospace;font-size:10px;cursor:pointer;
+    ">Enviar via Obi-Wan</button>
+  </div>
+  <div id="travel-log" style="margin-top:10px;max-height:80px;overflow:hidden;
+    font-size:9px;color:rgba(150,170,200,.6);line-height:1.6"></div>
+</div>
+
+<!-- ── TOAST DE ENTREGA ──────────────────────────────────────── -->
+<div id="msg-toast" style="
+  position:fixed;bottom:80px;right:24px;
+  background:rgba(0,0,0,.88);
+  border:1px solid rgba(255,200,80,.25);
+  border-radius:8px;padding:14px 18px;
+  max-width:260px;
+  opacity:0;transform:translateY(8px);
+  transition:opacity .4s,transform .4s;
+  pointer-events:none;
+  z-index:21;
+  font-family:monospace;
+">
+  <div style="font-size:9px;letter-spacing:.35em;color:rgba(255,200,80,.55);
+    text-transform:uppercase;margin-bottom:5px">
+    Mensagem entregue em <span id="toast-planet" style="color:rgba(255,220,100,.8)"></span>
+  </div>
+  <div id="toast-msg" style="font-size:11px;color:rgba(220,230,245,.7);line-height:1.6"></div>
+</div>
 </body>
 </html>
