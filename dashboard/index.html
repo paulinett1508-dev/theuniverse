@@ -798,7 +798,7 @@ function resizeOrbit(){
 // ═══════════════════════════════════════════════════════
 // THREE.JS — VISTA GALÁCTICA
 // ═══════════════════════════════════════════════════════
-const THREE_SCALE=480;
+const THREE_SCALE=580; // órbitas maiores = planetas mais espaçados
 
 function _healthCol(health,bodyType){
   if(bodyType==='station')    return{base:0x4a6888,emissive:0x1a2a40,glow:0x6090b8};
@@ -824,8 +824,8 @@ function _initThree(){
   renderer.setClearColor(0x000000,0);
 
   const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,1,6000);
-  camera.position.set(0,220,860); // ângulo baixo: 14° de elevação — perspectiva dramática
+  const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,1,8000);
+  camera.position.set(0,360,920); // 21° elevação — perspectiva clara sem achatar
   camera.lookAt(0,0,0);
 
   scene.add(new THREE.PointLight(0xffeebb,3.5,2800,1.5));
@@ -865,7 +865,7 @@ function _initThree(){
   dustGeo.setAttribute('position',new THREE.BufferAttribute(dPos,3));
   dustGeo.setAttribute('color',new THREE.BufferAttribute(dCol,3));
   const dustPts=new THREE.Points(dustGeo,
-    new THREE.PointsMaterial({size:1.5,vertexColors:true,transparent:true,opacity:.5,depthWrite:false})
+    new THREE.PointsMaterial({size:1.2,vertexColors:true,transparent:true,opacity:.28,depthWrite:false})
   );
   scene.add(dustPts);
 
@@ -876,7 +876,7 @@ function _initThree(){
 
   function _mkPlanet(planet,ri){
     const col=_healthCol(planet.health,planet.bodyType);
-    const radius=8+((planet.magnitude||3)/5)*28; // 8–36 unidades — visível na cena
+    const radius=5+((planet.magnitude||3)/5)*13; // 5–18 unidades — visível mas não sobreposto
     const mesh=new THREE.Mesh(
       new THREE.SphereGeometry(radius,32,32),
       new THREE.MeshPhongMaterial({
@@ -884,8 +884,8 @@ function _initThree(){
       })
     );
     mesh.add(new THREE.Mesh(
-      new THREE.SphereGeometry(radius*1.4,16,16),
-      new THREE.MeshBasicMaterial({color:col.glow,transparent:true,opacity:.13,side:THREE.BackSide,depthWrite:false})
+      new THREE.SphereGeometry(radius*1.7,16,16),
+      new THREE.MeshBasicMaterial({color:col.glow,transparent:true,opacity:.07,side:THREE.BackSide,depthWrite:false})
     ));
     if(planet.bodyType==='supernova'){
       mesh.add(new THREE.Mesh(
