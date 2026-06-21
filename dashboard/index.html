@@ -182,10 +182,27 @@ body.panel-open #wrap{padding-right:270px}
 .vb.active{border-color:rgba(100,120,200,.5);color:#c8ceff;background:rgba(100,120,200,.07)}
 .vb:hover:not(.active){color:#7880a8;border-color:rgba(100,120,200,.3)}
 
-/* ── vista galáctica: Three.js toma conta, DOM some ── */
-#three-canvas{position:fixed;top:0;left:0;width:100%;height:100%;display:none;z-index:8;pointer-events:none}
+/* ── vista galáctica: CSS puro — stack solar-system.js ── */
+#gal-scene{position:fixed;top:0;left:0;width:100%;height:100%;display:none;z-index:8;pointer-events:none;overflow:hidden}
 #wrap.galactic #univ{display:none}
 #wrap.galactic #loader{display:none}
+#wrap.galactic #gal-scene{display:block;pointer-events:auto}
+#gal-sun{position:absolute;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 38% 38%,#fff8cc,#ffd700 40%,#ff8c00 75%,#5a1500);box-shadow:0 0 30px 10px rgba(255,180,0,.5),0 0 80px 30px rgba(255,100,0,.25);animation:sun-pulse 5s ease-in-out infinite;z-index:50}
+.gal-ring{position:absolute;border:1px solid rgba(80,120,200,.15);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+.gal-planet{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
+.gal-planet figure{margin:0;padding:0;border-radius:50%;overflow:hidden;transition:filter .2s}
+.gal-planet figure img{display:block;width:200%;height:100%;animation:gal-spin 20s linear infinite;pointer-events:none}
+.gal-planet[data-retro] figure img{animation:gal-spin-retro 35s linear infinite}
+@keyframes gal-spin{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes gal-spin-retro{from{transform:translateX(0)}to{transform:translateX(50%)}}
+.gal-planet:hover figure{filter:brightness(1.35)}
+.gal-planet[data-health="alert"] figure{box-shadow:0 0 0 2px #ff3300,0 0 8px rgba(255,51,0,.6)}
+.gal-planet[data-health="warning"] figure{box-shadow:0 0 0 2px #ffaa00,0 0 6px rgba(255,170,0,.5)}
+.gal-lbl{position:absolute;top:108%;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(255,255,255,.45);white-space:nowrap;pointer-events:none;font-family:'Courier New',monospace;letter-spacing:.05em}
+.gal-satellite figure{clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);border-radius:0!important;background:linear-gradient(135deg,#c0d8f0,#607888)}
+.gal-satellite figure img{display:none}
+.gal-station{position:absolute;transform:translate(-50%,-50%);width:22px;height:22px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(135deg,#9ab2d0,#4a6888);box-shadow:0 0 8px rgba(130,170,220,.7);animation:station-spin 28s linear infinite;cursor:pointer;z-index:60}
+.gal-toys-canvas{width:100%;height:100%;border-radius:50%;display:block}
 
 /* ── body types ── */
 .body-station .pd{clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);border-radius:0;background:linear-gradient(135deg,#9ab2d0 0%,#4a6888 55%,#2a3e58 100%);box-shadow:0 0 8px rgba(130,170,220,.7),0 0 24px rgba(70,110,200,.35);animation:station-spin 28s linear infinite}
@@ -203,7 +220,7 @@ body.panel-open #wrap{padding-right:270px}
 <body>
 
 <canvas id="stars"></canvas>
-<canvas id="three-canvas"></canvas>
+<div id="gal-scene"></div>
 
 <div id="hdr">
   <h1>the<em>universe</em> &middot; observatório <span style="font-size:.55em;opacity:.45;font-weight:400;letter-spacing:.08em">v3</span></h1>
@@ -797,301 +814,194 @@ function resizeOrbit(){
 }
 
 // ═══════════════════════════════════════════════════════
-// THREE.JS — VISTA GALÁCTICA
+// VISTA GALÁCTICA — CSS puro (stack solar-system.js)
 // ═══════════════════════════════════════════════════════
-const THREE_SCALE=720; // órbitas maiores = planetas mais espaçados
+// (Three.js removido — vista galáctica agora é CSS puro)
 
-function _healthCol(health,bodyType){
-  if(bodyType==='station')    return{base:0x4a6888,emissive:0x1a2a40,glow:0x6090b8};
-  if(bodyType==='satellite')  return{base:0x5a7890,emissive:0x1e2838,glow:0x7090a8};
-  if(bodyType==='supernova')  return{base:0xff6200,emissive:0x661000,glow:0xff9900};
-  if(bodyType==='observatory')return{base:0x8898c8,emissive:0x2a3450,glow:0xaab8e0};
-  if(bodyType==='toys')       return{base:0x8040e0,emissive:0x2a0880,glow:0xb060ff};
-  if(!health||health==='dormant')return{base:0x1e1e38,emissive:0x08081a,glow:0x3a3a60};
-  if(health.startsWith('warning'))return{base:0xcc9900,emissive:0x442a00,glow:0xffcc00};
-  if(health.startsWith('alert'))  return{base:0xcc2233,emissive:0x440010,glow:0xff4466};
-  return{base:0x00aa55,emissive:0x003320,glow:0x00ff88};
+// ── classificação de tipo visual (mesmo critério do Three.js anterior) ──
+const _GAL_TEX={
+  jupiter:    'assets/textures/5_jupiter.jpg',
+  mars:       'assets/textures/4_mars.jpg',
+  earth:      'assets/textures/3_earth.jpg',
+  moon:       'assets/textures/1_mercury.jpg',
+  uranus:     'assets/textures/7_uranus.jpg',
+  neptune:    'assets/textures/8_neptune.jpg',
+  supernova:  'assets/textures/2_venus.jpg',
+  observatory:'assets/textures/1_mercury.jpg',
+};
+// spin duration em segundos por tipo — menor = mais rápido
+const _GAL_SPIN={
+  jupiter:8, supernova:6, earth:20, mars:18, neptune:15,
+  uranus:35, moon:60, observatory:40, satellite:10, toys:15,
+};
+
+function _galClassify(planet){
+  const bt=planet.bodyType;
+  if(['satellite','supernova','toys','observatory'].includes(bt)) return bt;
+  const kb=planet.diskKB||0, days=planet.daysSincePush||999;
+  if(kb>4000&&days<60)  return 'jupiter';
+  if(kb>4000)            return 'uranus';
+  if(days<30)            return 'earth';
+  if(days<90)            return 'mars';
+  return 'moon';
 }
 
-let _thr=null;
-
-function _initThree(){
-  if(_thr||typeof THREE==='undefined') return;
-  const canvas=document.getElementById('three-canvas');
-
-  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(innerWidth,innerHeight);
-  renderer.setClearColor(0x000000,0);
-
-  const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,1,8000);
-  // distância responsiva: 644 no 16:9 desktop, recua em telas estreitas
-  function _posCamera(){
-    const asp=innerWidth/innerHeight;
-    const d=Math.round(644*Math.max(1,Math.min(2.2,1.45/asp)));
-    camera.position.set(0,d*.358,d*.934); // 21° elevação fixa
-    camera.lookAt(0,0,0);
-  }
-  _posCamera();
-
-  scene.add(new THREE.PointLight(0xffeebb,3.5,2800,1.5));
-  scene.add(new THREE.AmbientLight(0x0a1428,0.7));
-
-  // textura de glow — canvas radial gradient branco→transparente
-  const _glowC=document.createElement('canvas'); _glowC.width=_glowC.height=128;
-  const _gc=_glowC.getContext('2d');
-  const _gg=_gc.createRadialGradient(64,64,0,64,64,64);
-  _gg.addColorStop(0,'rgba(255,255,255,1)');_gg.addColorStop(.25,'rgba(255,255,255,.5)');
-  _gg.addColorStop(.6,'rgba(255,255,255,.08)');_gg.addColorStop(1,'rgba(255,255,255,0)');
-  _gc.fillStyle=_gg; _gc.fillRect(0,0,128,128);
-  const glowTex=new THREE.CanvasTexture(_glowC);
-
-  // ── planet textures — NASA real images via THREE.TextureLoader ──────
-  let _toyHue=0;
-  const _texLoader=new THREE.TextureLoader();
-  const _texCache={};
-  function _getTex(url){
-    if(!_texCache[url]){const t=_texLoader.load(url);t.wrapS=THREE.RepeatWrapping;_texCache[url]=t;}
-    return _texCache[url];
-  }
-
-  // Toys: canvas animado por hue-rotate — único sintético do universo
-  const _toyCanvas=document.createElement('canvas');_toyCanvas.width=256;_toyCanvas.height=128;
-  const _toyCtx=_toyCanvas.getContext('2d');
-  const _toyTex=(()=>{const t=new THREE.CanvasTexture(_toyCanvas);t.wrapS=THREE.RepeatWrapping;return t;})();
-  function _paintToys(hue){
-    const g=_toyCtx.createLinearGradient(0,0,256,128);
-    g.addColorStop(0,`hsl(${hue},100%,65%)`);g.addColorStop(.4,`hsl(${(hue+60)%360},100%,55%)`);
-    g.addColorStop(.8,`hsl(${(hue+140)%360},100%,60%)`);g.addColorStop(1,`hsl(${(hue+200)%360},100%,65%)`);
-    _toyCtx.fillStyle=g;_toyCtx.fillRect(0,0,256,128);
-  }
-  _paintToys(0);
-
-  const _TEX_MAP={
-    jupiter:     'assets/textures/5_jupiter.jpg',
-    mars:        'assets/textures/4_mars.jpg',
-    earth:       'assets/textures/3_earth.jpg',
-    moon:        'assets/textures/1_mercury.jpg',
-    uranus:      'assets/textures/7_uranus.jpg',
-    neptune:     'assets/textures/8_neptune.jpg',
-    supernova:   'assets/textures/2_venus.jpg',
-    observatory: 'assets/textures/1_mercury.jpg',
-  };
-
-  function _buildPlanetTex(ptype){
-    if(ptype==='toys') return _toyTex;
-    const url=_TEX_MAP[ptype]||_TEX_MAP.earth;
-    return _getTex(url);
-  }
-
-  function _classifyPlanetType(planet){
-    const bt=planet.bodyType;
-    if(['station','satellite','supernova','toys','observatory'].includes(bt)) return bt;
-    const kb=planet.diskKB||0,days=planet.daysSincePush||999;
-    if(kb>4000&&days<60)  return 'jupiter';
-    if(kb>4000)            return 'uranus';
-    if(days<30)            return 'earth';
-    if(days<90)            return 'mars';
-    return 'moon';
-  }
-
-  // sol + camadas de glow
-  const sunMat=new THREE.MeshStandardMaterial({color:0xffaa22,emissive:0xffcc44,emissiveIntensity:1.5,roughness:.8});
-  scene.add(new THREE.Mesh(new THREE.SphereGeometry(44,32,32),sunMat));
-  [[90,0xff9900,.10],[150,0xff6600,.045],[240,0xff3300,.018]].forEach(([r,c,o])=>
-    scene.add(new THREE.Mesh(
-      new THREE.SphereGeometry(r,16,16),
-      new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,side:THREE.BackSide,depthWrite:false})
-    ))
-  );
-  // glow sprite do sol
-  const sunSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xffdd88,transparent:true,opacity:.55,blending:THREE.AdditiveBlending,depthWrite:false}));
-  sunSprite.scale.set(340,340,1); scene.add(sunSprite);
-
-  // anéis orbitais (torus)
-  RINGS.forEach(ring=>{
-    const m=new THREE.Mesh(
-      new THREE.TorusGeometry(ring.rf*THREE_SCALE,1.8,8,180),
-      new THREE.MeshBasicMaterial({color:0x2a3a5a,transparent:true,opacity:.28,depthWrite:false})
-    );
-    m.rotation.x=Math.PI/2;
-    scene.add(m);
-  });
-
-  // poeiras cósmicas — BufferGeometry de pontos
-  const N=3200,dPos=new Float32Array(N*3),dCol=new Float32Array(N*3);
-  for(let i=0;i<N;i++){
-    const a=Math.random()*Math.PI*2, r=80+Math.pow(Math.random(),.55)*620;
-    dPos[i*3]=Math.cos(a)*r; dPos[i*3+1]=(Math.random()-.5)*28; dPos[i*3+2]=Math.sin(a)*r;
-    const t=Math.random();
-    dCol[i*3]=.5+t*.4; dCol[i*3+1]=.55+t*.15; dCol[i*3+2]=.65+(1-t)*.35;
-  }
-  const dustGeo=new THREE.BufferGeometry();
-  dustGeo.setAttribute('position',new THREE.BufferAttribute(dPos,3));
-  dustGeo.setAttribute('color',new THREE.BufferAttribute(dCol,3));
-  const dustPts=new THREE.Points(dustGeo,
-    new THREE.PointsMaterial({size:1.2,vertexColors:true,transparent:true,opacity:.28,depthWrite:false})
-  );
-  scene.add(dustPts);
-
-  const raycaster=new THREE.Raycaster();
-  const mouse=new THREE.Vector2();
-  const byMesh=new WeakMap();
-  let planets3={};
-
-  function _mkPlanet(planet,ri){
-    const col=_healthCol(planet.health,planet.bodyType);
-    const ptype=_classifyPlanetType(planet);
-    const radius=4+((planet.magnitude||3)/5)*5;
-
-    let geom,mat,tex=null;
-    if(ptype==='satellite'){
-      geom=new THREE.OctahedronGeometry(radius);
-      mat=new THREE.MeshStandardMaterial({color:col.base,metalness:.8,roughness:.2,emissive:col.emissive,emissiveIntensity:.15});
-    } else {
-      geom=new THREE.SphereGeometry(radius,32,16);
-      tex=_buildPlanetTex(ptype);
-      // saúde como emissive mínimo — textura é a identidade principal
-      const emInt=ptype==='supernova'?.7:ptype==='toys'?.0:.02;
-      mat=new THREE.MeshPhongMaterial({map:tex,emissive:col.emissive,emissiveIntensity:emInt,shininess:60,specular:0x223344});
-    }
-
-    const mesh=new THREE.Mesh(geom,mat);
-    // anel de alerta: apenas quando warning/alert, sem glow sprite que engole textura
-    if(planet.health==='alert'||planet.health==='warning'){
-      const ringCol=planet.health==='alert'?0xff2200:0xffaa00;
-      mesh.add(new THREE.Mesh(
-        new THREE.TorusGeometry(radius*1.35,.6,6,32),
-        new THREE.MeshBasicMaterial({color:ringCol,transparent:true,opacity:.75,depthWrite:false})
-      ));
-    }
-    if(ptype==='uranus') mesh.rotation.z=Math.PI*.45; // Urano é deitado
-
-    const ra=RINGS[ri].rf*THREE_SCALE;
-    const a=savedAngles[planet.name]||0;
-    mesh.position.set(ra*Math.cos(a),0,ra*Math.sin(a));
-    scene.add(mesh);
-    planets3[planet.name]={mesh,ri,health:planet.health,bodyType:planet.bodyType,ptype,tex};
-    byMesh.set(mesh,planet);
-  }
-
-  function buildPlanets(planets){
-    Object.values(planets3).forEach(({mesh})=>scene.remove(mesh));
-    planets3={};
-    const station=planets.find(p=>p.bodyType==='station');
-    const orbital=planets.filter(p=>p.bodyType!=='station');
-    const sorted=[...orbital].sort((a,b)=>a.daysSincePush-b.daysSincePush);
-    const si=sorted.findIndex(p=>p.bodyType==='satellite');
-    if(si>0){const[s]=sorted.splice(si,1);sorted.unshift(s);}
-    const t=sorted.length;
-    const sp=[Math.round(t*.18),Math.round(t*.26),Math.round(t*.30)];
-    sp.push(t-sp[0]-sp[1]-sp[2]);
-    let pi=0;
-    const ringCounts=[0,0,0,0];
-    for(let ri=0;ri<RINGS.length;ri++)
-      for(let j=0;j<sp[ri]&&pi<sorted.length;j++,pi++){
-        const p=sorted[pi];
-        // distribuição inicial uniforme por anel — evita empilhamento no ângulo 0
-        if(savedAngles[p.name]===undefined)
-          savedAngles[p.name]=(ringCounts[ri]/sp[ri])*Math.PI*2+ri*0.37;
-        ringCounts[ri]++;
-        _mkPlanet(p,ri);
-      }
-    if(station){
-      const col=_healthCol(station.health,'station');
-      const r=3+((station.magnitude||3)/5)*4;
-      const mesh=new THREE.Mesh(
-        new THREE.CylinderGeometry(r,r,r*.6,6),
-        new THREE.MeshPhongMaterial({color:col.base,emissive:col.emissive,emissiveIntensity:.4,shininess:80})
-      );
-      mesh.position.set(0,10,0);
-      scene.add(mesh);
-      planets3[station.name]={mesh,ri:-1};
-      byMesh.set(mesh,station);
-    }
-  }
-
-  // velocidade de rotação própria por tipo (rad/frame a 60fps)
-  const _ROT={jupiter:.014,mars:.007,earth:.006,moon:.002,uranus:.003,
-               neptune:.005,supernova:.016,pulsar:.028,toys:.008,
-               observatory:.002,satellite:.01};
-
-  function step(){
-    const t=performance.now()*.001;
-    dustPts.rotation.y+=.00018;
-    sunMat.emissiveIntensity=1.3+.35*Math.sin(t*.6);
-    sunSprite.material.opacity=.45+.15*Math.sin(t*.6);
-
-    // toys hue avança globalmente
-    _toyHue=(_toyHue+.55)%360;
-
-    Object.entries(planets3).forEach(([name,{mesh,ri,health,bodyType,ptype,tex}])=>{
-      const spd=_ROT[ptype]||.004;
-      // retrógrado: venus-like e uranus
-      mesh.rotation.y+=(ptype==='uranus')?-spd:spd;
-      if(ri<0){return;} // station: só gira, não orbita
-
-      // toys: repinta o canvas compartilhado a cada frame
-      if(ptype==='toys'){
-        _paintToys(_toyHue);
-        _toyTex.needsUpdate=true;
-      }
-      // planetas doentes pulsam
-      if(health&&health!=='healthy'){
-        const ph=(name.charCodeAt(0)%7)*.9;
-        const pulse=.45+.55*Math.abs(Math.sin(t*2.8+ph));
-        mesh.material.emissiveIntensity=pulse;
-        const sp=mesh.children[0];if(sp&&!sp.isMesh)sp.material.opacity=.4+.6*pulse;
-      }
-      if(ptype==='supernova'){
-        const ph=(name.charCodeAt(1)||5)*.7;
-        mesh.material.emissiveIntensity=.7+.5*Math.abs(Math.sin(t*3.5+ph));
-      }
-      savedAngles[name]=(savedAngles[name]||0)+RINGS[ri].spd*.003;
-      const ra=RINGS[ri].rf*THREE_SCALE,a=savedAngles[name];
-      mesh.position.set(ra*Math.cos(a),0,ra*Math.sin(a));
-    });
-    renderer.render(scene,camera);
-  }
-
-  function getMeshes(){return Object.values(planets3).map(p=>p.mesh);}
-
-  canvas.addEventListener('click',e=>{
-    const rc=canvas.getBoundingClientRect();
-    mouse.x=((e.clientX-rc.left)/rc.width)*2-1;
-    mouse.y=-((e.clientY-rc.top)/rc.height)*2+1;
-    raycaster.setFromCamera(mouse,camera);
-    const hits=raycaster.intersectObjects(getMeshes());
-    if(hits.length){const d=byMesh.get(hits[0].object);if(d)openPanel(d,null);}
-  });
-  canvas.addEventListener('mousemove',e=>{
-    const rc=canvas.getBoundingClientRect();
-    mouse.x=((e.clientX-rc.left)/rc.width)*2-1;
-    mouse.y=-((e.clientY-rc.top)/rc.height)*2+1;
-    raycaster.setFromCamera(mouse,camera);
-    canvas.style.cursor=raycaster.intersectObjects(getMeshes()).length?'pointer':'default';
-  });
-
-  _thr={renderer,scene,camera,buildPlanets,step,posCamera:_posCamera};
+// dimensões dos anéis elípticos — ajuste responsivo ao viewport
+function _galRings(){
+  const W=innerWidth, H=innerHeight;
+  const minDim=Math.min(W,H);
+  return [
+    {rX:minDim*.14, rY:minDim*.065},
+    {rX:minDim*.26, rY:minDim*.12},
+    {rX:minDim*.38, rY:minDim*.175},
+    {rX:minDim*.48, rY:minDim*.22},
+  ];
 }
+
+let _galRaf=null, _galPlanets=[], _galToysHue=0;
 
 function buildGalactic(planets){
-  _initThree();
-  if(!_thr) return;
-  _thr.buildPlanets(planets);
-  const tc=document.getElementById('three-canvas');
-  tc.style.display='block'; tc.style.pointerEvents='auto';
+  const scene=document.getElementById('gal-scene');
+  if(!scene) return;
+
+  // para animação anterior
+  if(_galRaf){cancelAnimationFrame(_galRaf);_galRaf=null;}
+
+  const W=innerWidth, H=innerHeight;
+  const cx=W/2, cy=H/2;
+  const rings=_galRings();
+  const minDim=Math.min(W,H);
+
+  // distribui planetas nos anéis (mesmo algoritmo do orbital)
+  const station=planets.find(p=>p.bodyType==='station');
+  const orbital=planets.filter(p=>p.bodyType!=='station');
+  const sorted=[...orbital].sort((a,b)=>a.daysSincePush-b.daysSincePush);
+  const si=sorted.findIndex(p=>p.bodyType==='satellite');
+  if(si>0){const[s]=sorted.splice(si,1);sorted.unshift(s);}
+  const total=sorted.length;
+  const sp=[Math.round(total*.18),Math.round(total*.26),Math.round(total*.30)];
+  sp.push(total-sp[0]-sp[1]-sp[2]);
+
+  // monta HTML
+  let html='';
+
+  // sol central
+  const sunSz=Math.round(minDim*.055);
+  html+=`<div id="gal-sun" style="left:${cx}px;top:${cy}px;width:${sunSz}px;height:${sunSz}px"></div>`;
+
+  // anéis elípticos como divs com border-radius via clip-path SVG inline
+  rings.forEach(r=>{
+    const ew=r.rX*2, eh=r.rY*2;
+    html+=`<div class="gal-ring" style="left:${cx}px;top:${cy}px;width:${ew}px;height:${eh}px;margin-left:${-r.rX}px;margin-top:${-r.rY}px;border-radius:50%"></div>`;
+  });
+
+  // station como hexágono central acima do sol
+  if(station){
+    html+=`<div class="gal-station" data-name="${station.name}" title="${station.name}" style="left:${cx}px;top:${cy-sunSz*.9}px"></div>`;
+  }
+
+  _galPlanets=[];
+  let pi=0;
+  for(let ri=0;ri<rings.length;ri++){
+    const count=sp[ri];
+    for(let j=0;j<count&&pi<sorted.length;j++,pi++){
+      const p=sorted[pi];
+      const ptype=_galClassify(p);
+      const isSatellite=ptype==='satellite';
+      const isToys=ptype==='toys';
+      const isRetro=ptype==='uranus'||p.health==='dormant';
+
+      // tamanho baseado em magnitude + anel (planetas mais externos são maiores)
+      const baseSize=minDim*(.022+ri*.008);
+      const sz=Math.round(baseSize*(1+(p.magnitude||3)/12));
+
+      // ângulo inicial uniforme por anel
+      if(savedAngles[p.name]===undefined)
+        savedAngles[p.name]=(j/count)*Math.PI*2+ri*0.37;
+
+      const ang=savedAngles[p.name];
+      const x=cx+rings[ri].rX*Math.cos(ang);
+      const y=cy+rings[ri].rY*Math.sin(ang);
+
+      // saúde como data-health para box-shadow CSS
+      const health=p.health&&p.health!=='healthy'?` data-health="${p.health}"`:'';
+      const retro=isRetro?' data-retro':''
+      const spinDur=(_GAL_SPIN[ptype]||20)*(1+pi%3*.15); // leve variação por planeta
+
+      let inner;
+      if(isToys){
+        inner=`<figure style="width:${sz}px;height:${sz}px"><canvas class="gal-toys-canvas" width="64" height="32" data-toys></canvas></figure>`;
+      } else if(isSatellite){
+        inner=`<figure style="width:${sz}px;height:${sz}px"></figure>`;
+      } else {
+        const tex=_GAL_TEX[ptype]||_GAL_TEX.earth;
+        inner=`<figure style="width:${sz}px;height:${sz}px"><img src="${tex}" alt="" style="animation-duration:${spinDur}s" draggable="false"></figure>`;
+      }
+
+      html+=`<div class="gal-planet${isSatellite?' gal-satellite':''}" data-name="${p.name}"${health}${retro} style="left:${Math.round(x)}px;top:${Math.round(y)}px;z-index:${Math.round(10+y/H*30)}">${inner}<span class="gal-lbl">${p.name}</span></div>`;
+      _galPlanets.push({name:p.name,ri,spd:RINGS[ri].spd,planet:p});
+    }
+  }
+
+  scene.innerHTML=html;
+
+  // toys: pinta canvas com hue-rotate
+  scene.querySelectorAll('[data-toys]').forEach(c=>{
+    const ctx=c.getContext('2d');
+    function paintToys(hue){
+      const g=ctx.createLinearGradient(0,0,64,32);
+      g.addColorStop(0,`hsl(${hue},100%,65%)`);
+      g.addColorStop(.4,`hsl(${(hue+60)%360},100%,55%)`);
+      g.addColorStop(.8,`hsl(${(hue+140)%360},100%,60%)`);
+      g.addColorStop(1,`hsl(${(hue+200)%360},100%,65%)`);
+      ctx.fillStyle=g; ctx.fillRect(0,0,64,32);
+    }
+    c._paintToys=paintToys;
+    paintToys(0);
+  });
+
+  // click em planetas
+  scene.querySelectorAll('.gal-planet,.gal-station').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const name=el.dataset.name;
+      const planet=planets.find(p=>p.name===name);
+      if(planet) openPanel(planet,null);
+    });
+  });
+
+  // loop de órbita CSS — apenas atualiza posições via JS, animação gira via CSS
+  function tick(){
+    _galToysHue=(_galToysHue+.4)%360;
+    const ringsNow=_galRings();
+    const W2=innerWidth, H2=innerHeight, cx2=W2/2, cy2=H2/2;
+
+    _galPlanets.forEach(({name,ri,spd})=>{
+      savedAngles[name]=(savedAngles[name]||0)+spd*.003;
+      const ang=savedAngles[name];
+      const x=cx2+ringsNow[ri].rX*Math.cos(ang);
+      const y=cy2+ringsNow[ri].rY*Math.sin(ang);
+      const el=scene.querySelector(`.gal-planet[data-name="${name}"]`);
+      if(el){
+        el.style.left=Math.round(x)+'px';
+        el.style.top=Math.round(y)+'px';
+        el.style.zIndex=Math.round(10+y/H2*30);
+      }
+    });
+
+    // toys canvas cycling
+    scene.querySelectorAll('[data-toys]').forEach(c=>{
+      if(c._paintToys) c._paintToys(_galToysHue);
+    });
+
+    _galRaf=requestAnimationFrame(tick);
+  }
+  _galRaf=requestAnimationFrame(tick);
 }
 
-function stepGalactic(){if(_thr) _thr.step();}
+function stepGalactic(){} // animação gerida pelo próprio RAF em buildGalactic
 
 function resizeGalactic(){
-  if(!_thr) return;
-  _thr.camera.aspect=innerWidth/innerHeight;
-  _thr.camera.updateProjectionMatrix();
-  _thr.renderer.setSize(innerWidth,innerHeight);
-  _thr.posCamera();
+  if(currentView==='galactic'&&allPlanets.length) buildGalactic(allPlanets);
 }
 
 function switchView(v){
@@ -1099,12 +1009,10 @@ function switchView(v){
   currentView=v;
   document.querySelectorAll('.vb').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
   document.getElementById('wrap').classList.toggle('galactic',v==='galactic');
-  const tc=document.getElementById('three-canvas');
   if(v==='galactic'){
-    tc.style.display='block'; tc.style.pointerEvents='auto';
     if(allPlanets.length) buildGalactic(allPlanets);
   } else {
-    tc.style.display='none'; tc.style.pointerEvents='none';
+    if(_galRaf){cancelAnimationFrame(_galRaf);_galRaf=null;}
     if(allPlanets.length){buildOrbit(allPlanets);resizeOrbit();}
   }
 }
@@ -1348,6 +1256,5 @@ window.addEventListener('resize',()=>{
 });
 main();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" integrity="sha512-vnmn/Qqn6aG0POAc9mIGzjq0IybrvxJXYDafNvp9JSnDGxeF3pbkSqLvf+YGd5ku63pT7sa/jxHn7/d0mU8+tA==" crossorigin="anonymous"></script>
 </body>
 </html>
