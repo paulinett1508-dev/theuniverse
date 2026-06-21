@@ -402,6 +402,84 @@ function stopPlanetAnim(){
   if(planetRaf){cancelAnimationFrame(planetRaf);planetRaf=null;}
 }
 
+function drawStation(pc,W,H,planet,rot){
+  pc.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,R=Math.min(W,H)*.34;
+  // glow
+  const ag=pc.createRadialGradient(cx,cy,R*.4,cx,cy,R*1.9);
+  ag.addColorStop(0,'rgba(100,150,220,.18)'); ag.addColorStop(1,'rgba(0,0,0,0)');
+  pc.fillStyle=ag; pc.beginPath(); pc.arc(cx,cy,R*1.9,0,Math.PI*2); pc.fill();
+  pc.save(); pc.translate(cx,cy); pc.rotate(rot*.28);
+  // outer ring
+  pc.beginPath(); pc.arc(0,0,R*1.18,0,Math.PI*2);
+  pc.strokeStyle='rgba(100,150,220,.22)'; pc.lineWidth=1.5; pc.stroke();
+  // hex body
+  pc.beginPath();
+  for(let i=0;i<6;i++){const a=i/6*Math.PI*2;i===0?pc.moveTo(R*Math.cos(a),R*Math.sin(a)):pc.lineTo(R*Math.cos(a),R*Math.sin(a));}
+  pc.closePath();
+  const g=pc.createLinearGradient(-R,-R,R,R);
+  g.addColorStop(0,'#9ab2d0'); g.addColorStop(.5,'#4a6888'); g.addColorStop(1,'#2a3e58');
+  pc.fillStyle=g; pc.fill();
+  pc.strokeStyle='rgba(150,190,240,.5)'; pc.lineWidth=1.5; pc.stroke();
+  // spokes + mid ring
+  pc.strokeStyle='rgba(150,190,240,.18)'; pc.lineWidth=1;
+  for(let i=0;i<6;i++){const a=i/6*Math.PI*2;pc.beginPath();pc.moveTo(0,0);pc.lineTo(R*Math.cos(a),R*Math.sin(a));pc.stroke();}
+  pc.beginPath(); pc.arc(0,0,R*.55,0,Math.PI*2);
+  pc.strokeStyle='rgba(150,190,240,.3)'; pc.lineWidth=1; pc.stroke();
+  // core hub
+  const hub=pc.createRadialGradient(-R*.08,-R*.08,0,0,0,R*.28);
+  hub.addColorStop(0,'#7090b8'); hub.addColorStop(1,'#1e3050');
+  pc.beginPath(); pc.arc(0,0,R*.28,0,Math.PI*2); pc.fillStyle=hub; pc.fill();
+  pc.strokeStyle='rgba(150,190,240,.5)'; pc.lineWidth=1; pc.stroke();
+  pc.restore();
+  const [gr,gg,gb]=hex2rgb('#6080a8');
+  pc.font='10px Courier New'; pc.fillStyle=`rgba(${gr},${gg},${gb},.55)`;
+  pc.textAlign='right'; pc.fillText(planet.name,W-10,H-8);
+}
+
+function drawSatellite(pc,W,H,planet,rot){
+  pc.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,R=Math.min(W,H)*.13;
+  // faint glow
+  const ag=pc.createRadialGradient(cx,cy,R,cx,cy,R*4);
+  ag.addColorStop(0,'rgba(120,160,200,.12)'); ag.addColorStop(1,'rgba(0,0,0,0)');
+  pc.fillStyle=ag; pc.beginPath(); pc.arc(cx,cy,R*4,0,Math.PI*2); pc.fill();
+  pc.save(); pc.translate(cx,cy); pc.rotate(rot*.45);
+  // solar panels
+  const pw=R*3.2,ph=R*.9;
+  [[-1],[1]].forEach(([side])=>{
+    const ox=side*(R+2);
+    const panelG=pc.createLinearGradient(ox,-ph/2,ox,ph/2);
+    panelG.addColorStop(0,'rgba(50,70,120,.9)'); panelG.addColorStop(1,'rgba(30,50,90,.9)');
+    pc.fillStyle=panelG; pc.fillRect(ox+(side<0?-pw:0),-ph/2,pw,ph);
+    pc.strokeStyle='rgba(80,120,200,.4)'; pc.lineWidth=.6;
+    pc.strokeRect(ox+(side<0?-pw:0),-ph/2,pw,ph);
+    for(let i=1;i<4;i++){
+      const x=ox+(side<0?-pw:0)+i*pw/4;
+      pc.beginPath(); pc.moveTo(x,-ph/2); pc.lineTo(x,ph/2);
+      pc.strokeStyle='rgba(80,120,180,.25)'; pc.stroke();
+    }
+    // panel connector
+    pc.beginPath(); pc.moveTo(side*R,0); pc.lineTo(ox,0);
+    pc.strokeStyle='rgba(150,180,220,.4)'; pc.lineWidth=1; pc.stroke();
+  });
+  // body (diamond)
+  pc.beginPath(); pc.moveTo(0,-R*2); pc.lineTo(R,0); pc.lineTo(0,R*2); pc.lineTo(-R,0); pc.closePath();
+  const g=pc.createLinearGradient(-R,-R*2,R,R*2);
+  g.addColorStop(0,'#c0ccdc'); g.addColorStop(.5,'#708090'); g.addColorStop(1,'#3a4858');
+  pc.fillStyle=g; pc.fill();
+  pc.strokeStyle='rgba(160,190,220,.6)'; pc.lineWidth=1; pc.stroke();
+  // antenna
+  pc.beginPath(); pc.moveTo(0,-R*2); pc.lineTo(0,-R*3.2);
+  pc.strokeStyle='rgba(180,200,220,.5)'; pc.lineWidth=1; pc.stroke();
+  pc.beginPath(); pc.arc(0,-R*3.2,R*.25,0,Math.PI*2);
+  pc.fillStyle='rgba(180,210,240,.7)'; pc.fill();
+  pc.restore();
+  const [gr,gg,gb]=hex2rgb('#7090a8');
+  pc.font='10px Courier New'; pc.fillStyle=`rgba(${gr},${gg},${gb},.55)`;
+  pc.textAlign='right'; pc.fillText(planet.name,W-10,H-8);
+}
+
 function startPlanetAnim(planet){
   stopPlanetAnim();
   const wrap=document.getElementById('planet-wrap');
@@ -413,10 +491,13 @@ function startPlanetAnim(planet){
   wrap.appendChild(cv);
   const pc=cv.getContext('2d');
   const seed=hashStr(planet.name);
-  const hasRings=(planet.magnitude>=4)&&(seed%3===0);
+  const bt=planet.bodyType||'planet';
+  const hasRings=(planet.magnitude>=4)&&(seed%3===0)&&bt==='planet';
   planetRot=0;
   function frame(){
-    drawPlanet(pc,W,H,planet,seed,planetRot,hasRings);
+    if(bt==='station') drawStation(pc,W,H,planet,planetRot);
+    else if(bt==='satellite') drawSatellite(pc,W,H,planet,planetRot);
+    else drawPlanet(pc,W,H,planet,seed,planetRot,hasRings);
     planetRot+=0.006;
     planetRaf=requestAnimationFrame(frame);
   }
