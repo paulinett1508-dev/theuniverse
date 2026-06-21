@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-21 (Carta de Apresentação enviada a 29/31 planetas via Artoo)
+> Última atualização: 2026-06-21 (Federação M2M: issue de design aberta — theuniverse#1)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -148,6 +148,16 @@ Quando `luna-base` for excluído ou outro repo ganhar tipo especial: atualizar `
 **Vista galáctica v4** (2026-06-21): Three.js WebGL — planetas 3D reais (SphereGeometry), 4 anéis com torus, poeiras cósmicas como PointCloud, câmera em perspectiva 21°. Planetas 3-9 unidades (magnitude 1-5), distribuição angular uniforme por anel, sem cascas de atmosfera sobrepostas. THREE_SCALE=720. Selecionável pelo botão "━ galáctica" no header.
 
 Próximas evoluções: pack de stickers · `sbrgestao` CI fix.
+
+### 7. Federação M2M — ⏳ DESIGN (theuniverse#1)
+
+**Issue:** [theuniverse#1](https://github.com/paulinett1508-dev/theuniverse/issues/1) — endpoint `POST /ask` na Polaris para comunicação síncrona planeta ↔ Obi-Wan.
+
+**Contexto:** nexus-labsobral (SHELDON) foi o primeiro planeta a solicitar federação síncrona. Canal assíncrono atual (GitHub Issues + `observatory-alert`) já está no ar no lado do planeta.
+
+**O que falta (decisão do TheGod):** porta, política de tokens (1 por planeta vs global), modo de resposta (síncrono vs callback assíncrono).
+
+**Lado do planeta:** quando o endpoint existir, SHELDON liga o cliente — rastreado em issue própria no repo do planeta.
 
 ### 5. Artoo — Mensageiro Cósmico | ✅ IMPLEMENTADO (2026-06-20)
 
