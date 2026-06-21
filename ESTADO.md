@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-20 (sessão madrugada — Dashboard NOC v2 + fixes Oráculo + luna-base)
+> Última atualização: 2026-06-21 (Oráculo v3.2 testado e confirmado — sticker + Carl Sagan)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -101,7 +101,7 @@ Gravidade = agnostic-core (submodule).
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
-### 1. Hermes-Oráculo (subsistema A) — ✅ NO AR | v3.2 (Polaris desatualizada — requer git pull)
+### 1. Hermes-Oráculo (subsistema A) — ✅ NO AR | v3.2
 
 Deploy: Polaris `195.200.5.145`. Telegram: `@guardiao_universo_bot`. 227 chunks indexados.
 
@@ -114,10 +114,7 @@ Deploy: Polaris `195.200.5.145`. Telegram: `@guardiao_universo_bot`. 227 chunks 
 
 **Re-deploy do zero:** `bash oraculo/deploy.sh` + `bash webhook/deploy.sh`
 
-⚠️ **Pendente**: Polaris ainda roda v3.1 — atualizar com:
-```
-ssh -i ~/.ssh/vscode_key root@195.200.5.145 "cd /opt/theuniverse && git pull && systemctl restart oraculo"
-```
+Polaris atualizada em 2026-06-21. Testado: reply a notificação → sticker 🌌 + resposta contextual. ✅
 
 ### 2. Subsistema B2 (Webhook Notifier) — ✅ NO AR
 
