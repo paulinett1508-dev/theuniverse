@@ -847,77 +847,42 @@ function _initThree(){
   _gc.fillStyle=_gg; _gc.fillRect(0,0,128,128);
   const glowTex=new THREE.CanvasTexture(_glowC);
 
-  // ── planet textures (canvas procedural, inspired by solar-system.js) ──────
-  const _TW=256,_TH=128;
+  // ── planet textures — NASA real images via THREE.TextureLoader ──────
   let _toyHue=0;
-
-  function _prng(seed){let s=seed%2147483647;if(s<=0)s+=2147483646;return()=>{s=s*16807%2147483647;return(s-1)/2147483646};}
-  function _hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=(Math.imul(31,h)+s.charCodeAt(i))|0;return Math.abs(h);}
-
-  function _ptJupiter(ctx){
-    const bands=[[0,10,'#f0d090'],[10,12,'#9a5c18'],[22,9,'#e8c070'],[31,14,'#7a3a10'],
-      [45,8,'#d49040'],[53,10,'#b85010'],[63,9,'#dfa050'],[72,12,'#6a3010'],
-      [84,10,'#c88030'],[94,12,'#f0d090'],[106,10,'#8a5a28'],[116,12,'#d09040']];
-    bands.forEach(([y,h,c])=>{ctx.fillStyle=c;ctx.fillRect(0,y,_TW,h);});
-    ctx.fillStyle='#7a1800';ctx.beginPath();ctx.ellipse(_TW*.42,58,_TW*.11,_TH*.075,-.15,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#c84030';ctx.beginPath();ctx.ellipse(_TW*.42,57,_TW*.07,_TH*.05,-.15,0,Math.PI*2);ctx.fill();
-  }
-  function _ptMars(ctx,r){
-    ctx.fillStyle='#b83c0e';ctx.fillRect(0,0,_TW,_TH);
-    ctx.globalAlpha=.55;for(let i=0;i<10;i++){const x=20+r()*(_TW-40),y=r()*_TH,rr=8+r()*26;ctx.fillStyle='#d45820';ctx.beginPath();ctx.ellipse(x,y,rr,rr*.6,r()*Math.PI,0,Math.PI*2);ctx.fill();}
-    ctx.globalAlpha=1;
-    for(let i=0;i<16;i++){const cx=16+r()*(_TW-32),cy=18+r()*(_TH-36),cr=2+r()*9;ctx.globalAlpha=.45;ctx.fillStyle='#5a1800';ctx.beginPath();ctx.arc(cx,cy,cr,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.2;ctx.fillStyle='#e8a070';ctx.beginPath();ctx.arc(cx-cr*.3,cy-cr*.3,cr*.5,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
-    const p=ctx.createLinearGradient(0,0,0,18);p.addColorStop(0,'rgba(240,230,210,.9)');p.addColorStop(1,'rgba(240,230,210,0)');ctx.fillStyle=p;ctx.fillRect(0,0,_TW,18);
-    const p2=ctx.createLinearGradient(0,_TH-14,0,_TH);p2.addColorStop(0,'rgba(240,230,210,0)');p2.addColorStop(1,'rgba(240,230,210,.7)');ctx.fillStyle=p2;ctx.fillRect(0,_TH-14,_TW,14);
-  }
-  function _ptEarth(ctx,r){
-    ctx.fillStyle='#1658a0';ctx.fillRect(0,0,_TW,_TH);
-    [[.1,.22,.16,.26,.3],[.40,.16,.13,.25,.2],[.58,.26,.15,.21,.4],[.74,.52,.09,.13,.5]].forEach(([lx,ly,rx,ry,a])=>{
-      const g=ctx.createRadialGradient(lx*_TW,ly*_TH+8,0,lx*_TW,ly*_TH,rx*_TW);g.addColorStop(0,'#3a7a30');g.addColorStop(.6,'#4a6020');g.addColorStop(1,'rgba(30,60,20,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(lx*_TW,ly*_TH,rx*_TW,ry*_TH,a,0,Math.PI*2);ctx.fill();
-    });
-    ctx.globalAlpha=.5;for(let i=0;i<8;i++){const cx=r()*_TW,cy=r()*_TH,cw=18+r()*50,ch=5+r()*12;const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,cw*.5);cg.addColorStop(0,'rgba(255,255,255,.9)');cg.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(cx,cy,cw,ch,r()*.8,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
-    const ic=ctx.createLinearGradient(0,0,0,13);ic.addColorStop(0,'rgba(225,240,255,.9)');ic.addColorStop(1,'rgba(225,240,255,0)');ctx.fillStyle=ic;ctx.fillRect(0,0,_TW,13);
-    const ic2=ctx.createLinearGradient(0,_TH-10,0,_TH);ic2.addColorStop(0,'rgba(225,240,255,0)');ic2.addColorStop(1,'rgba(225,240,255,.75)');ctx.fillStyle=ic2;ctx.fillRect(0,_TH-10,_TW,10);
-  }
-  function _ptMoon(ctx,r){
-    ctx.fillStyle='#787878';ctx.fillRect(0,0,_TW,_TH);
-    ctx.globalAlpha=.55;[[.32,.38,26,18],[.64,.28,17,13],[.18,.6,21,15],[.78,.56,11,9]].forEach(([mx,my,mrx,mry])=>{ctx.fillStyle='#4e4e4e';ctx.beginPath();ctx.ellipse(mx*_TW,my*_TH,mrx,mry,0,0,Math.PI*2);ctx.fill();});ctx.globalAlpha=1;
-    for(let i=0;i<24;i++){const cx=14+r()*(_TW-28),cy=r()*_TH,cr=2+r()*10;ctx.globalAlpha=.5;ctx.fillStyle='#404040';ctx.beginPath();ctx.arc(cx,cy,cr,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.28;ctx.strokeStyle='#9a9a9a';ctx.lineWidth=.7;ctx.beginPath();ctx.arc(cx,cy,cr,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
-  }
-  function _ptUranus(ctx){
-    const g=ctx.createLinearGradient(0,0,0,_TH);g.addColorStop(0,'#80e8e0');g.addColorStop(.5,'#50c8c8');g.addColorStop(1,'#60d8d0');ctx.fillStyle=g;ctx.fillRect(0,0,_TW,_TH);
-    ctx.globalAlpha=.1;for(let y=0;y<_TH;y+=8){ctx.fillStyle=y%16===0?'#b0f8f0':'#30a0a0';ctx.fillRect(0,y,_TW,4);}ctx.globalAlpha=1;
-  }
-  function _ptNeptune(ctx){
-    ctx.fillStyle='#1028b8';ctx.fillRect(0,0,_TW,_TH);
-    ctx.globalAlpha=.18;for(let y=0;y<_TH;y+=10){ctx.fillStyle='#2040e0';ctx.fillRect(0,y,_TW,5);}ctx.globalAlpha=.65;
-    ctx.fillStyle='#08109a';ctx.beginPath();ctx.ellipse(_TW*.55,_TH*.38,_TW*.09,_TH*.07,-.2,0,Math.PI*2);ctx.fill();
-    ctx.globalAlpha=.5;ctx.fillStyle='#b0c8ff';ctx.beginPath();ctx.ellipse(_TW*.38,_TH*.32,_TW*.14,_TH*.025,.15,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
-  }
-  function _ptSupernova(ctx,r){
-    ctx.fillStyle='#080000';ctx.fillRect(0,0,_TW,_TH);
-    const g=ctx.createRadialGradient(_TW*.5,_TH*.5,0,_TW*.5,_TH*.5,_TW*.5);g.addColorStop(0,'#ffffff');g.addColorStop(.15,'#fff0a0');g.addColorStop(.4,'#ff8800');g.addColorStop(.7,'#cc2200');g.addColorStop(1,'#200000');ctx.fillStyle=g;ctx.fillRect(0,0,_TW,_TH);
-    ctx.globalAlpha=.55;for(let i=0;i<12;i++){const ang=r()*Math.PI*2,len=14+r()*40,x0=_TW*.5+Math.cos(ang)*7,y0=_TH*.5+Math.sin(ang)*5;ctx.strokeStyle='#ffcc44';ctx.lineWidth=.6+r();ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x0+Math.cos(ang)*len,y0+Math.sin(ang)*len*.65);ctx.stroke();}ctx.globalAlpha=1;
-  }
-  function _ptToys(ctx,hue){
-    const g=ctx.createLinearGradient(0,0,_TW,_TH);g.addColorStop(0,`hsl(${hue},100%,65%)`);g.addColorStop(.4,`hsl(${(hue+60)%360},100%,55%)`);g.addColorStop(.8,`hsl(${(hue+140)%360},100%,60%)`);g.addColorStop(1,`hsl(${(hue+200)%360},100%,65%)`);ctx.fillStyle=g;ctx.fillRect(0,0,_TW,_TH);
+  const _texLoader=new THREE.TextureLoader();
+  const _texCache={};
+  function _getTex(url){
+    if(!_texCache[url]){const t=_texLoader.load(url);t.wrapS=THREE.RepeatWrapping;_texCache[url]=t;}
+    return _texCache[url];
   }
 
-  function _buildPlanetTex(ptype,seed){
-    const c=document.createElement('canvas');c.width=_TW;c.height=_TH;
-    const x=c.getContext('2d'),r=_prng(seed);
-    if(ptype==='jupiter')    _ptJupiter(x);
-    else if(ptype==='mars')  _ptMars(x,r);
-    else if(ptype==='earth') _ptEarth(x,r);
-    else if(ptype==='moon')  _ptMoon(x,r);
-    else if(ptype==='uranus')_ptUranus(x);
-    else if(ptype==='neptune')_ptNeptune(x);
-    else if(ptype==='supernova')_ptSupernova(x,r);
-    else if(ptype==='toys')  _ptToys(x,0);
-    else { x.fillStyle='#1e1e38';x.fillRect(0,0,_TW,_TH); }
-    const t=new THREE.CanvasTexture(c);
-    t.wrapS=THREE.RepeatWrapping;
-    return t;
+  // Toys: canvas animado por hue-rotate — único sintético do universo
+  const _toyCanvas=document.createElement('canvas');_toyCanvas.width=256;_toyCanvas.height=128;
+  const _toyCtx=_toyCanvas.getContext('2d');
+  const _toyTex=(()=>{const t=new THREE.CanvasTexture(_toyCanvas);t.wrapS=THREE.RepeatWrapping;return t;})();
+  function _paintToys(hue){
+    const g=_toyCtx.createLinearGradient(0,0,256,128);
+    g.addColorStop(0,`hsl(${hue},100%,65%)`);g.addColorStop(.4,`hsl(${(hue+60)%360},100%,55%)`);
+    g.addColorStop(.8,`hsl(${(hue+140)%360},100%,60%)`);g.addColorStop(1,`hsl(${(hue+200)%360},100%,65%)`);
+    _toyCtx.fillStyle=g;_toyCtx.fillRect(0,0,256,128);
+  }
+  _paintToys(0);
+
+  const _TEX_MAP={
+    jupiter:     'assets/textures/5_jupiter.jpg',
+    mars:        'assets/textures/4_mars.jpg',
+    earth:       'assets/textures/3_earth.jpg',
+    moon:        'assets/textures/1_mercury.jpg',
+    uranus:      'assets/textures/7_uranus.jpg',
+    neptune:     'assets/textures/8_neptune.jpg',
+    supernova:   'assets/textures/2_venus.jpg',
+    observatory: 'assets/textures/1_mercury.jpg',
+  };
+
+  function _buildPlanetTex(ptype){
+    if(ptype==='toys') return _toyTex;
+    const url=_TEX_MAP[ptype]||_TEX_MAP.earth;
+    return _getTex(url);
   }
 
   function _classifyPlanetType(planet){
@@ -978,7 +943,6 @@ function _initThree(){
   function _mkPlanet(planet,ri){
     const col=_healthCol(planet.health,planet.bodyType);
     const ptype=_classifyPlanetType(planet);
-    const seed=_hashStr(planet.name);
     const radius=7+((planet.magnitude||3)/5)*10;
 
     let geom,mat,tex=null;
@@ -987,7 +951,7 @@ function _initThree(){
       mat=new THREE.MeshStandardMaterial({color:col.base,metalness:.8,roughness:.2,emissive:col.emissive,emissiveIntensity:.2});
     } else {
       geom=new THREE.SphereGeometry(radius,32,16);
-      tex=_buildPlanetTex(ptype,seed);
+      tex=_buildPlanetTex(ptype);
       const emInt=ptype==='toys'?.0:.04;
       mat=new THREE.MeshPhongMaterial({map:tex,emissive:col.emissive,emissiveIntensity:emInt,shininess:55,specular:0x334466});
       if(ptype==='supernova') mat.emissiveIntensity=.9;
@@ -1069,10 +1033,10 @@ function _initThree(){
       mesh.rotation.y+=(ptype==='uranus')?-spd:spd;
       if(ri<0){return;} // station: só gira, não orbita
 
-      // toys: repinta a textura com novo hue a cada frame
-      if(ptype==='toys'&&tex){
-        _ptToys(tex.image.getContext('2d'),_toyHue);
-        tex.needsUpdate=true;
+      // toys: repinta o canvas compartilhado a cada frame
+      if(ptype==='toys'){
+        _paintToys(_toyHue);
+        _toyTex.needsUpdate=true;
       }
       // planetas doentes pulsam
       if(health&&health!=='healthy'){
