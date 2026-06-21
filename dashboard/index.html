@@ -953,23 +953,23 @@ const _GAL_PERSONA={
   'f1-pulse':            {surface:'smooth', hue:350, sat:92, lit:48, radius:2.0, rings:false},
 };
 
-// Anel forçado (0=35, 1=58, 2=85, 3=118) — nexus+sbrgestao lado a lado no anel 1
+// Par binário: nexus + sbrgestao orbitam um baricentro comum (anel 1, orbit=58)
+// Os dois ficam dentro do binaryGroup, separados por 16u
+const _GAL_BINARY_PAIR=['nexus-labsobral','sbrgestao'];
+const _GAL_BINARY_KEY='_binary_nexus_sbrgestao'; // key em parentGroupMap + savedAngles
+
+// Anel forçado — apenas supercartolamanager; binário tratado à parte
 const _GAL_FORCED_RING={
-  'nexus-labsobral':     1,
-  'sbrgestao':           1,
   'supercartolamanager': 0,
 };
-// Ângulo inicial forçado — nexus e sbrgestao lado a lado (~22° de distância)
 const _GAL_FORCED_ANGLE={
-  'nexus-labsobral':     1.60,
-  'sbrgestao':           1.98,
   'supercartolamanager': 0.80,
 };
 
-// Luas: nome → nome do planeta-pai
+// Luas: nome → chave do grupo-pai
 const _GAL_MOON_OF={
-  'the-matrix':  'sbrgestao',
-  'matrix-core': 'nexus-labsobral',
+  'the-matrix':  _GAL_BINARY_KEY,  // orbita o baricentro
+  'matrix-core': _GAL_BINARY_KEY,
 };
 
 const _GAL_RINGS=[{orbit:35,speed:.052},{orbit:58,speed:.033},{orbit:85,speed:.021},{orbit:118,speed:.0134}];
@@ -1198,13 +1198,13 @@ function _galInitScene(planets){
 
     const station=pList.find(p=>p.bodyType==='station');
     const allOrbital=pList.filter(p=>p.bodyType!=='station');
-    // separar luas das planetas normais
     const moonList=allOrbital.filter(p=>_GAL_MOON_OF[p.name]);
     const orbital=allOrbital.filter(p=>!_GAL_MOON_OF[p.name]);
 
-    // planetas com anel forçado e planetas normais
+    // planetas do par binário (nexus+sbrgestao) e planetas com anel forçado
+    const binaryPlanetList=orbital.filter(p=>_GAL_BINARY_PAIR.includes(p.name));
     const forcedPlanets=orbital.filter(p=>_GAL_FORCED_RING[p.name]!==undefined);
-    const normalOrbital=orbital.filter(p=>_GAL_FORCED_RING[p.name]===undefined);
+    const normalOrbital=orbital.filter(p=>!_GAL_BINARY_PAIR.includes(p.name)&&_GAL_FORCED_RING[p.name]===undefined);
 
     // distribuir planetas normais pelos 4 anéis
     const sorted=[...normalOrbital].sort((a,b)=>a.daysSincePush-b.daysSincePush);
@@ -1288,12 +1288,63 @@ function _galInitScene(planets){
       for(let j=0;j<count&&pi<sorted.length;j++,pi++) addPlanet(sorted[pi],ri,count,j);
     }
 
-    // planetas com anel forçado (nexus, sbrgestao, supercartolamanager)
+    // planetas com anel forçado (supercartolamanager)
     forcedPlanets.forEach(p=>{
       const ri=_GAL_FORCED_RING[p.name];
       if(_GAL_FORCED_ANGLE[p.name]!==undefined) savedAngles[p.name]=_GAL_FORCED_ANGLE[p.name];
       addPlanet(p,ri,1,0);
     });
+
+    // ── SISTEMA BINÁRIO: nexus-labsobral + sbrgestao ──
+    // Um baricentro (binaryGroup) orbita o sol no anel 1.
+    // Os dois planetas ficam dentro dele, separados por 16u.
+    // As matrix orbitam o baricentro.
+    if(binaryPlanetList.length>0){
+      const BINARY_RI=1, BINARY_ORBIT=_GAL_RINGS[BINARY_RI].orbit;
+      const BINARY_SEP=8; // distância de cada planeta ao centro do baricentro
+      if(savedAngles[_GAL_BINARY_KEY]===undefined) savedAngles[_GAL_BINARY_KEY]=1.8;
+      const bAng=savedAngles[_GAL_BINARY_KEY];
+
+      const binaryGroup=new THREE.Group();
+      binaryGroup.userData={_isBinary:true,_galRi:BINARY_RI,_galOrbit:BINARY_ORBIT,name:_GAL_BINARY_KEY};
+      binaryGroup.position.set(Math.cos(bAng)*BINARY_ORBIT,0,Math.sin(bAng)*BINARY_ORBIT);
+      scene.add(binaryGroup);
+      planetGroups.push(binaryGroup);
+      parentGroupMap[_GAL_BINARY_KEY]=binaryGroup;
+
+      // ordenar para garantir nexus sempre à esquerda, sbrgestao à direita
+      const binaryOrder=['nexus-labsobral','sbrgestao'];
+      const sortedBinary=[...binaryPlanetList].sort((a,b)=>binaryOrder.indexOf(a.name)-binaryOrder.indexOf(b.name));
+
+      sortedBinary.forEach((p,idx)=>{
+        const side=idx===0?-1:1;
+        const bt=p.bodyType||'planet';
+        const radius=_galRadius(p);
+        const atmCol=_galAtmCol(p);
+        const baseCol=_galBaseCol(p);
+        const{mesh:actualMesh,dna}=_buildPlanetMesh(p,bt,radius);
+        actualMesh.userData={...p,_inBinary:true,_binaryOffset:side*BINARY_SEP};
+        actualMesh.position.set(side*BINARY_SEP,0,0);
+        // anéis de Saturno
+        const persona=_GAL_PERSONA[p.name];
+        if(persona?.rings){
+          const ringTex=_galSaturnRingTex(persona.ringHue||45);
+          const ringMesh=new THREE.Mesh(
+            new THREE.RingGeometry(radius*1.35,radius*2.6,96),
+            new THREE.MeshBasicMaterial({map:ringTex,side:THREE.DoubleSide,transparent:true,opacity:persona.ringAlpha||.85,depthWrite:false})
+          );
+          ringMesh.rotation.x=Math.PI*.5+dna.tilt*.4;
+          actualMesh.add(ringMesh);
+        }
+        if(atmCol){const atm=_galMakeAtm(radius,atmCol,1.0);actualMesh.add(atm);atmospheres.push(atm);}
+        actualMesh.add(_galGlow(radius*2.5,baseCol,.12));
+        if(p.health==='alert')  actualMesh.add(_galGlow(radius*3.5,0xff2200,.22));
+        if(p.health==='warning')actualMesh.add(_galGlow(radius*3.0,0xffaa00,.16));
+        binaryGroup.add(actualMesh);
+        actualMeshes.push(actualMesh);
+        parentGroupMap[p.name]=binaryGroup; // para lookup de tooltip
+      });
+    }
 
     // luas — parenteadas ao grupo do planeta-pai
     moonList.forEach(moon=>{
@@ -1404,29 +1455,40 @@ function _galInitScene(planets){
       planetGroups.forEach(group=>{
         const p=group.userData;
         if(p._isStation){
-          // station gira no próprio eixo
           const sm=group.children[0];
           if(sm)sm.rotateOnAxis(_localY,dt*.8);
           return;
         }
+        // ── sistema binário nexus+sbrgestao ──
+        if(p._isBinary){
+          savedAngles[_GAL_BINARY_KEY]=(savedAngles[_GAL_BINARY_KEY]||0)+_GAL_RINGS[p._galRi].speed*dt;
+          const bAng=savedAngles[_GAL_BINARY_KEY];
+          group.position.set(Math.cos(bAng)*p._galOrbit,0,Math.sin(bAng)*p._galOrbit);
+          // rotação interna: os dois planetas orbitam o baricentro
+          group.rotation.y+=dt*0.018;
+          // rotação axial dos filhos (os dois planetas)
+          group.children.forEach(child=>{
+            if(child.isMesh){
+              const spinSpeed=.6+((child.userData.magnitude||3)*.08);
+              child.rotateOnAxis(_localY,spinSpeed*dt);
+            }
+          });
+          return;
+        }
         const ri=p._galRi; if(ri===undefined)return;
-        // órbita: avança o ângulo pelo grupo, não pelo mesh
         savedAngles[p.name]=(savedAngles[p.name]||0)+_GAL_RINGS[ri].speed*dt;
         const ang=savedAngles[p.name],orbit=p._galOrbit;
         group.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
 
-        // rotação axial: no actualMesh (respeita inclinação setada em rotation.z)
         const actualMesh=group.children[0];
         if(!actualMesh)return;
         const spinSpeed=p.bodyType==='supernova'?2.5:p.bodyType==='satellite'?1.5:.5+((p.magnitude||3)*.1);
         actualMesh.rotateOnAxis(_localY,spinSpeed*dt);
 
-        // pulso supernova
         if(p.bodyType==='supernova'){
           const pulse=1+.3*Math.sin(t3*4+(p.name.charCodeAt(0)||0)*.7);
           actualMesh.scale.set(pulse,pulse*(1-(_GAL_OB.smooth||0)),pulse);
         }
-        // alerta emissivo
         if(p.health==='alert'&&actualMesh.material?.emissiveIntensity!==undefined){
           actualMesh.material.emissiveIntensity=.03+.07*Math.abs(Math.sin(t3*3));
         }
