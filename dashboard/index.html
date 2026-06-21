@@ -1020,6 +1020,9 @@ const _GAL_MOON_OF={
   'matrix-core': _GAL_BINARY_KEY,
 };
 
+// Ângulo dourado — distribui pontos no círculo sem clustering
+const _GAL_GOLDEN=Math.PI*(3-Math.sqrt(5)); // ≈2.399rad ≈137.5°
+
 // 21 anéis orbitais — cada posição nominal tem um anel específico
 const _GAL_RINGS=[
   {orbit: 18, speed:.073},  // 0 — inner / generic
@@ -1254,8 +1257,11 @@ function _galInitScene(planets){
   // ── helper: constrói e registra um orbit group ──
   function _addOrbitGroup(p,ri,ang,orbit){
     const orbitGroup=new THREE.Group();
-    orbitGroup.userData={...p,_galRi:ri,_galOrbit:orbit};
-    orbitGroup.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
+    // inclinação orbital: anéis externos mais inclinados + offset por nome
+    let nh=0;const nm=p.name||'';for(let i=0;i<nm.length;i++)nh=(Math.imul(31,nh)+nm.charCodeAt(i))|0;
+    const tilt=0.04+(ri/20)*0.38+((nh>>>0)%12)/100;
+    orbitGroup.userData={...p,_galRi:ri,_galOrbit:orbit,_galOrbitTilt:tilt};
+    orbitGroup.position.set(orbit*Math.cos(ang),Math.sin(ang)*orbit*tilt,orbit*Math.sin(ang));
     return orbitGroup;
   }
 
@@ -1291,7 +1297,10 @@ function _galInitScene(planets){
       const baseCol=_galBaseCol(p);
       const atmCol=_galAtmCol(p);
       const radius=_galRadius(p);
-      if(savedAngles[p.name]===undefined) savedAngles[p.name]=(jInRing/Math.max(1,totalInRing))*Math.PI*2;
+      if(savedAngles[p.name]===undefined){
+        const fi=_GAL_FORCED_RING[p.name];
+        savedAngles[p.name]=fi!==undefined?fi*_GAL_GOLDEN:(jInRing/Math.max(1,totalInRing))*Math.PI*2;
+      }
       const ang=savedAngles[p.name];
       const orbit=_GAL_RINGS[ri].orbit;
       const orbitGroup=_addOrbitGroup(p,ri,ang,orbit);
@@ -1422,22 +1431,32 @@ function _galInitScene(planets){
       const parentName=_GAL_MOON_OF[moon.name];
       const parentGroup=parentGroupMap[parentName];
       if(!parentGroup)return; // pai não encontrado (pode não estar na lista)
-      const mRadius=_galRadius(moon);
+      const mRadius=Math.max(0.9,_galRadius(moon));
       const parentData=parentGroup.userData;
       const parentRadius=_galRadius(parentData)||2;
-      const mOrbit=parentRadius*3.5+5;
+      const mOrbit=parentRadius*3.2+6;
       if(savedAngles[moon.name+'_m']===undefined) savedAngles[moon.name+'_m']=Math.PI*(moon.name.length%10)/5;
       const mAng=savedAngles[moon.name+'_m'];
       const moonGroup=new THREE.Group();
       moonGroup.userData={...moon,_isMoon:true,_moonOrbit:mOrbit};
       moonGroup.position.set(Math.cos(mAng)*mOrbit,0,Math.sin(mAng)*mOrbit);
+      const mCol=moon.name==='the-matrix'?0x4a6a5a:0x4a5a7a;
+      const mEmit=moon.name==='the-matrix'?0x1a3a2a:0x1a2a4a;
       const moonMesh=new THREE.Mesh(
         new THREE.SphereGeometry(mRadius,22,22),
-        new THREE.MeshStandardMaterial({color:0x1a2030,roughness:.95,metalness:.05,emissive:new THREE.Color(0x080c18),emissiveIntensity:.4})
+        new THREE.MeshStandardMaterial({color:mCol,roughness:.85,metalness:.12,emissive:new THREE.Color(mEmit),emissiveIntensity:.45})
       );
       moonMesh.userData={...moon,_isMoon:true};
+      // outline ring — identificável mesmo no escuro
+      const mRing=new THREE.Mesh(
+        new THREE.RingGeometry(mRadius*1.1,mRadius*1.25,32),
+        new THREE.MeshBasicMaterial({color:mCol,transparent:true,opacity:.45,side:THREE.DoubleSide})
+      );
+      mRing.rotation.x=Math.PI/2;
+      moonMesh.add(mRing);
       moonGroup.add(moonMesh);
-      moonGroup.add(_galGlow(mRadius*4,0x2030a0,.15));
+      moonGroup.add(_galGlow(mRadius*5,mCol,.42));
+      moonGroup.add(_galGlow(mRadius*9,mCol,.18));
       parentGroup.add(moonGroup);
       moonGroups.push(moonGroup);
       actualMeshes.push(moonMesh);
@@ -1549,7 +1568,7 @@ function _galInitScene(planets){
         const ri=p._galRi; if(ri===undefined)return;
         savedAngles[p.name]=(savedAngles[p.name]||0)+_GAL_RINGS[ri].speed*dt;
         const ang=savedAngles[p.name],orbit=p._galOrbit;
-        group.position.set(orbit*Math.cos(ang),0,orbit*Math.sin(ang));
+        group.position.set(orbit*Math.cos(ang),Math.sin(ang)*orbit*(p._galOrbitTilt||0),orbit*Math.sin(ang));
 
         const actualMesh=group.children[0];
         if(!actualMesh)return;
