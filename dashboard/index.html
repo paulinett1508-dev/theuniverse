@@ -1166,32 +1166,33 @@ function _galInitScene(planets){
   // ── camera orbit ──
   let sph={th:.3,ph:1.1,r:220},tSph={...sph};
   let _dragStart={x:0,y:0},_dragged=false,focusGroup=null;
+  let focusMesh=null;
+  const _focusTarget=new THREE.Vector3();
 
   function applyCam(){
-    const lookAt=focusGroup?focusGroup.position.clone():new THREE.Vector3();
-    camera.position.copy(lookAt).add(new THREE.Vector3(sph.r*Math.sin(sph.ph)*Math.sin(sph.th),sph.r*Math.cos(sph.ph),sph.r*Math.sin(sph.ph)*Math.cos(sph.th)));
-    camera.lookAt(lookAt);
+    camera.position.set(
+      _focusTarget.x+sph.r*Math.sin(sph.ph)*Math.sin(sph.th),
+      _focusTarget.y+sph.r*Math.cos(sph.ph),
+      _focusTarget.z+sph.r*Math.sin(sph.ph)*Math.cos(sph.th)
+    );
+    camera.lookAt(_focusTarget);
   }
 
-  // mousedown: registra posição de início (distinguir clique de drag)
-  canvas.addEventListener('mousedown',e=>{if(e.target!==canvas)return;_dragStart={x:e.clientX,y:e.clientY};_dragged=false;});
+  // ── DRAG DA CÂMERA ──────────────────────────────────────────────
+  let _drag=false,_pm={x:0,y:0};
+  canvas.addEventListener('mousedown',e=>{if(e.target!==canvas)return;_drag=true;_pm={x:e.clientX,y:e.clientY};_dragStart={x:e.clientX,y:e.clientY};_dragged=false;});
+  window.addEventListener('mouseup',()=>{_drag=false;});
   window.addEventListener('mousemove',e=>{
-    if(!(e.buttons&1))return;
-    const dx=e.clientX-_dragStart.x,dy=e.clientY-_dragStart.y;
-    if(Math.abs(dx)>4||Math.abs(dy)>4)_dragged=true;
-    tSph.th-=dx*.007;
-    tSph.ph=Math.max(.12,Math.min(Math.PI*.48,tSph.ph+dy*.005));
-    _dragStart={x:e.clientX,y:e.clientY};
+    if(!_drag)return;
+    tSph.th-=(e.clientX-_pm.x)*.007;
+    tSph.ph=Math.max(.1,Math.min(Math.PI*.47,tSph.ph+(e.clientY-_pm.y)*.005));
+    _pm={x:e.clientX,y:e.clientY};
+    _dragged=true;
   });
-  canvas.addEventListener('wheel',e=>{tSph.r=Math.max(20,Math.min(700,tSph.r+e.deltaY*.15));});
-  canvas.addEventListener('touchstart',e=>{if(e.target!==canvas)return;_dragStart={x:e.touches[0].clientX,y:e.touches[0].clientY};_dragged=false;},{passive:true});
-  canvas.addEventListener('touchmove',e=>{
-    if(!e.touches[0])return;
-    const t=e.touches[0],dx=t.clientX-_dragStart.x,dy=t.clientY-_dragStart.y;
-    if(Math.abs(dx)>4||Math.abs(dy)>4)_dragged=true;
-    tSph.th-=dx*.007;tSph.ph=Math.max(.12,Math.min(Math.PI*.48,tSph.ph+dy*.005));
-    _dragStart={x:t.clientX,y:t.clientY};
-  },{passive:true});
+  canvas.addEventListener('wheel',e=>{if(e.target!==canvas)return;tSph.r=Math.max(15,Math.min(700,tSph.r+e.deltaY*.15));e.preventDefault();},{passive:false});
+  canvas.addEventListener('touchstart',e=>{if(e.target!==canvas)return;_drag=true;_pm={x:e.touches[0].clientX,y:e.touches[0].clientY};_dragStart={x:e.touches[0].clientX,y:e.touches[0].clientY};_dragged=false;},{passive:true});
+  canvas.addEventListener('touchmove',e=>{if(!_drag)return;tSph.th-=(e.touches[0].clientX-_pm.x)*.007;tSph.ph=Math.max(.1,Math.min(Math.PI*.47,tSph.ph+(e.touches[0].clientY-_pm.y)*.005));_pm={x:e.touches[0].clientX,y:e.touches[0].clientY};_dragged=true;},{passive:true});
+  canvas.addEventListener('touchend',()=>{_drag=false;});
 
   // ── stars ──
   (()=>{
@@ -1554,8 +1555,7 @@ function _galInitScene(planets){
       if(parentName===_GAL_BINARY_KEY){
         // Sistema binário: usar PIVÔ para órbita correta
         const pivot=new THREE.Object3D();
-        pivot.rotation.x=moon.name==='the-matrix'?0.22:0.35; // inclinação orbital
-        pivot.rotation.y=savedAngles[moon.name+'_m'];
+        pivot.setRotationFromEuler(new THREE.Euler(moon.name==='the-matrix'?0.22:0.35, savedAngles[moon.name+'_m'], 0));
         moonMesh.position.set(mOrbit,0,0);
         pivot.add(moonMesh);
         parentGroup.add(pivot);
@@ -1566,18 +1566,41 @@ function _galInitScene(planets){
         parentGroup.add(trail);
         const orbitSpd=moon.name==='the-matrix'?1.4:0.9;
         moonPivots.push({pivot,moonMesh,orbitSpeed:orbitSpd,selfRotSpeed:.3});
+        actualMeshes.push(moonMesh);
       } else {
-        // Luas normais: manter sistema original com moonGroups
+        // Luas normais
+        let _finalMesh;
+        if(moon.name==='luna-base'){
+          // ISS-like geometry
+          const _issGrp=new THREE.Group();
+          const _m=new THREE.MeshStandardMaterial({color:0x99aabb,emissive:new THREE.Color(0x223344),emissiveIntensity:.6,roughness:.25,metalness:.85});
+          const _sm=new THREE.MeshStandardMaterial({color:0x1a3a6a,emissive:new THREE.Color(0x0a1a3a),emissiveIntensity:.4,roughness:.4,metalness:.6});
+          const _core=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),_m);_core.rotation.z=Math.PI/2;_issGrp.add(_core);
+          const _truss=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,1.8,6),_m);_truss.rotation.z=Math.PI/2;_issGrp.add(_truss);
+          [[-0.7,-0.25],[-0.7,0.25],[0.7,-0.25],[0.7,0.25]].forEach(([x,z])=>{
+            const p=new THREE.Mesh(new THREE.BoxGeometry(.55,.02,.22),_sm);p.position.set(x,0,z);_issGrp.add(p);
+          });
+          [-0.15,0,0.15].forEach(z=>{
+            const mod=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.2,8),_m);mod.rotation.z=Math.PI/2;mod.position.z=z;mod.position.y=.06;_issGrp.add(mod);
+          });
+          _issGrp.add(_galGlow(.5,0x4488ff,.55));_issGrp.add(_galGlow(1.2,0x4488ff,.18));
+          _issGrp.add(new THREE.PointLight(0x4488ff,.3,6));
+          _issGrp.userData={...moon,_isMoon:true,colorHex:'#88aacc',cluster:'sobral-core'};
+          _finalMesh=_issGrp;
+        } else {
+          const _sphMesh=new THREE.Mesh(new THREE.SphereGeometry(mRadius,22,22),new THREE.MeshStandardMaterial({color:mCol,roughness:.88,metalness:.05,emissive:new THREE.Color(mEmit),emissiveIntensity:.45}));
+          _sphMesh.userData={...moon,_isMoon:true,colorHex:'#'+new THREE.Color(mCol).getHexString(),cluster:_GAL_CLUSTER_MAP[parentGroup.userData._galRi||0]||'inner'};
+          _finalMesh=_sphMesh;
+        }
         const moonGroup=new THREE.Group();
         moonGroup.userData={...moon,_isMoon:true,_moonOrbit:mOrbit};
         moonGroup.position.set(Math.cos(savedAngles[moon.name+'_m'])*mOrbit,0,Math.sin(savedAngles[moon.name+'_m'])*mOrbit);
-        moonGroup.add(moonMesh);
-        moonGroup.add(_galGlow(mRadius*5,mCol,.42));
-        moonGroup.add(_galGlow(mRadius*9,mCol,.18));
+        moonGroup.add(_finalMesh);
+        if(moon.name!=='luna-base'){moonGroup.add(_galGlow(mRadius*5,mCol,.42));moonGroup.add(_galGlow(mRadius*9,mCol,.18));}
         parentGroup.add(moonGroup);
         moonGroups.push(moonGroup);
+        actualMeshes.push(_finalMesh);
       }
-      actualMeshes.push(moonMesh);
     });
 
     // station
@@ -1637,7 +1660,7 @@ function _galInitScene(planets){
         _legendSelected=pd.name;
         _legendEl.querySelectorAll('.leg-row').forEach(r=>r.classList.toggle('active',r.dataset.name===pd.name));
         const m=actualMeshes.find(x=>x.userData.name===pd.name);
-        if(m){focusMesh=m;tSph.r=(_galRadius(pd)||2)*8+20;}
+        if(m){focusMesh=m;if(m.userData.isBH){tSph.r=120;}else{tSph.r=(_galRadius(pd)||2)*8+20;}}
       });
       _legendEl.appendChild(row);
     });
@@ -1687,6 +1710,12 @@ function _galInitScene(planets){
     for(let i=0;i<N2;i++){const t=rs(),r2=15+(1-t)*180,a2=t*Math.PI*8+rs()*.3;sp2[i*3]=Math.cos(a2)*r2;sp2[i*3+1]=(rs()-.5)*(1-t)*15;sp2[i*3+2]=Math.sin(a2)*r2;sc2[i*3]=.4+t*.6;sc2[i*3+1]=.2+(1-t)*.5;sc2[i*3+2]=.1+(1-t)*.4;}
     const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sp2,3));sg.setAttribute('color',new THREE.BufferAttribute(sc2,3));
     grp.add(new THREE.Points(sg,new THREE.PointsMaterial({size:.55,sizeAttenuation:true,vertexColors:true,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false})));
+    // userData + hitbox clicável
+    grp.userData={id:'black-hole',name:'Buraco Negro',colorHex:'#ff6600',cluster:'zona de decadência',isBH:true,radius:20};
+    const bhHit=new THREE.Mesh(new THREE.SphereGeometry(22,16,16),new THREE.MeshBasicMaterial({visible:false,depthWrite:false}));
+    bhHit.userData=grp.userData;
+    grp.add(bhHit);
+    actualMeshes.push(bhHit);
     scene.add(grp);
     return{grp,disk1:_bhDisk1,disk2:_bhDisk2};
   }
@@ -1769,13 +1798,31 @@ function _galInitScene(planets){
   const raycaster=new THREE.Raycaster();
   const mouse=new THREE.Vector2();
 
+  // ── HOVER ──────────────────────────────────────────────────────
+  const _hovMouse=new THREE.Vector2();
+  let _hovId=null;
+  const _tooltipEl=document.getElementById('tip');
   canvas.addEventListener('mousemove',e=>{
-    if(_dragged)return;
-    mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
-    raycaster.setFromCamera(mouse,camera);
+    if(_drag){if(_tooltipEl)_tooltipEl.style.opacity='0';return;}
+    _hovMouse.x=(e.clientX/innerWidth)*2-1;
+    _hovMouse.y=-(e.clientY/innerHeight)*2+1;
+    raycaster.setFromCamera(_hovMouse,camera);
     const hits=raycaster.intersectObjects(actualMeshes,false);
-    if(hits.length){showTip(e,hits[0].object.userData);}else{hideTip();}
+    if(hits.length>0){
+      const d=hits[0].object.userData;
+      if(_hovId!==d.name){
+        _hovId=d.name;
+        showTip(e,d);
+      }
+      if(_tooltipEl){_tooltipEl.style.opacity='1';_tooltipEl.style.left=(e.clientX+16)+'px';_tooltipEl.style.top=(e.clientY-8)+'px';}
+      canvas.style.cursor='pointer';
+    } else {
+      _hovId=null;
+      hideTip();
+      canvas.style.cursor='grab';
+    }
   });
+  canvas.addEventListener('mouseleave',()=>{_hovId=null;hideTip();});
   // mouseup distingue click de drag — só abre painel se não arrastou
   canvas.addEventListener('mouseup',e=>{
     if(_dragged)return;
@@ -1784,7 +1831,10 @@ function _galInitScene(planets){
     const hits=raycaster.intersectObjects(actualMeshes,false);
     if(hits.length){
       const ud=hits[0].object.userData;
-      focusMesh=hits[0].object;tSph.r=_galRadius(ud)*8+20;
+      const m=hits[0].object;
+      focusMesh=m;
+      if(m.userData.isBH){tSph.r=120;}
+      else{tSph.r=(_galRadius(m.userData)||2)*8+20;}
       openPanel(ud,null);
     } else {
       focusMesh=null;tSph.r=340;
@@ -1800,6 +1850,8 @@ function _galInitScene(planets){
     t3+=raw; // t3 sempre corre (animações cosméticas independentes de pausa)
     if(!_galState.paused){_simYear+=dt*0.015*_galState.speed;_updateClock();}
     sph.th+=(tSph.th-sph.th)*.065;sph.ph+=(tSph.ph-sph.ph)*.065;sph.r+=(tSph.r-sph.r)*.065;
+    if(focusMesh){const _wp=new THREE.Vector3();focusMesh.getWorldPosition(_wp);_focusTarget.lerp(_wp,.06);}
+    else{_focusTarget.lerp(new THREE.Vector3(),.06);}
     applyCam();
 
     // HUD indicador BH
@@ -1874,11 +1926,12 @@ function _galInitScene(planets){
         const a=savedAngles[mg.userData.name+'_m'];
         mg.position.set(Math.cos(a)*r,0,Math.sin(a)*r);
         const mm=mg.children[0];
-        if(mm)mm.rotateOnAxis(_localY,dt*0.8);
+        if(mm&&mm.userData.name==='luna-base'){mm.rotation.y+=dt*.3;} // ISS gira lentamente
+        else if(mm)mm.rotateOnAxis(_localY,dt*0.8);
       });
       // pivôs de luas binárias
       moonPivots.forEach(({pivot,moonMesh,orbitSpeed,selfRotSpeed})=>{
-        pivot.rotation.y+=orbitSpeed*dt;
+        pivot.rotateOnWorldAxis(new THREE.Vector3(0,1,0),orbitSpeed*dt);
         moonMesh.rotateOnAxis(_localY,selfRotSpeed*dt);
       });
       // buraco negro — disco gira
