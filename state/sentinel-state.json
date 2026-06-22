@@ -30,7 +30,8 @@
     "the-matrix",
     "tokentown",
     "vibegaminghub",
-    "luna-base"
+    "luna-base",
+    "mybots-telegram"
   ],
   "last_run_id": {
     "agnostic-core": 27944547665,
@@ -48,7 +49,7 @@
     "luna-base": 27888139181
   },
   "last_issue_number": {
-    "agnostic-core": 34,
+    "agnostic-core": 35,
     "SbrTask": 6,
     "sbrgestao": 11,
     "sicefsus-sistema": 17,
