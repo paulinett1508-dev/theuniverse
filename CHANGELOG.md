@@ -4,6 +4,20 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-22 — Secret Audit: varredura de conteúdo (Sentinel)
+
+### 🔑 Detecção de segredos hardcoded que o scanner nativo ignora
+- Novo `scripts/secret_scan.py`: baixa o tarball de cada planeta e aplica regex de conteúdo
+  (token Telegram, age, PEM, PAT, Groq/OpenAI, AWS, senhas hardcoded). Complementa o
+  `secret_exposto` nativo do GitHub — pega segredos custom (senhas, creds) inclusive em repos
+  privados sem Advanced Security.
+- Dedup por hash em `state/secret-scan-state.json` (guarda só hashes, nunca o segredo). Valores
+  são redigidos nas notificações. Modo `--local DIR...` para CLI/teste offline.
+- Workflow `secret-audit.yml` (cron diário ~06:30 BRT) reusa o canal Telegram do Sentinel.
+- `scripts/test_secret_scan.py`: 8 testes travando a calibração real-vs-falso-positivo.
+- 1ª varredura achou credenciais hardcoded em planetas (RustDesk, Pi-hole, RTSP/DVR, Portainer)
+  que o secret-scanning nativo nunca reportou.
+
 ## 2026-06-21 — Dashboard NOC v4: Galáctica WebGL final
 
 ### 🪐 Three.js — planetas discretos, sem sobreposição
