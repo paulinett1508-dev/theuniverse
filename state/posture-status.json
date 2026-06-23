@@ -1,170 +1,170 @@
 {
   "schema": "entity-exchange/posture-status@1",
   "entity": "sentinel",
-  "ts": 1782215419,
+  "ts": 1782216076,
   "repos": [
     {
       "repo": "AlgodaoAtelie",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "CertiSYS",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "FinanceFlow",
-      "visibilidade": "public",
-      "score": 75,
+      "visibilidade": "private",
+      "score": 90,
       "achados_abertos": [
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "server/fixCollaboratorPassword.ts:12",
           "detalhe": "const pla***rd = \"ace***ab\";",
           "ref_key": "e40d51dd1bfba024"
         }
       ],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "GessoExpress",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "SuperCartolaManagerv5-production",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "agnostic-core",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "agnvendas-painelsbr",
-      "visibilidade": "public",
-      "score": 75,
+      "visibilidade": "private",
+      "score": 90,
       "achados_abertos": [
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "docs/superpowers/plans/2026-03-26-agnostic-core-improvements.md:2481",
           "detalhe": "-d '{\"email\":\"adm***br\",\"senha\":\"Sen***26\"}' | jq '.acc***en' | head -c 30",
           "ref_key": "e9fbbc73384bcdb3"
         }
       ],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "bolaocopa2026",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "centroculturalsbr",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "contabilplus",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "f1-pulse",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "florianorun",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "flowdigitalstudio",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "hqplus",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "imersaobitrix24",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "lp-ellenpedrosa",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "lp-restauranteflutuante",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "lpjaraujoinfo",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "luna-base",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "matrix-core",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "mcp-eventos",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "nexus-labsobral",
@@ -207,85 +207,85 @@
           "ref_key": "3c4bf0c301c0eb96"
         }
       ],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "pedidomobile",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "sbrchecks",
-      "visibilidade": "public",
-      "score": 0,
+      "visibilidade": "private",
+      "score": 10,
       "achados_abertos": [
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "login-kit/scripts/tmp/zabbix-add-dvr5.py:18",
           "detalhe": "res = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})",
           "ref_key": "0021a751670a667c"
         },
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "login-kit/scripts/tmp/zabbix-add-dvr6.py:17",
           "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
           "ref_key": "d300976ae42aa0d0"
         },
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "login-kit/scripts/tmp/zabbix-check-dvr5.py:18",
           "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
           "ref_key": "9f514aaac7cfef70"
         },
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "login-kit/scripts/tmp/zabbix-check-icmp.py:18",
           "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
           "ref_key": "989b80dea9febc9d"
         },
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "login-kit/scripts/tmp/zabbix-dvr6-icmp.py:17",
           "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
           "ref_key": "3f4e556ff4ca93a8"
         },
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "login-kit/scripts/tmp/zabbix-dvr6-restore-snmp.py:17",
           "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
           "ref_key": "56c639f5967f2874"
         },
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "login-kit/scripts/tmp/zabbix-fix-dvr6.py:17",
           "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
           "ref_key": "f4a855211b161ac8"
         },
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "login-kit/scripts/tmp/zabbix-inspect.py:17",
           "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
           "ref_key": "ba70fa00510d8bc3"
         },
         {
-          "kind": "repo_publico_com_segredo",
-          "severidade": "critico",
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
           "path": "login-kit/scripts/tmp/zabbix-list-cameras.py:16",
           "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
           "ref_key": "9bcee219a7c7a3f6"
         }
       ],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "sbrgestao",
@@ -307,21 +307,21 @@
           "ref_key": "40a1ac3200006537"
         }
       ],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "sentinel-core",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "sicefsus-sistema",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "sigmed",
@@ -350,36 +350,36 @@
           "ref_key": "7cca00d11c6908d5"
         }
       ],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "temperodemamae",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "the-matrix",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "tokentown",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     },
     {
       "repo": "vibegaminghub",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782215419
+      "ultimaVarredura": 1782216076
     }
   ],
-  "resumo": "6 repo(s) com achado aberto; 14 crítico(s)."
+  "resumo": "6 repo(s) com achado aberto; 3 crítico(s)."
 }
