@@ -1,12 +1,12 @@
 # theuniverse — Mapa dos Planetas
 
-> Atualizado: 2026-06-22 | 27 planetas mapeados (Censo automático)
+> Atualizado: 2026-06-23 | 28 planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
 
 | planeta | cluster | linguagem | issues |
 |---|---|---|---|
-| 🟢 [agnostic-core](planets/agnostic-core.md) | meta-infra | Shell | 5 |
+| 🟢 [agnostic-core](planets/agnostic-core.md) | meta-infra | Shell | 6 |
 | 🟡 [AlgodaoAtelie](planets/AlgodaoAtelie.md) | landing-clientes | TypeScript | 1 |
 | 🟡 [bolaocopa2026](planets/bolaocopa2026.md) | entretenimento | TypeScript | 1 |
 | 🟢 [centroculturalsbr](planets/centroculturalsbr.md) | sobral-core | - | 1 |
@@ -24,10 +24,11 @@
 | 🟡 [lpjaraujoinfo](planets/lpjaraujoinfo.md) | landing-clientes | TypeScript | 1 |
 | 🟢 [luna-base](planets/luna-base.md) | observatorio | - | 1 |
 | 🟢🔒 [mcp-eventos](planets/mcp-eventos.md) | mcp-ia | Python | 1 |
+| 🟢 [mybots-telegram](planets/mybots-telegram.md) | nao-classificado | Shell | 0 |
 | 🟢🔒 [nexus-labsobral](planets/nexus-labsobral.md) | sobral-core | Python | 125 |
 | 🟢 [sbrchecks](planets/sbrchecks.md) | sobral-core | Python | 1 |
-| 🟢 [sbrgestao](planets/sbrgestao.md) | sobral-core | TypeScript | 1 |
-| 🟢 [sicefsus-sistema](planets/sicefsus-sistema.md) | gov-publico | JavaScript | 2 |
+| 🟢🔒 [sbrgestao](planets/sbrgestao.md) | sobral-core | TypeScript | 2 |
+| 🟢 [sicefsus-sistema](planets/sicefsus-sistema.md) | gov-publico | JavaScript | 3 |
 | 🟢 [sigmed](planets/sigmed.md) | sobral-core | TypeScript | 1 |
 | 🟢 [SuperCartolaManagerv5-production](planets/SuperCartolaManagerv5-production.md) | entretenimento | JavaScript | 1 |
 | 🟡 [temperodemamae](planets/temperodemamae.md) | landing-clientes | HTML | 1 |
