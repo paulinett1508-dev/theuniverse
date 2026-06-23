@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Testes do scan_text — travam a calibração de ruído (real vs falso-positivo)."""
 import unittest
-from secret_scan import scan_text, redact, _is_placeholder
+from secret_scan import scan_text, redact, _is_placeholder, build_posture
 
 
 class TestScanText(unittest.TestCase):
@@ -68,6 +68,47 @@ class TestScanText(unittest.TestCase):
         self.assertTrue(_is_placeholder("${X}"))
         self.assertFalse(_is_placeholder("Kf8jZq2mra"))
         self.assertFalse(_is_placeholder("Mix7Case#9"))
+
+
+class TestBuildPosture(unittest.TestCase):
+    def _finding(self, repo="r", path="a.py", line=1, key="k1"):
+        return {"repo": repo, "path": path, "line": line, "label": "Senha/secret hardcoded",
+                "redacted": "PASS = ***", "key": key}
+
+    def test_schema_e_entity(self):
+        p = build_posture([], {"r": "private"}, 1718800000)
+        self.assertEqual(p["schema"], "entity-exchange/posture-status@1")
+        self.assertEqual(p["entity"], "sentinel")
+
+    def test_repo_limpo_score_100(self):
+        p = build_posture([], {"limpo": "private"}, 1)
+        r = p["repos"][0]
+        self.assertEqual(r["score"], 100)
+        self.assertEqual(r["achados_abertos"], [])
+
+    def test_publico_com_segredo_e_critico(self):
+        p = build_posture([self._finding(repo="pub")], {"pub": "public"}, 1)
+        r = p["repos"][0]
+        self.assertEqual(r["achados_abertos"][0]["kind"], "repo_publico_com_segredo")
+        self.assertEqual(r["achados_abertos"][0]["severidade"], "critico")
+        self.assertEqual(r["score"], 75)  # 100 - 25
+        self.assertIn("crítico", p["resumo"])
+
+    def test_privado_e_aviso(self):
+        p = build_posture([self._finding(repo="priv")], {"priv": "private"}, 1)
+        a = p["repos"][0]["achados_abertos"][0]
+        self.assertEqual(a["severidade"], "avisos")
+        self.assertEqual(p["repos"][0]["score"], 90)  # 100 - 10
+
+    def test_detalhe_redigido_nunca_cru(self):
+        p = build_posture([self._finding()], {"r": "private"}, 1)
+        self.assertNotIn("PASS = sobral", json_dump(p))  # nada de valor cru
+        self.assertIn("***", p["repos"][0]["achados_abertos"][0]["detalhe"])
+
+
+def json_dump(o):
+    import json
+    return json.dumps(o)
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ import re
 import sys
 import html
 import json
+import time
 import hashlib
 import tarfile
 import subprocess
@@ -26,6 +27,7 @@ from gh import ROOT, API, token, list_repos
 from sentinel import send_telegram
 
 STATE_PATH = ROOT / "state" / "secret-scan-state.json"
+POSTURE_PATH = ROOT / "state" / "posture-status.json"  # embaixada: posture-status@1
 _GH = "https://github.com/paulinett1508-dev"
 NOTIFY_CAP = 25          # teto de notificações por run (evita flood)
 MAX_FILE_BYTES = 800_000
@@ -148,8 +150,10 @@ def _fetch_bytes(url, tok):
 
 def scan_remote(tok):
     findings = []
+    repo_meta = {}   # nome -> visibilidade ("public"/"private")
     for r in list_repos(tok):
         full_name, repo = r["full_name"], r["name"]
+        repo_meta[repo] = r.get("visibility") or ("private" if r.get("private") else "public")
         try:
             blob = _fetch_bytes(f"{API}/repos/{full_name}/tarball", tok)
             tar = tarfile.open(fileobj=io.BytesIO(blob), mode="r:gz")
@@ -169,7 +173,43 @@ def scan_remote(tok):
             except Exception:
                 continue
         tar.close()
-    return findings
+    return findings, repo_meta
+
+
+_SEV_WEIGHT = {"critico": 25, "avisos": 10, "normal": 5}
+
+
+def _posture_finding(f, visibility):
+    # repo público com segredo é P1; privado é aviso. detalhe já vem redigido.
+    pub = visibility == "public"
+    return {
+        "kind": "repo_publico_com_segredo" if pub else "secret_hardcoded",
+        "severidade": "critico" if pub else "avisos",
+        "path": f"{f['path']}:{f['line']}",
+        "detalhe": f["redacted"],
+        "ref_key": f["key"],
+    }
+
+
+def build_posture(findings, repo_meta, ts):
+    """Manifest posture-status@1 (matrix-core). Inclui TODO repo — score 100 = limpo."""
+    by_repo = {}
+    for f in findings:
+        by_repo.setdefault(f["repo"], []).append(f)
+    repos, crit = [], 0
+    for repo in sorted(repo_meta):
+        vis = repo_meta[repo]
+        achados = [_posture_finding(f, vis) for f in by_repo.get(repo, [])]
+        score = max(0, 100 - sum(_SEV_WEIGHT[a["severidade"]] for a in achados))
+        crit += sum(1 for a in achados if a["severidade"] == "critico")
+        repos.append({"repo": repo, "visibilidade": vis, "score": score,
+                      "achados_abertos": achados, "ultimaVarredura": ts})
+    n_com = sum(1 for r in repos if r["achados_abertos"])
+    return {
+        "schema": "entity-exchange/posture-status@1",
+        "entity": "sentinel", "ts": ts, "repos": repos,
+        "resumo": f"{n_com} repo(s) com achado aberto; {crit} crítico(s).",
+    }
 
 
 def format_finding(f):
@@ -211,15 +251,19 @@ def run_local(dirs):
 
 def run_remote():
     tok = token()
-    findings = scan_remote(tok)
+    findings, repo_meta = scan_remote(tok)
     by_key = {f["key"]: f for f in findings}   # dedup intra-run
+
+    # Emite postura na embaixada SEMPRE (estado vivo do ecossistema, não só quando há segredo novo).
+    save_state(POSTURE_PATH, build_posture(list(by_key.values()), repo_meta, int(time.time())))
+
     state = load_state(STATE_PATH)
     seen = set(state["seen"]) if state else set()
     first_run = state is None
 
     fresh = [f for k, f in by_key.items() if k not in seen]
     if not fresh:
-        print("Nenhum segredo novo.")
+        print("Nenhum segredo novo. Postura atualizada.")
         save_state(STATE_PATH, {"seen": sorted(seen | set(by_key))})
         return 0
 
