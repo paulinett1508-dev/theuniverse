@@ -1,0 +1,22 @@
+[Unit]
+Description=Obi-Wan API — endpoint /ask M2M (porta 9121)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/theuniverse
+EnvironmentFile=/opt/obi-wan/.env
+ExecStart=/opt/obi-wan/venv/bin/uvicorn api:app \
+    --app-dir /opt/theuniverse/obi-wan \
+    --host 0.0.0.0 \
+    --port 9121 \
+    --workers 1
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=obi-wan-api
+
+[Install]
+WantedBy=multi-user.target
