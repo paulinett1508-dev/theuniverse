@@ -1,4 +1,5 @@
 """API REST do Obi-Wan — endpoint /ask para comunicação M2M planeta ↔ Observatório."""
+import hmac
 import os
 import time
 from collections import defaultdict
@@ -42,23 +43,27 @@ class AskRequest(BaseModel):
 
 def _auth(request: Request) -> None:
     header = request.headers.get("Authorization", "")
-    if not header.startswith("Bearer ") or header[7:] != _API_TOKEN:
+    supplied = header[7:] if header.startswith("Bearer ") else ""
+    if not hmac.compare_digest(supplied, _API_TOKEN):
         raise HTTPException(status_code=401)
 
 
-def _rate_check(planet: str) -> None:
+def _rate_check(ip: str) -> None:
     now = time.monotonic()
-    hits = [t for t in _rate[planet] if now - t < _RATE_WINDOW]
+    hits = [t for t in _rate[ip] if now - t < _RATE_WINDOW]
     if len(hits) >= _RATE_LIMIT:
         raise HTTPException(status_code=429, detail="rate limit exceeded")
     hits.append(now)
-    _rate[planet] = hits
+    if hits:
+        _rate[ip] = hits
+    else:
+        _rate.pop(ip, None)
 
 
 @app.post("/ask")
 def ask(body: AskRequest, request: Request):
     _auth(request)
-    _rate_check(body.planet)
+    _rate_check(request.client.host)
 
     question = body.question
     if body.context:
