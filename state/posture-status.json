@@ -1,0 +1,385 @@
+{
+  "schema": "entity-exchange/posture-status@1",
+  "entity": "sentinel",
+  "ts": 1782215419,
+  "repos": [
+    {
+      "repo": "AlgodaoAtelie",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "CertiSYS",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "FinanceFlow",
+      "visibilidade": "public",
+      "score": 75,
+      "achados_abertos": [
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "server/fixCollaboratorPassword.ts:12",
+          "detalhe": "const pla***rd = \"ace***ab\";",
+          "ref_key": "e40d51dd1bfba024"
+        }
+      ],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "GessoExpress",
+      "visibilidade": "private",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "SuperCartolaManagerv5-production",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "agnostic-core",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "agnvendas-painelsbr",
+      "visibilidade": "public",
+      "score": 75,
+      "achados_abertos": [
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "docs/superpowers/plans/2026-03-26-agnostic-core-improvements.md:2481",
+          "detalhe": "-d '{\"email\":\"adm***br\",\"senha\":\"Sen***26\"}' | jq '.acc***en' | head -c 30",
+          "ref_key": "e9fbbc73384bcdb3"
+        }
+      ],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "bolaocopa2026",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "centroculturalsbr",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "contabilplus",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "f1-pulse",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "florianorun",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "flowdigitalstudio",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "hqplus",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "imersaobitrix24",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "lp-ellenpedrosa",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "lp-restauranteflutuante",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "lpjaraujoinfo",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "luna-base",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "matrix-core",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "mcp-eventos",
+      "visibilidade": "private",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "nexus-labsobral",
+      "visibilidade": "private",
+      "score": 50,
+      "achados_abertos": [
+        {
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
+          "path": "fileexplorer/api/portainer.py:11",
+          "detalhe": "_CREDS = jso***ps({\"us***me\": \"admin\", \"pa***rd\": \"@ce***dm\"}).encode()",
+          "ref_key": "a71f5e2ea25c45ed"
+        },
+        {
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
+          "path": "fileexplorer/static/install-rustdesk.ps1:20",
+          "detalhe": "$Use***rd    = 'rus***11'",
+          "ref_key": "c71864befb546cb8"
+        },
+        {
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
+          "path": "infra/docker/pihole/docker-compose.yml:12",
+          "detalhe": "WEB***RD: \"@ce***97\"",
+          "ref_key": "156c8bb47c01b26f"
+        },
+        {
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
+          "path": "scripts/dvr-check.py:28",
+          "detalhe": "RTS***SS = \"sob***11\"",
+          "ref_key": "576644bd0b3801df"
+        },
+        {
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
+          "path": "servers/labsobral-214/rustdesk/share-pack/install-rustdesk.ps1:31",
+          "detalhe": "$Use***rd      = 'rus***11'",
+          "ref_key": "3c4bf0c301c0eb96"
+        }
+      ],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "pedidomobile",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "sbrchecks",
+      "visibilidade": "public",
+      "score": 0,
+      "achados_abertos": [
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "login-kit/scripts/tmp/zabbix-add-dvr5.py:18",
+          "detalhe": "res = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})",
+          "ref_key": "0021a751670a667c"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "login-kit/scripts/tmp/zabbix-add-dvr6.py:17",
+          "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
+          "ref_key": "d300976ae42aa0d0"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "login-kit/scripts/tmp/zabbix-check-dvr5.py:18",
+          "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
+          "ref_key": "9f514aaac7cfef70"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "login-kit/scripts/tmp/zabbix-check-icmp.py:18",
+          "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
+          "ref_key": "989b80dea9febc9d"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "login-kit/scripts/tmp/zabbix-dvr6-icmp.py:17",
+          "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
+          "ref_key": "3f4e556ff4ca93a8"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "login-kit/scripts/tmp/zabbix-dvr6-restore-snmp.py:17",
+          "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
+          "ref_key": "56c639f5967f2874"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "login-kit/scripts/tmp/zabbix-fix-dvr6.py:17",
+          "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
+          "ref_key": "f4a855211b161ac8"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "login-kit/scripts/tmp/zabbix-inspect.py:17",
+          "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
+          "ref_key": "ba70fa00510d8bc3"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "login-kit/scripts/tmp/zabbix-list-cameras.py:16",
+          "detalhe": "auth = call(\"use***in\", {\"us***me\": \"Admin\", \"pa***rd\": \"zabbix\"})[\"result\"]",
+          "ref_key": "9bcee219a7c7a3f6"
+        }
+      ],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "sbrgestao",
+      "visibilidade": "private",
+      "score": 80,
+      "achados_abertos": [
+        {
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
+          "path": "apps/agnvendas/docs/superpowers/plans/2026-03-26-agnostic-core-improvements.md:2481",
+          "detalhe": "-d '{\"email\":\"adm***br\",\"senha\":\"Sen***26\"}' | jq '.acc***en' | head -c 30",
+          "ref_key": "02f532128137b48e"
+        },
+        {
+          "kind": "secret_hardcoded",
+          "severidade": "avisos",
+          "path": "docs/superpowers/plans/2026-04-15-gestao-sbr-auth-ad-ldap.md:1275",
+          "detalhe": "-d '{\"us***me\":\"usu***te\",\"pa***rd\":\"Sen***AD\"}' | jq .",
+          "ref_key": "40a1ac3200006537"
+        }
+      ],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "sentinel-core",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "sicefsus-sistema",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "sigmed",
+      "visibilidade": "public",
+      "score": 25,
+      "achados_abertos": [
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "docs/superpowers/plans/2026-06-11-phase2-identidade-tenancy.md:720",
+          "detalhe": "ser***in({ email: 'adm***ev', pa***rd: 'wro***ss' }),",
+          "ref_key": "68b16d81aaf59e4e"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "docs/superpowers/plans/2026-06-11-phase2-identidade-tenancy.md:1614",
+          "detalhe": ".send({ email: 'tes***ev', pa***rd: 'tes***23' });",
+          "ref_key": "820ae5b8d68ded4e"
+        },
+        {
+          "kind": "repo_publico_com_segredo",
+          "severidade": "critico",
+          "path": "docs/superpowers/plans/2026-06-11-phase2-identidade-tenancy.md:1596",
+          "detalhe": ".send({ email: 'tes***ev', pa***rd: 'wro***23' })",
+          "ref_key": "7cca00d11c6908d5"
+        }
+      ],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "temperodemamae",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "the-matrix",
+      "visibilidade": "private",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "tokentown",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    },
+    {
+      "repo": "vibegaminghub",
+      "visibilidade": "public",
+      "score": 100,
+      "achados_abertos": [],
+      "ultimaVarredura": 1782215419
+    }
+  ],
+  "resumo": "6 repo(s) com achado aberto; 14 crítico(s)."
+}
