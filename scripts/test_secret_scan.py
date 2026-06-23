@@ -38,6 +38,25 @@ class TestScanText(unittest.TestCase):
         self.assertEqual(scan_text("r", "src/__tests__/a.test.js", 'password = "realpass99"'), [])
         self.assertEqual(scan_text("r", "x.spec.ts", 'password = "realpass99"'), [])
 
+    def test_ignora_arquivo_example(self):
+        # .env.example / settings.json.example são templates — placeholder por definição
+        self.assertEqual(scan_text("r", ".env.example", 'PASSWORD="Kf8jZq2mra"'), [])
+        self.assertEqual(scan_text("r", "settings.json.example", 'PASSWORD="Kf8jZq2mra"'), [])
+
+    def test_ignora_linha_ja_redigida(self):
+        # não re-alertar conteúdo já mascarado (evita o scanner flagrar o próprio doc de achados)
+        self.assertEqual(scan_text("r", "AUDIT.md", "ADMIN_PASSWORD='Sen***26'"), [])
+
+    def test_pem_exige_corpo_real(self):
+        # placeholder de chave privada não alerta
+        self.assertEqual(
+            scan_text("r", "README.md", 'KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----"'),
+            [])
+        # chave com corpo base64 real alerta
+        body = "MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEAZk9pLmQ2Rw8Tn4Vb1Yc3Xs6Dh0Gf7Jp"
+        self.assertTrue(
+            scan_text("r", "leaked.pem", f'KEY="-----BEGIN PRIVATE KEY-----\\n{body}\\n-----END"'))
+
     def test_redact_esconde_o_miolo(self):
         r = redact("RTSP_PASS = Kf8jZq2mra")
         self.assertNotIn("Kf8jZq2mra", r)
