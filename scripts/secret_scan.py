@@ -34,7 +34,8 @@ MAX_FILE_BYTES = 800_000
 PATTERNS = [
     ("Telegram bot token", re.compile(r"[0-9]{8,10}:[A-Za-z0-9_-]{35}")),
     ("age private key", re.compile(r"AGE-SECRET-KEY-1[0-9A-Z]+")),
-    ("Private key block", re.compile(r"BEGIN[ A-Z]*PRIVATE KEY")),
+    # exige corpo base64 real (≥40) após o cabeçalho — corta placeholders "...\n", "SUA_CHAVE", "MIIB..."
+    ("Private key block", re.compile(r"BEGIN[ A-Z]*PRIVATE KEY-----(?:\\n|\s)*[A-Za-z0-9+/]{40,}")),
     ("GitHub PAT", re.compile(r"gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{40,}")),
     ("Groq/OpenAI key", re.compile(r"\b(?:gsk|sk)_[A-Za-z0-9]{20,}")),
     ("AWS access key", re.compile(r"AKIA[0-9A-Z]{16}")),
@@ -45,7 +46,7 @@ PATTERNS = [
 ]
 IGNORE = re.compile(
     r"(?i)revogar|example|placeholder|xxxx|<[a-z]|your[_-]|changeme|dummy|fake|redact|"
-    r"senha123|\bmock\b|\bsample\b")
+    r"senha123|\bmock\b|\bsample\b|\*\*\*|sua[_ ]?chave|seu[_ ]?token")  # *** = linha já redigida
 
 # valores que são placeholder/exemplo, não segredo real
 _PLACEHOLDER_WORD = re.compile(
@@ -64,7 +65,7 @@ def _is_placeholder(v):
         return True
     return False
 SKIP_PATH = re.compile(r"(/|^)(\.git|node_modules|dist|build|vendor|__tests__|tests?)(/|$)|"
-                       r"\.(test|spec)\.|/fixtures?/")
+                       r"\.(test|spec)\.|/fixtures?/|\.example(\.|$)|\.sample(\.|$)")
 SKIP_EXT = re.compile(r"\.(png|jpe?g|gif|svg|pdf|zip|gz|tgz|ico|woff2?|ttf|eot|"
                       r"lock|min\.js|map|mp4|mp3|bin)$", re.I)
 
