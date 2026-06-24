@@ -1,5 +1,6 @@
 import sys
 import json
+import urllib.request
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
@@ -22,6 +23,7 @@ def test_seed_state_from_snapshot():
         "repos": ["alpha", "beta"],
         "latest_run": {"alpha": {"id": 100, "conclusion": "success"}, "beta": None},
         "issues": {"alpha": [{"number": 5, "title": "x"}, {"number": 2, "title": "y"}], "beta": []},
+        "secrets": {"alpha": [], "beta": []},
     }
     state = sentinel.seed_state(snapshot)
     assert state["known_repos"] == ["alpha", "beta"]
@@ -29,11 +31,12 @@ def test_seed_state_from_snapshot():
     assert state["last_issue_number"] == {"alpha": 5}  # maior número; beta sem issue → ausente
 
 
-def _snapshot(repos, latest_run=None, issues=None):
+def _snapshot(repos, latest_run=None, issues=None, secrets=None):
     return {
         "repos": repos,
         "latest_run": latest_run or {r: None for r in repos},
         "issues": issues or {r: [] for r in repos},
+        "secrets": secrets or {r: [] for r in repos},
     }
 
 
@@ -111,10 +114,54 @@ def test_notify_avanca_so_em_envio_ok():
 
     def send_fn(text):
         sent.append(text)
-        if "Issue" in text:
+        if "🚨" in text:
             raise RuntimeError("telegram caiu")
 
     new_state, count = sentinel.notify(events, state, snap, send_fn)
     assert count == 1                                   # só o CI foi
     assert new_state["last_run_id"]["alpha"] == 11      # CI avançou
     assert "alpha" not in new_state["last_issue_number"]  # issue NÃO avançou → re-tenta
+
+
+# --- Heartbeat ---
+
+def test_build_heartbeat_report_clean_cycle():
+    report = sentinel.build_heartbeat_report(["alpha", "beta", "gamma"], [])
+    assert "3" in report
+    assert "UTC" in report
+    assert "✅" in report
+    assert "Tudo limpo" in report
+
+
+def test_build_heartbeat_report_with_events():
+    events = [
+        {"type": "ci_falhou", "repo": "alpha", "detail": "build"},
+        {"type": "issue_nova", "repo": "beta", "detail": "bug X"},
+    ]
+    report = sentinel.build_heartbeat_report(["alpha", "beta"], events)
+    assert "2" in report
+    assert "🔴" in report
+    assert "🚨" in report
+    assert "alpha" in report
+    assert "⚠️" in report
+    assert "Ciclo concluído" in report
+
+
+def test_build_heartbeat_report_all_event_emojis():
+    events = [
+        {"type": "ci_falhou",    "repo": "r1", "detail": "x"},
+        {"type": "issue_nova",   "repo": "r2", "detail": "x"},
+        {"type": "secret_exposto", "repo": "r3", "detail": "x"},
+        {"type": "novo_planeta", "repo": "r4", "detail": "x"},
+        {"type": "planeta_sumido", "repo": "r5", "detail": "x"},
+    ]
+    report = sentinel.build_heartbeat_report(["r1", "r2", "r3", "r4", "r5"], events)
+    for emoji in ["🔴", "🚨", "🔑", "🆕", "💥"]:
+        assert emoji in report
+
+
+def test_send_heartbeat_silent_on_failure(monkeypatch):
+    def raise_always(*a, **kw):
+        raise OSError("sem rede")
+    monkeypatch.setattr(urllib.request, "urlopen", raise_always)
+    sentinel.send_heartbeat("bad_token", "123", "<b>ok</b>")

@@ -165,6 +165,50 @@ def format_event(event):
     return f"Evento em {repo}"
 
 
+def build_heartbeat_report(scanned_repos, detected_events):
+    import datetime
+    ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M") + " UTC"
+    n_repos = len(scanned_repos)
+    n_ev = len(detected_events)
+    lines = [
+        "<b>🤖 Sentinel Heartbeat</b>",
+        f"🕐 {ts}",
+        "",
+        f"📦 {n_repos} repos · {n_ev} evento{'s' if n_ev != 1 else ''}",
+    ]
+    if detected_events:
+        lines.append("")
+        for ev in detected_events:
+            emoji = _EMOJI.get(ev["type"], "•")
+            detail = f" · {ev['detail']}" if ev.get("detail") else ""
+            lines.append(f"{emoji} <b>{ev['repo']}</b> · {ev['type']}{detail}")
+        lines.append("")
+        lines.append("⚠️ Ciclo concluído com eventos")
+    else:
+        lines.append("")
+        lines.append("✅ Tudo limpo")
+    return "\n".join(lines)
+
+
+def send_heartbeat(tok, chat_id, report):
+    try:
+        payload = urllib.parse.urlencode({
+            "chat_id": chat_id,
+            "text": report,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": "true",
+        }).encode()
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{tok}/sendMessage",
+            data=payload,
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=30):
+            pass
+    except Exception:
+        pass
+
+
 def notify(events, state, snapshot, send_fn):
     sent = 0
     for event in events:
