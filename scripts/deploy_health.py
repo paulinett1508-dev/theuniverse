@@ -12,7 +12,8 @@ import time
 from pathlib import Path
 
 from gh import ROOT, API, token, list_repos, api as gh_api
-from sentinel import send_telegram
+from sentinel import send_telegram, TOPICS
+_TOPIC = TOPICS["deploy"]
 
 STATE_PATH = ROOT / "state" / "deploy-state.json"
 TARGET_ENV = "production"
@@ -98,7 +99,7 @@ def main():
         save_state(STATE_PATH, {"last": current})
         print(f"Estado inicial: {len(current)} repos com deploy registrado.")
         try:
-            send_telegram(build_report(len(repos), []))
+            send_telegram(build_report(len(repos), []), thread_id=_TOPIC)
         except Exception:
             pass
         return 0
@@ -106,14 +107,14 @@ def main():
     events = compute_events(state, current)
     for ev in events:
         try:
-            send_telegram(format_event(ev))
+            send_telegram(format_event(ev), thread_id=_TOPIC)
         except Exception as e:
             print(f"  envio falhou ({ev['repo']}): {e}", file=sys.stderr)
 
     save_state(STATE_PATH, {"last": current})
 
     try:
-        send_telegram(build_report(len(repos), events))
+        send_telegram(build_report(len(repos), events), thread_id=_TOPIC)
     except Exception:
         pass
 

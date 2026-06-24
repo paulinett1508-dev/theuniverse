@@ -24,6 +24,25 @@ _EMOJI = {
     "secret_exposto": "🔑",
 }
 
+TOPICS = {
+    "planetas": 2,
+    "alertas":  4,
+    "ci":       6,
+    "pulso":    8,
+    "deps":     10,
+    "deploy":   12,
+    "seguranca": 14,
+    "heartbeat": 16,
+}
+
+_KIND_TOPIC = {
+    "novo_planeta":   TOPICS["planetas"],
+    "planeta_sumido": TOPICS["alertas"],
+    "ci_falhou":      TOPICS["ci"],
+    "issue_nova":     TOPICS["alertas"],
+    "secret_exposto": TOPICS["seguranca"],
+}
+
 
 def load_state(path):
     if not Path(path).exists():
@@ -197,6 +216,7 @@ def send_heartbeat(tok, chat_id, report):
             "text": report,
             "parse_mode": "HTML",
             "disable_web_page_preview": "true",
+            "message_thread_id": str(TOPICS["heartbeat"]),
         }).encode()
         req = urllib.request.Request(
             f"https://api.telegram.org/bot{tok}/sendMessage",
@@ -212,8 +232,9 @@ def send_heartbeat(tok, chat_id, report):
 def notify(events, state, snapshot, send_fn):
     sent = 0
     for event in events:
+        topic = _KIND_TOPIC.get(event["kind"])
         try:
-            send_fn(format_event(event))
+            send_fn(format_event(event), thread_id=topic)
         except Exception as e:
             print(f"  envio falhou ({event['kind']} {event['repo']}): {e}", file=sys.stderr)
             continue
@@ -222,13 +243,16 @@ def notify(events, state, snapshot, send_fn):
     return state, sent
 
 
-def send_telegram(text):
+def send_telegram(text, thread_id=None):
     tg_token = os.environ["TELEGRAM_TOKEN"]
     chat_id = os.environ["SOL_CHAT_ID"]
-    payload = urllib.parse.urlencode({
+    params = {
         "chat_id": chat_id, "text": text, "parse_mode": "HTML",
         "disable_web_page_preview": "true",
-    }).encode()
+    }
+    if thread_id:
+        params["message_thread_id"] = str(thread_id)
+    payload = urllib.parse.urlencode(params).encode()
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{tg_token}/sendMessage",
         data=payload, method="POST",

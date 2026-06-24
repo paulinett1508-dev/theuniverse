@@ -16,7 +16,8 @@ import urllib.request
 from pathlib import Path
 
 from gh import ROOT, API, token, list_repos
-from sentinel import send_telegram
+from sentinel import send_telegram, TOPICS
+_TOPIC = TOPICS["deps"]
 
 STATE_PATH = ROOT / "state" / "deps-state.json"
 OSV_URL = "https://api.osv.dev/v1/query"
@@ -195,7 +196,7 @@ def main():
         save_state(STATE_PATH, {"seen": sorted(keys)})
         print(f"Estado inicial: {len(repos)} repos, {len(all_findings)} CVEs base.")
         try:
-            send_telegram(build_report(len(repos), []))
+            send_telegram(build_report(len(repos), []), thread_id=_TOPIC)
         except Exception:
             pass
         return 0
@@ -204,7 +205,7 @@ def main():
     sent = 0
     for ev in events[:NOTIFY_CAP]:
         try:
-            send_telegram(format_event(ev))
+            send_telegram(format_event(ev), thread_id=_TOPIC)
             sent += 1
         except Exception as e:
             print(f"  envio falhou ({ev['repo']} {ev['cve']}): {e}", file=sys.stderr)
@@ -213,7 +214,7 @@ def main():
     save_state(STATE_PATH, {"seen": sorted(new_seen)})
 
     try:
-        send_telegram(build_report(len(repos), events))
+        send_telegram(build_report(len(repos), events), thread_id=_TOPIC)
     except Exception:
         pass
 

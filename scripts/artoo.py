@@ -47,11 +47,13 @@ _GH = f"https://github.com/{OWNER}"
 
 
 def _tg_send(text):
+    from sentinel import TOPICS
     tg_token = os.environ["TELEGRAM_TOKEN"]
     chat_id = os.environ["SOL_CHAT_ID"]
     payload = urllib.parse.urlencode({
         "chat_id": chat_id, "text": text,
         "parse_mode": "HTML", "disable_web_page_preview": "true",
+        "message_thread_id": str(TOPICS["alertas"]),
     }).encode()
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{tg_token}/sendMessage",

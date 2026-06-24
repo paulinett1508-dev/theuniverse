@@ -24,7 +24,8 @@ import urllib.request
 from pathlib import Path
 
 from gh import ROOT, API, token, list_repos
-from sentinel import send_telegram
+from sentinel import send_telegram, TOPICS
+_TOPIC = TOPICS["seguranca"]
 
 STATE_PATH = ROOT / "state" / "secret-scan-state.json"
 POSTURE_PATH = ROOT / "state" / "posture-status.json"  # embaixada: posture-status@1
@@ -270,14 +271,16 @@ def run_remote():
     sent = 0
     for f in fresh[:NOTIFY_CAP]:
         try:
-            send_telegram(format_finding(f))
+            send_telegram(format_finding(f), thread_id=_TOPIC)
             sent += 1
         except Exception as e:
             print(f"  envio falhou ({f['repo']} {f['path']}): {e}", file=sys.stderr)
     if len(fresh) > NOTIFY_CAP:
         try:
-            send_telegram(f"🔑 <b>+{len(fresh) - NOTIFY_CAP}</b> outros segredos hardcoded "
-                          f"detectados (teto de {NOTIFY_CAP}/run). Rode a auditoria completa.")
+            send_telegram(
+                f"🔑 <b>+{len(fresh) - NOTIFY_CAP}</b> outros segredos hardcoded "
+                f"detectados (teto de {NOTIFY_CAP}/run). Rode a auditoria completa.",
+                thread_id=_TOPIC)
         except Exception:
             pass
 

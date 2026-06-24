@@ -14,7 +14,8 @@ import urllib.error
 from pathlib import Path
 
 from gh import ROOT, token, list_repos
-from sentinel import send_telegram
+from sentinel import send_telegram, TOPICS
+_TOPIC = TOPICS["pulso"]
 
 STATE_PATH = ROOT / "state" / "pulso-state.json"
 TIMEOUT_S = 10
@@ -121,7 +122,7 @@ def main():
         save_state(STATE_PATH, {"status": {r["url"]: r["ok"] for r in results}})
         print(f"Estado inicial: {len(results)} URLs. Próxima run detectará mudanças.")
         try:
-            send_telegram(build_report(results, []))
+            send_telegram(build_report(results, []), thread_id=_TOPIC)
         except Exception:
             pass
         return 0
@@ -129,14 +130,14 @@ def main():
     events = compute_events(state, results)
     for ev in events:
         try:
-            send_telegram(format_event(ev))
+            send_telegram(format_event(ev), thread_id=_TOPIC)
         except Exception as e:
             print(f"  envio falhou ({ev['url']}): {e}")
 
     save_state(STATE_PATH, {"status": {r["url"]: r["ok"] for r in results}})
 
     try:
-        send_telegram(build_report(results, events))
+        send_telegram(build_report(results, events), thread_id=_TOPIC)
     except Exception:
         pass
 
