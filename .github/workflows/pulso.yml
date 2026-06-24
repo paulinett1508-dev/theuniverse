@@ -1,0 +1,33 @@
+name: Sentinel · Pulso — Uptime dos Planetas
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  pulso:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore state
+        uses: actions/cache@v4
+        with:
+          path: state/pulso-state.json
+          key: pulso-state-${{ github.run_id }}
+          restore-keys: pulso-state-
+
+      - name: Run Sentinel · Pulso
+        env:
+          GITHUB_TOKEN: ${{ secrets.SENTINEL_GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/pulso.py
+
+      - name: Save state
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: state/pulso-state.json
+          key: pulso-state-${{ github.run_id }}

@@ -1,0 +1,33 @@
+name: Sentinel · Deploy — Saúde dos Deploys
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  deploy-health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore state
+        uses: actions/cache@v4
+        with:
+          path: state/deploy-state.json
+          key: deploy-state-${{ github.run_id }}
+          restore-keys: deploy-state-
+
+      - name: Run Sentinel · Deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.SENTINEL_GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/deploy_health.py
+
+      - name: Save state
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: state/deploy-state.json
+          key: deploy-state-${{ github.run_id }}
