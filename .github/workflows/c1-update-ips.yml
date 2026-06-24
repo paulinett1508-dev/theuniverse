@@ -30,12 +30,13 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           SOL_CHAT_ID: ${{ secrets.SOL_CHAT_ID }}
+          SUMMARY: ${{ steps.update.outputs.summary }}
         run: |
           python3 - <<'EOF'
           import os, urllib.request, urllib.parse
           token = os.environ["TELEGRAM_TOKEN"]
           chat_id = os.environ["SOL_CHAT_ID"]
-          summary = "${{ steps.update.outputs.summary }}"
+          summary = os.environ.get("SUMMARY", "")
           text = (
               "🛡️ <b>Escudos atualizados</b> · Polaris\n\n"
               f"<code>{summary}</code>\n\n"
