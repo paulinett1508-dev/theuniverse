@@ -238,9 +238,11 @@ body.panel-open #gal-legend{display:none!important}
 #search-input:focus{border-color:rgba(255,200,80,.4)}
 #search-results{position:absolute;top:100%;left:0;width:100%;background:rgba(4,4,12,.95);border:1px solid rgba(255,255,255,.08);border-radius:4px;margin-top:4px;display:none;z-index:50;max-height:280px;overflow-y:auto}
 .sr-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background .15s}
-.sr-item:hover{background:rgba(255,255,255,.06)}
+.sr-item:hover,.sr-item.active{background:rgba(255,200,80,.07)}
+.sr-item.active{border-left:2px solid rgba(255,200,80,.35);padding-left:10px}
 .sr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .sr-name{font-size:10px;letter-spacing:.15em;color:rgba(255,255,255,.7)}
+.sr-match{color:rgba(255,200,80,.9);font-weight:600}
 .sr-cluster{font-size:8px;letter-spacing:.25em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-top:2px}
 .sr-empty{padding:10px 12px;font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.2em}
 
@@ -2527,33 +2529,105 @@ function _galInitScene(planets){
     el.style.borderColor='rgba(255,80,80,.8)';setTimeout(()=>el.style.borderColor='',600);
   }
 
-  // ── Barra de busca ──
+  // ── Barra de busca com autocomplete ──
+  let _srActiveIdx=-1,_srMatches=[],_srDeleting=false;
+
+  function _srSelect(m){
+    focusMesh=m;cam.radiusGoal=(m.userData.radius??2)*8+20;
+    const inp=document.getElementById('search-input');
+    if(inp){inp.value='';inp.blur();}
+    _closeSearchResults();
+  }
+  function _srSetActive(items,idx){
+    items.forEach((el,i)=>el.classList.toggle('active',i===idx));
+  }
+  function _srHighlight(container,text,q){
+    const lo=text.toLowerCase(),qi=lo.indexOf(q);
+    if(qi===-1||!q){container.textContent=text;return;}
+    container.appendChild(document.createTextNode(text.slice(0,qi)));
+    const s=document.createElement('span');s.className='sr-match';s.textContent=text.slice(qi,qi+q.length);
+    container.appendChild(s);
+    container.appendChild(document.createTextNode(text.slice(qi+q.length)));
+  }
+
   window._filterUniverse=function(query){
-    const results=document.getElementById('search-results');if(!results)return;
-    if(!query.trim()){results.style.display='none';return;}
-    const q=query.toLowerCase();
-    const matches=actualMeshes.filter(m=>m.userData.id&&m.userData.id.toLowerCase().includes(q)).slice(0,8);
+    const results=document.getElementById('search-results');
+    const inp=document.getElementById('search-input');
+    if(!results)return;
+    _srActiveIdx=-1;
+    const raw=query.trim();
+    if(!raw){results.style.display='none';return;}
+    const q=raw.toLowerCase();
+    const prefix=[],contains=[];
+    actualMeshes.forEach(m=>{
+      if(!m.userData.id)return;
+      const name=(m.userData.name||m.userData.id).toLowerCase();
+      if(name.startsWith(q))prefix.push(m);
+      else if(name.includes(q))contains.push(m);
+    });
+    _srMatches=[...prefix,...contains].slice(0,8);
+
+    // autocomplete inline — só em prefix match, nunca ao deletar
+    if(!_srDeleting&&inp&&prefix.length>0){
+      const top=prefix[0].userData.name||prefix[0].userData.id;
+      if(top.toLowerCase().startsWith(q)&&inp.value===raw){
+        inp.value=top;
+        inp.setSelectionRange(raw.length,top.length);
+      }
+    }
+
     results.innerHTML='';
-    if(!matches.length){results.innerHTML='<div class="sr-empty">nenhum resultado</div>';results.style.display='block';return;}
-    matches.forEach(m=>{
+    if(!_srMatches.length){
+      const e=document.createElement('div');e.className='sr-empty';e.textContent='nenhum resultado';
+      results.appendChild(e);results.style.display='block';return;
+    }
+    _srMatches.forEach(m=>{
       const item=document.createElement('div');item.className='sr-item';
       const dot=document.createElement('div');dot.className='sr-dot';
       const hex=m.userData.colorHex||'';dot.style.background=/^#[0-9a-fA-F]{3,8}$/.test(hex)?hex:'#fff';
-      const wrap=document.createElement('div');
-      const nm=document.createElement('div');nm.className='sr-name';nm.textContent=m.userData.name||m.userData.id;
-      const cl=document.createElement('div');cl.className='sr-cluster';cl.textContent=m.userData.cluster||'';
+      const wrap=document.createElement('div');wrap.style.flex='1';
+      const nm=document.createElement('div');nm.className='sr-name';
+      _srHighlight(nm,m.userData.name||m.userData.id,q);
+      const cl=document.createElement('div');cl.className='sr-cluster';cl.textContent=m.userData.cluster||m.userData.type||'';
       wrap.appendChild(nm);wrap.appendChild(cl);item.appendChild(dot);item.appendChild(wrap);
-      item.addEventListener('click',()=>{
-        focusMesh=m;cam.radiusGoal=(m.userData.radius??2)*8+20;
-        document.getElementById('search-input').value='';
-        _closeSearchResults();
-      });
+      item.addEventListener('mousedown',e=>{e.preventDefault();_srSelect(m);});
       results.appendChild(item);
     });
     results.style.display='block';
   };
   window._openSearchResults=function(){const q=document.getElementById('search-input')?.value;if(q?.trim())_filterUniverse(q);};
-  window._closeSearchResults=function(){const r=document.getElementById('search-results');if(r)r.style.display='none';};
+  window._closeSearchResults=function(){const r=document.getElementById('search-results');if(r)r.style.display='none';_srActiveIdx=-1;};
+
+  // Navegação por teclado
+  (function(){
+    const inp=document.getElementById('search-input');if(!inp)return;
+    inp.addEventListener('keydown',function(e){
+      _srDeleting=(e.key==='Backspace'||e.key==='Delete');
+      const items=document.querySelectorAll('#search-results .sr-item');
+      if(e.key==='ArrowDown'){
+        e.preventDefault();
+        _srActiveIdx=Math.min(_srActiveIdx+1,items.length-1);
+        _srSetActive(items,_srActiveIdx);
+        if(_srMatches[_srActiveIdx]){const n=_srMatches[_srActiveIdx].userData.name||_srMatches[_srActiveIdx].userData.id;inp.value=n;inp.setSelectionRange(n.length,n.length);}
+      }else if(e.key==='ArrowUp'){
+        e.preventDefault();
+        _srActiveIdx=Math.max(_srActiveIdx-1,-1);
+        _srSetActive(items,_srActiveIdx);
+        if(_srActiveIdx>=0&&_srMatches[_srActiveIdx]){const n=_srMatches[_srActiveIdx].userData.name||_srMatches[_srActiveIdx].userData.id;inp.value=n;inp.setSelectionRange(n.length,n.length);}
+      }else if(e.key==='Enter'){
+        e.preventDefault();
+        const idx=_srActiveIdx>=0?_srActiveIdx:0;
+        if(_srMatches[idx])_srSelect(_srMatches[idx]);
+      }else if(e.key==='Escape'){
+        _closeSearchResults();inp.blur();
+      }else if(e.key==='Tab'){
+        e.preventDefault();
+        inp.setSelectionRange(inp.value.length,inp.value.length);
+        if(_srMatches[0])_srSelect(_srMatches[0]);
+      }
+    });
+    inp.addEventListener('keyup',()=>{_srDeleting=false;});
+  })();
 
   // Popular select do Obi-Wan após construção dos meshes
   (function(){
