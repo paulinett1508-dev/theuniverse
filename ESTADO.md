@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-24 (Heartbeat Sentinel · radar postura · busca autocomplete)
+> Última atualização: 2026-06-24 (Heartbeat Sentinel · radar postura · busca autocomplete · Pulso · Deps · Deploy)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -122,8 +122,11 @@ Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após c
 
 ### 3. Subsistema C — ✅ IMPLEMENTADO
 
-- **Sentinel · Escudos:** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. Notifica Telegram após cada run (sem silêncio no universo).
+- **Sentinel · Escudos:** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. Notifica Telegram após cada run.
 - **Sentinel · Farejador:** varredura de conteúdo por regex em todos os planetas, notifica Telegram e atualiza `state/posture-status.json`.
+- **Sentinel · Pulso:** uptime das URLs de produção (`homepage` da API GitHub). Cron 15min. Estado em `state/pulso-state.json`. Notifica queda/retorno + heartbeat.
+- **Sentinel · Deps:** CVE scan de `package.json`+`requirements.txt` via OSV.dev API. Cron diário 06h. Estado em `state/deps-state.json`. Notifica novas vulns + heartbeat.
+- **Sentinel · Deploy:** saúde de deployments de produção via GitHub Deployments API (Vercel-compatível). Cron 30min. Estado em `state/deploy-state.json`. Detecta regressões + recuperações + heartbeat.
 
 ### 4. Dashboard NOC — ✅ NO AR | v7
 
