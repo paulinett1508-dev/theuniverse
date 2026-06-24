@@ -1,4 +1,4 @@
-name: C1 — Atualiza IPs do GitHub na Polaris
+name: Sentinel · Escudos — Atualiza IPs do GitHub na Polaris
 
 on:
   schedule:

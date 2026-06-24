@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""C1 — Escudos: restringe porta 9120 aos IPs oficiais do GitHub.
+"""Sentinel · Escudos: restringe porta 9120 aos IPs oficiais do GitHub.
 
 Roda na Polaris (precisa de root para ufw).
 Idempotente: limpa todas as regras existentes de 9120 e recria.

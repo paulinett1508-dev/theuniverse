@@ -20,7 +20,7 @@
 | Frota (servidores = estrelas) | `docs/ecossistema/frota.md` |
 | Spec Obi-Wan (subsistema A) | `docs/ecossistema/A-obi-wan-spec.md` |
 | Spec Webhook Notifier (subsistema B2) | `docs/ecossistema/B2-webhook-notifier-spec.md` |
-| Script escudos (C1) | `scripts/c1-update-github-ips.py` |
+| Sentinel · Escudos (C1) | `scripts/c1-update-github-ips.py` |
 | Fichas dos planetas | `planets/*.md` + `planets/_index.md` |
 | Diário de bordo | `CHANGELOG.md` |
 | Censo (auto-descoberta) | `scripts/censo.py` + `.github/workflows/censo.yml` |
@@ -96,8 +96,8 @@ Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após c
 
 ### 3. Subsistema C — ✅ IMPLEMENTADO
 
-- **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`.
-- **C2 (Secrets Scan):** sentinel detecta secrets expostos em qualquer planeta e notifica Telegram.
+- **Sentinel · Escudos:** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`.
+- **Sentinel · Farejador:** varredura de conteúdo por regex em todos os planetas, notifica Telegram e atualiza postura.
 
 ### 4. Dashboard NOC — ✅ NO AR | v6
 

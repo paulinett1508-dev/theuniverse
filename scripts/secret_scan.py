@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Auditoria de segredos hardcoded (subsistema do Sentinel).
+"""Sentinel · Farejador: auditoria de segredos hardcoded em todos os planetas.
 
 Complementa o `secret_exposto` nativo (GitHub secret-scanning) com varredura de
 CONTEÚDO por regex: pega segredos custom (senhas, tokens não-provider) que o
