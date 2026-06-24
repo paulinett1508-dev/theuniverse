@@ -45,6 +45,7 @@ def _send(text: str) -> None:
             "text": text,
             "parse_mode": "HTML",
             "disable_web_page_preview": True,
+            "message_thread_id": 2,  # tópico Planetas no grupo TheUniverse
         }, timeout=10)
         r.raise_for_status()
     except Exception as e:
