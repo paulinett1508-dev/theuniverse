@@ -1492,7 +1492,7 @@ function _galInitScene(planets){
     const orbitGroup=new THREE.Group();
     // inclinação orbital: anéis externos mais inclinados + offset por nome
     let nh=0;const nm=p.name||'';for(let i=0;i<nm.length;i++)nh=(Math.imul(31,nh)+nm.charCodeAt(i))|0;
-    const tilt=0.04+(ri/20)*0.38+((nh>>>0)%12)/100;
+    const tilt=0.02+(ri/20)*0.06+((nh>>>0)%5)/200;
     orbitGroup.userData={...p,_galRi:ri,_galOrbit:orbit,_galOrbitTilt:tilt};
     orbitGroup.position.set(orbit*Math.cos(ang),Math.sin(ang)*orbit*tilt,orbit*Math.sin(ang));
     return orbitGroup;
@@ -2041,15 +2041,19 @@ function _galInitScene(planets){
         for(let i=0;i<12;i++){const x1=Math.random()*sz,y1=Math.random()*sz,x2=x1+(Math.random()-.5)*40,y2=y1+(Math.random()-.5)*40;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle='rgba(180,220,255,.18)';ctx.lineWidth=.6;ctx.stroke();}
       });
       const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.radius,32,32),new THREE.MeshStandardMaterial({map:tc,emissive:new THREE.Color(p.col).multiplyScalar(.08),emissiveIntensity:.5,roughness:.95,metalness:0}));
-      mesh.userData={...p,isArchived:true};
+      mesh.userData={...p,isArchived:true,cluster:'zona de decadência',status:'archived'};
       mesh.add(_galGlow(p.radius*2,p.col,.08));
       scene.add(mesh);dm.push(mesh);
+      actualMeshes.push(mesh);
     });
     _DELETED.forEach(p=>{
-      const grp=new THREE.Group();grp.userData={...p,isDeleted:true};
+      const hex='#'+new THREE.Color(p.col).getHexString();
+      const grp=new THREE.Group();grp.userData={...p,isDeleted:true,name:p.id,colorHex:hex,cluster:'zona de decadência',status:'supernova'};
       grp.add(new THREE.Mesh(new THREE.SphereGeometry(p.radius,24,24),new THREE.MeshBasicMaterial({color:p.col,transparent:true,opacity:.06})));
       grp.add(new THREE.Mesh(new THREE.SphereGeometry(p.radius,12,12),new THREE.MeshBasicMaterial({color:p.col,transparent:true,opacity:.22,wireframe:true})));
       grp.add(_galGlow(p.radius*1.8,p.col,.05));
+      const hit=new THREE.Mesh(new THREE.SphereGeometry(p.radius*1.8,8,8),new THREE.MeshBasicMaterial({visible:false,depthWrite:false}));
+      hit.userData=grp.userData;grp.add(hit);actualMeshes.push(hit);
       scene.add(grp);dm.push(grp);
     });
     // Automacao-de-CND — só partículas escuras no BH
@@ -2118,10 +2122,9 @@ function _galInitScene(planets){
   const _obiWanISS=_buildObiWanISS();
   _obiWanISS.position.copy(_OBI_HOME);
   _obiWanISS.scale.setScalar(3.0);
-  _obiWanISS.add(_galGlow(4,0xaabbdd,.45));
-  _obiWanISS.add(_galGlow(9,0x8899aa,.18));
-  _obiWanISS.add(_galGlow(18,0x667788,.06));
-  const _obiLight=new THREE.PointLight(0x8899cc,.8,20);
+  const _obiGlows=[_galGlow(3,0xaabbdd,.20),_galGlow(7,0x8899aa,.08),_galGlow(14,0x667788,.025)];
+  _obiGlows.forEach(gw=>_obiWanISS.add(gw));
+  const _obiLight=new THREE.PointLight(0x8899cc,.4,16);
   _obiWanISS.add(_obiLight);
   scene.add(_obiWanISS);
   actualMeshes.push(_obiWanISS);
@@ -2156,7 +2159,7 @@ function _galInitScene(planets){
   _sentinelMesh.position.set(3,0,0);
   _sentinelPivot.add(_sentinelMesh);
   scene.add(_sentinelPivot);
-  actualMeshes.push(_sentinelMesh);
+  // sentinel-core intencionalmente fora do actualMeshes — é satélite, não planeta
 
   // ── Sistema 2: Obi-Wan ISS Messenger ──────────────────────────
   const _OBJ_STATE={state:'idle',target:null,message:null,progress:0,
@@ -2168,8 +2171,8 @@ function _galInitScene(planets){
     orbitAngle:0,orbitTimer:0,orbitDuration:0,cruiseProgress:0,cruisePath:null};
 
   function _pickWanderTarget(){
-    const pool=actualMeshes.filter(m=>m.userData.isPlanet&&m!==_OBI_WANDER.currentHost);
-    if(!pool.length)return actualMeshes.find(m=>m.userData.isPlanet)||null;
+    const pool=actualMeshes.filter(m=>m.userData.bodyType==='planet'&&m!==_OBI_WANDER.currentHost);
+    if(!pool.length)return actualMeshes.find(m=>m.userData.bodyType==='planet')||null;
     return pool[Math.floor(Math.random()*pool.length)];
   }
   function _initObiWanWander(){
@@ -2476,6 +2479,14 @@ function _galInitScene(planets){
     _obiWanPanelOpen=!_obiWanPanelOpen;
     document.getElementById('obiwan-body').style.display=_obiWanPanelOpen?'flex':'none';
     document.getElementById('obiwan-chevron').textContent=_obiWanPanelOpen?'▾':'▸';
+  };
+  let _obiLightsOn=true;
+  window._toggleObiWanLights=function(){
+    _obiLightsOn=!_obiLightsOn;
+    _obiGlows.forEach(gw=>{gw.visible=_obiLightsOn;});
+    _obiLight.intensity=_obiLightsOn?.4:0;
+    const btn=document.getElementById('obiwan-lights-btn');
+    if(btn)btn.textContent=_obiLightsOn?'luzes: on':'luzes: off';
   };
   window._dispatchObiWanMessage=function(){
     const targetId=document.getElementById('msg-target').value;
@@ -3174,6 +3185,7 @@ main();
       <input type="text" id="msg-text" placeholder="Mensagem..." maxlength="120"
         onkeydown="if(event.key==='Enter') _dispatchObiWanMessage()">
       <button onclick="_dispatchObiWanMessage()">Enviar via Obi-Wan</button>
+      <button id="obiwan-lights-btn" onclick="_toggleObiWanLights()">luzes: on</button>
       <div id="travel-log"></div>
     </div>
   </div>
