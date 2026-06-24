@@ -2559,7 +2559,7 @@ function _galInitScene(planets){
     if(!raw){results.style.display='none';return;}
     const q=raw.toLowerCase();
     const prefix=[],contains=[];
-    actualMeshes.forEach(m=>{
+    [...actualMeshes,_sentinelMesh].forEach(m=>{
       if(!m.userData.id)return;
       const name=(m.userData.name||m.userData.id).toLowerCase();
       if(name.startsWith(q))prefix.push(m);
