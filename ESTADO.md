@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-23 (Dashboard galáctica v6 + endpoint /ask M2M deployado)
+> Última atualização: 2026-06-24 (Heartbeat Sentinel · radar postura · busca autocomplete)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -53,7 +53,33 @@ Gravidade = agnostic-core (submodule).
 
 ## ✅ Concluído nesta jornada
 
-### Sessão 2026-06-23 (esta)
+### Sessão 2026-06-24 (esta)
+
+**Sentinel — Heartbeat do ciclo:**
+- `build_heartbeat_report()` + `send_heartbeat()` implementados via TDD (4 testes novos)
+- Corrigidos 5 testes regressivos da outra sessão (`_snapshot` sem `secrets`, `"Issue"` → `"🚨"`)
+- `main()` acumula `scanned_repos` + `detected_events` e dispara heartbeat ao final de cada ciclo
+- Relatório HTML chega no Telegram a cada 15 min: repos escaneados, eventos detectados, ✅/⚠️
+
+**Sentinel · Escudos — observabilidade:**
+- Adicionado step de notificação Telegram no workflow `c1-update-ips.yml`
+- Corrigida injeção GitHub Actions (`summary` via env var, não interpolado no heredoc Python)
+
+**Renaming C1/C2 → Sentinel · Escudos / Sentinel · Farejador:**
+- Atualizado em: `ESTADO.md`, workflows, docstrings dos scripts
+
+**Dashboard v7 — radar de postura no sentinel-core:**
+- `api/posture.js` — novo endpoint Vercel que lê `state/posture-status.json`
+- Anel radar girante no sentinel-core: cor = `status` da postura (verde/amarelo/vermelho)
+- Pulso de 1.5s ao detectar mudança de estado entre polls
+
+**Dashboard v7 — busca com autocomplete:**
+- Prefix completion inline: digitar "flori" preenche `florianorun` com seleção no restante
+- Navegação por teclado: ↑↓ percorre dropdown, Enter seleciona, Esc fecha, Tab confirma
+- Match destacado em amarelo no dropdown, resultados rankeados (prefix primeiro)
+- sentinel-core adicionado ao pool de busca (antes só acessível pela legenda)
+
+### Sessão 2026-06-23
 
 **Federação M2M (issue #1 — FECHADA):**
 - `obi-wan/api.py` — FastAPI `/ask` porta 9121, Bearer auth (hmac.compare_digest), rate limit por IP
@@ -96,24 +122,25 @@ Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após c
 
 ### 3. Subsistema C — ✅ IMPLEMENTADO
 
-- **Sentinel · Escudos:** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`.
-- **Sentinel · Farejador:** varredura de conteúdo por regex em todos os planetas, notifica Telegram e atualiza postura.
+- **Sentinel · Escudos:** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. Notifica Telegram após cada run (sem silêncio no universo).
+- **Sentinel · Farejador:** varredura de conteúdo por regex em todos os planetas, notifica Telegram e atualiza `state/posture-status.json`.
 
-### 4. Dashboard NOC — ✅ NO AR | v6
+### 4. Dashboard NOC — ✅ NO AR | v7
 
 URL: `theuniverse-lake.vercel.app` (Vercel, deploy automático no push).
-Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_TOKEN` no painel Vercel.
+Infra: `api/planets.js` + `api/events.js` + `api/posture.js` (Vercel functions). Env var: `GITHUB_TOKEN` no painel Vercel.
 
 **Corpos celestes especiais** (hardcoded em `api/planets.js → SPECIAL_BODIES`):
 - station: `agnostic-core` · satellite: `mcp-eventos` · observatory: `luna-base`
 - supernova: `bolaocopa2026`, `f1-pulse` · nebula: `vibegaminghub`
 
-**Vista galáctica v6** (`dashboard/index.html` ~3050 linhas):
+**Vista galáctica v7** (`dashboard/index.html`):
 - 24 anéis orbitais, ring 0 = orbit 20u, ring 23 = orbit 375u
 - Obi-Wan ISS: exílio `(80,120,60)`, wander autônomo quando idle (visita planetas por `bodyType==='planet'`)
-- sentinel-core: satélite que orbita a ISS — fora do `actualMeshes`, não é planeta
+- sentinel-core: satélite que orbita a ISS — anel radar girante com cor de postura (🟢 limpo · 🟡 avisos · 🔴 crítico), poll `/api/posture` a cada 60s, pulsa ao detectar mudança
 - Zona de decadência (BH): todos os corpos com hitbox no raycaster (tooltip + card)
 - Toggle de luzes da ISS: abrir painel Obi-Wan → botão "luzes: on/off"
+- **Busca com autocomplete**: prefix completion inline (Tab confirma), ↑↓/Enter/Esc, match destacado em amarelo, sentinel-core incluído no pool de busca
 
 **Novos planetas a adicionar ao mapa forçado:** `mybots-telegram` (ver issue #9)
 
