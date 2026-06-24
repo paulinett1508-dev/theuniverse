@@ -1,6 +1,6 @@
 # theuniverse — Mapa dos Planetas
 
-> Atualizado: 2026-06-23 | 28 planetas mapeados (Censo automático)
+> Atualizado: 2026-06-24 | 28 planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
 
@@ -13,7 +13,7 @@
 | 🟡 [CertiSYS](planets/CertiSYS.md) | gov-publico | TypeScript | 1 |
 | 🟡 [contabilplus](planets/contabilplus.md) | produtos | - | 1 |
 | 🟡 [f1-pulse](planets/f1-pulse.md) | entretenimento | TypeScript | 1 |
-| 🟡 [FinanceFlow](planets/FinanceFlow.md) | produtos | TypeScript | 1 |
+| 🟢🔒 [FinanceFlow](planets/FinanceFlow.md) | produtos | TypeScript | 1 |
 | 🟡 [florianorun](planets/florianorun.md) | landing-clientes | TypeScript | 1 |
 | 🟡 [flowdigitalstudio](planets/flowdigitalstudio.md) | produtos | TypeScript | 1 |
 | 🟡🔒 [GessoExpress](planets/GessoExpress.md) | landing-clientes | JavaScript | 2 |
@@ -24,12 +24,12 @@
 | 🟡 [lpjaraujoinfo](planets/lpjaraujoinfo.md) | landing-clientes | TypeScript | 1 |
 | 🟢 [luna-base](planets/luna-base.md) | observatorio | - | 1 |
 | 🟢🔒 [mcp-eventos](planets/mcp-eventos.md) | mcp-ia | Python | 1 |
-| 🟢 [mybots-telegram](planets/mybots-telegram.md) | nao-classificado | Shell | 0 |
-| 🟢🔒 [nexus-labsobral](planets/nexus-labsobral.md) | sobral-core | Python | 125 |
-| 🟢 [sbrchecks](planets/sbrchecks.md) | sobral-core | Python | 1 |
-| 🟢🔒 [sbrgestao](planets/sbrgestao.md) | sobral-core | TypeScript | 2 |
-| 🟢 [sicefsus-sistema](planets/sicefsus-sistema.md) | gov-publico | JavaScript | 3 |
-| 🟢 [sigmed](planets/sigmed.md) | sobral-core | TypeScript | 1 |
+| 🟢🔒 [nexus-labsobral](planets/nexus-labsobral.md) | sobral-core | Python | 132 |
+| 🟢🔒 [sbrchecks](planets/sbrchecks.md) | sobral-core | Python | 1 |
+| 🟢🔒 [sbrgestao](planets/sbrgestao.md) | sobral-core | TypeScript | 6 |
+| 🟢 [sentinel-core](planets/sentinel-core.md) | nao-classificado | Shell | 0 |
+| 🟢 [sicefsus-sistema](planets/sicefsus-sistema.md) | gov-publico | JavaScript | 4 |
+| 🟢🔒 [sigmed](planets/sigmed.md) | sobral-core | TypeScript | 1 |
 | 🟢 [SuperCartolaManagerv5-production](planets/SuperCartolaManagerv5-production.md) | entretenimento | JavaScript | 1 |
 | 🟡 [temperodemamae](planets/temperodemamae.md) | landing-clientes | HTML | 1 |
 | 🟢 [tokentown](planets/tokentown.md) | produtos | TypeScript | 2 |

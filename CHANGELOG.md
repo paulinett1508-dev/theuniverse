@@ -5,6 +5,13 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+
+## 2026-06-24 — Censo automático
+
+### 🆕 Planetas descobertos
+- **sentinel-core** — entrou no universo
+### 💥 Planetas sumidos
+- **mybots-telegram** — não consta mais no GitHub (ficha arquivada)
 ## 2026-06-23 — Censo automático
 
 ### 🆕 Planetas descobertos
