@@ -19,6 +19,35 @@ jobs:
           ssh-keyscan -p 22 195.200.5.145 >> ~/.ssh/known_hosts
 
       - name: Atualiza IPs do GitHub no UFW
+        id: update
         run: |
           ssh -i ~/.ssh/polaris_key -p 22 root@195.200.5.145 \
-            "cd /opt/theuniverse && git pull --ff-only && python3 scripts/c1-update-github-ips.py"
+            "cd /opt/theuniverse && git pull --ff-only && python3 scripts/c1-update-github-ips.py" \
+            | tee /tmp/c1-output.txt
+          echo "summary=$(tail -1 /tmp/c1-output.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Notifica Telegram
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          SOL_CHAT_ID: ${{ secrets.SOL_CHAT_ID }}
+        run: |
+          python3 - <<'EOF'
+          import os, urllib.request, urllib.parse
+          token = os.environ["TELEGRAM_TOKEN"]
+          chat_id = os.environ["SOL_CHAT_ID"]
+          summary = "${{ steps.update.outputs.summary }}"
+          text = (
+              "🛡️ <b>Escudos atualizados</b> · Polaris\n\n"
+              f"<code>{summary}</code>\n\n"
+              "CIDRs do GitHub recarregados. Porta 9120 protegida."
+          )
+          payload = urllib.parse.urlencode({
+              "chat_id": chat_id, "text": text,
+              "parse_mode": "HTML", "disable_web_page_preview": "true",
+          }).encode()
+          req = urllib.request.Request(
+              f"https://api.telegram.org/bot{token}/sendMessage",
+              data=payload, method="POST",
+          )
+          urllib.request.urlopen(req, timeout=15)
+          EOF
