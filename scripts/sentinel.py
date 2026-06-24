@@ -282,23 +282,36 @@ def main():
         save_state(STATE_PATH, seed_state(snapshot))
         print(f"Baseline semeado: {len(snapshot['repos'])} planetas. (sem notificar)")
         return 0
+
+    scanned_repos = list(snapshot["repos"])
     events = compute_events(state, snapshot)
+    detected_events = [
+        {"type": e["kind"], "repo": e["repo"], "detail": e.get("detail", "")}
+        for e in events
+    ]
+
     if not events:
         print("Universo quieto — nenhum evento novo.")
-        return 0
-    new_state, sent = notify(events, state, snapshot, send_telegram)
-    save_state(STATE_PATH, new_state)
-    print(f"Eventos: {len(events)} detectados, {sent} notificados.")
+    else:
+        new_state, sent = notify(events, state, snapshot, send_telegram)
+        save_state(STATE_PATH, new_state)
+        print(f"Eventos: {len(events)} detectados, {sent} notificados.")
 
-    # Despacha Artoo para novos CI failures — alerta o mundo do planeta
-    ci_failures = [e for e in events if e["kind"] == "ci_falhou"]
-    if ci_failures:
-        try:
-            from artoo import dispatch as artoo_dispatch
-            for e in ci_failures:
-                artoo_dispatch(e["repo"], "CI falhou", e.get("detail", ""), tok=tok)
-        except Exception as e:
-            print(f"  Artoo falhou: {e}", file=sys.stderr)
+        # Despacha Artoo para novos CI failures — alerta o mundo do planeta
+        ci_failures = [e for e in events if e["kind"] == "ci_falhou"]
+        if ci_failures:
+            try:
+                from artoo import dispatch as artoo_dispatch
+                for e in ci_failures:
+                    artoo_dispatch(e["repo"], "CI falhou", e.get("detail", ""), tok=tok)
+            except Exception as e:
+                print(f"  Artoo falhou: {e}", file=sys.stderr)
+
+    tg_token = os.environ.get("TELEGRAM_TOKEN", "")
+    chat_id = os.environ.get("SOL_CHAT_ID", "")
+    if tg_token and chat_id:
+        report = build_heartbeat_report(scanned_repos, detected_events)
+        send_heartbeat(tg_token, chat_id, report)
 
     return 0
 
