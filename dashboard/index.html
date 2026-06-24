@@ -2155,12 +2155,35 @@ function _galInitScene(planets){
     g.add(_galGlow(.5,0x00aaff,.65));
     g.add(_galGlow(1.2,0x0088cc,.25));
     g.add(new THREE.PointLight(0x00aaff,.5,8));
+    // radar ring — cor e intensidade controladas pela postura
+    const _rr=new THREE.Mesh(
+      new THREE.TorusGeometry(.55,.008,4,64),
+      new THREE.MeshStandardMaterial({color:0x00ff88,emissive:0x00ff88,emissiveIntensity:.6,
+        roughness:.1,metalness:.8,transparent:true,opacity:.7,depthWrite:false})
+    );
+    _rr.renderOrder=2;g.add(_rr);g._radar=_rr;
     return g;
   })();
+  const _sentRadar=_sentinelMesh._radar;
   _sentinelMesh.position.set(3,0,0);
   _sentinelPivot.add(_sentinelMesh);
   scene.add(_sentinelPivot);
   // sentinel-core intencionalmente fora do actualMeshes — é satélite, não planeta
+
+  // ── Postura do Sentinel (C1/C2 facetas) ──
+  const _POSTURE_COLOR={clean:0x00ff88,warnings:0xffaa00,critical:0xff2244};
+  let _sentPosture={status:'clean',criticals:0,warnings:0};
+  let _sentPosturePulse=0;
+  (async function _fetchPosture(){
+    try{
+      const r=await fetch('/api/posture');
+      if(!r.ok)return;
+      const d=await r.json();
+      if(d.status&&d.status!==_sentPosture.status)_sentPosturePulse=1.5;
+      _sentPosture=d;
+    }catch{}
+    setTimeout(_fetchPosture,60_000);
+  })();
 
   // ── Sistema 2: Obi-Wan ISS Messenger ──────────────────────────
   const _OBJ_STATE={state:'idle',target:null,message:null,progress:0,
@@ -2742,6 +2765,18 @@ function _galInitScene(planets){
       _sentinelMesh.children[1].rotation.x+=dt*1.5;
       _sentinelMesh.children[0].rotation.y+=dt*.8;
       _sentinelMesh.children[0].material.emissiveIntensity=.8+Math.sin(_simYear*3600)*.4;
+      // radar ring — rotação + cor da postura
+      _sentRadar.rotation.y+=dt*.6;
+      _sentRadar.rotation.z+=dt*.25;
+      const _pc=_POSTURE_COLOR[_sentPosture.status]||0x00ff88;
+      _sentRadar.material.color.setHex(_pc);
+      _sentRadar.material.emissive.setHex(_pc);
+      if(_sentPosturePulse>0){
+        _sentRadar.material.emissiveIntensity=2*_sentPosturePulse;
+        _sentPosturePulse=Math.max(0,_sentPosturePulse-dt);
+      }else{
+        _sentRadar.material.emissiveIntensity=.5+Math.sin(_simYear*1800)*.2;
+      }
       // decay zone — órbitas ao redor do BH
       const _allDecay=[
         ..._ARCHIVED.map((p,i)=>({data:p,mesh:_decayMeshes[i]})),
