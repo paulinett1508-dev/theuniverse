@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-21 (Dashboard galáctica v5 deployada — Obi-Wan mensageiro + relógio real)
+> Última atualização: 2026-06-23 (Dashboard galáctica v6 + endpoint /ask M2M deployado)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -35,15 +35,17 @@ O mundo **Matrix** (repo `the-matrix`) é um ecossistema separado do Laboratóri
 
 Gravidade = agnostic-core (submodule).
 
-## Universo observável (2026-06-20)
+## Universo observável (2026-06-23)
 
-**27 planetas** — todos de `paulinett1508-dev`.
+**27+ planetas** — todos de `paulinett1508-dev`.
 
 **Excluídos do universo (decisão do TheGod):**
 - `the-matrix`, `matrix-core` — mundo Matrix separado
 - `baileys-whatsapp-server`, `bitrix-buddy-chat` — repos de terceiros (`rvsigor`)
-- `agnvendas-painelsbr`, `pedidomobile` — arquivados (funcionalidade absorvida por outros repos)
-- `Lab-Sobral-Dev/*` — org fora de escopo; `SBR-ocomon-5.0` fadado ao arquivamento; `SbrTask` será migrado para `paulinett1508-dev/SbrTask` (futuro — censo captura automaticamente quando criado)
+- `agnvendas-painelsbr`, `pedidomobile` — arquivados (na zona de decadência do BH)
+- `Lab-Sobral-Dev/*` — org fora de escopo
+
+**⚠️ Planeta novo detectado pelo censo:** `mybots-telegram` — não indexado ainda (ver issue #9)
 
 **Issues abertas a monitorar:** `agnostic-core`×3 · `tokentown`×1 · `GessoExpress`×1
 **CI com falha:** `sbrgestao` — `agnvendas-unit-tests failure` (Estrela da Morte ativa no dashboard)
@@ -51,145 +53,85 @@ Gravidade = agnostic-core (submodule).
 
 ## ✅ Concluído nesta jornada
 
-- **Sessão 2026-06-19/20 (máquina anterior):** Frota 100% mapeada · Subsistema B no ar · Subsistema A implementado (26 testes).
-- **Sessão 2026-06-20 (esta máquina):**
-  - Universo remapeado: Matrix separado, Lab-Sobral-Dev incluído, exclusões definidas (31 planetas)
-  - Obi-Wan deployado na Polaris — Telegram respondendo via `@guardiao_universo_bot`
-  - **Skill Sol** criada em `.agnostic-core/skills/automacao/sol-aquece-planetas.md` — testada em `botclinop`
-  - **Subsistema B2 (Webhook Notifier)** deployado na Polaris porta 9120:
-    - `webhook/receiver.py` — FastAPI + HMAC-SHA256
-    - `scripts/setup-webhooks.py` — registra webhooks nos repos
-    - 27/27 repos com webhook ativo → notificações Telegram em tempo real (push + PR)
-  - **PAT renovado** (`theuniverse-master-key`) com scopes `repo` + `admin:repo_hook` + `admin:org_hook`
-  - **Universo finalizado em 27 planetas**: Lab-Sobral-Dev removido de UNIVERSE_OWNERS; `agnvendas-painelsbr` e `pedidomobile` adicionados ao EXCLUDE
-  - **Subsistema C implementado:**
-    - C1 (Escudos): porta 9120 restrita aos 6 CIDRs oficiais do GitHub via UFW. Cron semanal (`.github/workflows/c1-update-ips.yml`) mantém IPs atualizados. `POLARIS_SSH_KEY` configurado nos secrets do GitHub.
-    - C2 (Secrets Scan): `sentinel.py` agora verifica `secret-scanning/alerts` em cada planeta. Novo evento `secret_exposto` notifica Telegram com tipo e link direto ao painel de segurança.
-- **Obi-Wan v2 (sessão 2026-06-20 tarde):**
-  - Reply contextual: bot detecta `reply_to_message`, extrai fatos (repo, branch, horário, commits via `_parse_notification`), injeta como `<dados_notificacao>` no prompt.
-  - Multi-turn: histórico de 5 turnos no `brain_fn`. Follow-ups lembram o repo da conversa.
-  - `ctx_repo`: filtra chunks do RAG pelo repo ativo — evita RAG de doc errado em follow-ups.
-  - Estética: strip de prefixos convencionais nos commits, truncação por palavra, respostas negativas em 1 linha.
-- **Obi-Wan v3.1 (sessão 2026-06-20 noite):**
-  - Fluxo de órbita: mensagem solta com planeta detectado → bot pergunta confirmação antes de entrar. Reply em notificação = consentimento implícito (entra direto). `SOVEREIGN_PLANETS` com aviso especial.
-  - Digitando: `sendChatAction typing` imediato ao receber mensagem.
-  - `sendSticker` nos momentos de órbita: 🚀 proposta, 🌌 confirmada, 👋 negada. Packs espaciais provisórios; pack customizado planejado (Star Wars, Severance).
-  - **Vocabulário vivo** no system prompt: Pluribus (o próprio Obi-Wan), Estrela da Morte, Lado Sombrio, A Força, Supernova, Órbita estável.
-- **Obi-Wan v3.2 (sessão 2026-06-20 madrugada):**
-  - Fix: reply a notificação agora envia sticker `orbit_confirmed` 🌌 antes de responder.
-  - Fix: mensagem só-emoji (ex: 🚀) → query implícita `"status de {repo}"` em vez de perguntar nada ao LLM.
-  - `planets/luna-base.md` criado (era `botclinop.md`) — `detect_planet` agora reconhece `luna-base`.
-- **Dashboard NOC v1 (sessão 2026-06-20 noite):**
-  - URL: `theuniverse-lake.vercel.app`
-  - Mapa orbital animado: 4 anéis, 27 planetas, starfield + cometas + bólidos.
-  - Magnitude por grandeza (commits + diskKB, escala 1–5).
-  - Card lateral: click fixa painel, planeta 3D com atmosfera + anéis.
-  - Responsivo: desktop=painel lateral, mobile=bottom sheet.
-  - Efeitos ao vivo: push→shockwave, PR→laranja, issue→âmbar. Poll 8s via `api/events.js`.
-- **Dashboard NOC v2 + cosmologia (sessão 2026-06-20 madrugada):**
-  - **Re-classificação planetária** (TheGod): 5 tipos de corpos celestes além de "planeta":
-    - `agnostic-core` → 🛸 Estação Espacial — hexágono fixo entre sol e anel 1, não orbita, gira lento
-    - `mcp-eventos` → 🛰 Satélite Artificial — diamante, forçado ao anel mais interno (órbita mais rápida)
-    - `luna-base` → 🌙 Observatório Lunar — planeta branco-azulado com anel pontilhado de lua (era `botclinop`, renomeado no GitHub via API)
-    - `bolaocopa2026` / `f1-pulse` → 💥 Supernova Iminente — pulso vermelho-laranja (serão arquivados/excluídos em breve)
-    - `vibegaminghub` → 🎮 Planeta Toys — gradiente rosa↔roxo↔azul animado
-  - **Paleta cromática**: 6 tonalidades determinísticas por nome para verde (healthy), amarelo (warning) e vermelho (alert) — nenhum planeta igual ao outro visualmente
-  - **Tamanhos aumentados**: range 8–26px (era 6–18px) — diferença de magnitude mais visível
-  - **Métricas novas no card**: linguagem principal (dot colorido), contribuidores, último PR (badge estado + título + data)
-  - **XSS fix**: `esc()` + `safeHex()` em todos os campos da API interpolados em innerHTML
-  - **`sbrgestao`** está como Estrela da Morte: `agnvendas-unit-tests failure` no CI — monitorar, não suprimir
-- **Dashboard NOC v2.1 (sessão 2026-06-21):**
-  - Canvas dedicado por tipo de corpo no card:
-    - `drawStation()` — hexágono metálico giratório, hub central, raios, anel externo
-    - `drawSatellite()` — diamante + painéis solares bilaterais + antena com beacon
-    - `drawObservatory()` — lua cinza-azulada com crateras, lua menor em órbita animada com trilha pontilhada
-  - **Vivacidade do dashboard** (documentado):
-    - Efeitos ao vivo (shockwave/pulso): poll 8s, janela 90s, latência real 10–90s — perda se aba fechada
-    - Status/cor/saúde: cache 2min — nunca perde, sempre atualiza
+### Sessão 2026-06-23 (esta)
+
+**Federação M2M (issue #1 — FECHADA):**
+- `obi-wan/api.py` — FastAPI `/ask` porta 9121, Bearer auth (hmac.compare_digest), rate limit por IP
+- `obi-wan/api.service` — systemd unit
+- `obi-wan/deploy.sh` — atualizado para subir `api.service`
+- Deploy na Polaris: `systemctl enable --now api.service` quando `.env` tiver `API_TOKEN`
+
+**Dashboard galáctica v6 (6 correções — commit `af3ad7c`):**
+1. **Tilt orbital**: `(ri/20)*0.38` → `(ri/20)*0.06` — florianorun, temperodemamae, lpjaraujoinfo deixam de cruzar as órbitas
+2. **Obi-Wan glows**: 0.45/0.18/0.06 → 0.20/0.08/0.025 + PointLight 0.8→0.4
+3. **Toggle de luzes**: botão "luzes: on/off" no card Obi-Wan → `_toggleObiWanLights()`
+4. **sentinel-core**: removido do `actualMeshes` (era tratado como planeta); wander corrigido: `isPlanet` → `bodyType==='planet'` — Obi-Wan agora realmente visita planetas no modo errante
+5. **Zona de decadência (BH)**: todos os objetos agora em `actualMeshes` com hitboxes → hover tooltip + card panel funcionam
+
+**Histórico de sessões anteriores:**
+- Sessões 2026-06-19–21: Frota mapeada · Obi-Wan v3.2 · B2/C1/C2 no ar · Dashboard v1-v5 · Artoo · Carta de Apresentação
 
 ## 🔴 FRENTES ABERTAS — retomar aqui
 
-### 1. Obi-Wan (subsistema A) — ✅ NO AR | v3.2
+### 1. Obi-Wan (subsistema A) — ✅ NO AR | v3.2 + endpoint /ask
 
 Deploy: Polaris `195.200.5.145`. Telegram: `@guardiao_universo_bot`. 227 chunks indexados.
 
 **Infra da Polaris:**
 - SSH: `ssh -i ~/.ssh/vscode_key root@195.200.5.145`
-- Obi-Wan: `systemctl status obi-wan` · `journalctl -u obi-wan -f`
+- Obi-Wan bot: `systemctl status obi-wan` · `journalctl -u obi-wan -f`
+- API /ask: `systemctl status api` · porta 9121 · `journalctl -u obi-wan-api -f`
 - Webhook: `systemctl status webhook` · `journalctl -u webhook -f`
 - Clone: `/opt/theuniverse` · env: `/opt/obi-wan/.env`
-- Atualizar: `git pull` em `/opt/theuniverse` + `systemctl restart obi-wan webhook`
+- Atualizar: `git pull` em `/opt/theuniverse` + `systemctl restart obi-wan webhook api`
 
 **Re-deploy do zero:** `bash obi-wan/deploy.sh` + `bash webhook/deploy.sh`
 
-Polaris atualizada em 2026-06-21. Testado: reply a notificação → sticker 🌌 + resposta contextual. ✅
+⚠️ `api.service` só inicia se `/opt/obi-wan/.env` tiver `API_TOKEN`. Se ausente, adicionar e `systemctl enable --now api`.
 
 ### 2. Subsistema B2 (Webhook Notifier) — ✅ NO AR
 
 27 repos monitorados. Notifica push e PRs em tempo real via Telegram.
 Para adicionar novo repo ao universo: `python scripts/setup-webhooks.py` após criar o repo.
 
-### 3. Subsistema C — ✅ IMPLEMENTADO (2026-06-20)
+### 3. Subsistema C — ✅ IMPLEMENTADO
 
-- **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`. `POLARIS_SSH_KEY` configurado — cron totalmente autônomo.
+- **C1 (Escudos):** UFW porta 9120 restrita aos CIDRs do GitHub. Cron semanal em `.github/workflows/c1-update-ips.yml`.
 - **C2 (Secrets Scan):** sentinel detecta secrets expostos em qualquer planeta e notifica Telegram.
 
-### 4. Dashboard NOC — ✅ NO AR | v5
+### 4. Dashboard NOC — ✅ NO AR | v6
 
 URL: `theuniverse-lake.vercel.app` (Vercel, deploy automático no push).
 Infra: `api/planets.js` + `api/events.js` (Vercel functions). Env var: `GITHUB_TOKEN` no painel Vercel.
 
 **Corpos celestes especiais** (hardcoded em `api/planets.js → SPECIAL_BODIES`):
 - station: `agnostic-core` · satellite: `mcp-eventos` · observatory: `luna-base`
-- supernova: `bolaocopa2026`, `f1-pulse` · toys: `vibegaminghub`
+- supernova: `bolaocopa2026`, `f1-pulse` · nebula: `vibegaminghub`
 
-**Vista galáctica v5** (2026-06-21): Three.js r128 WebGL single-file `dashboard/index.html` (~3000 linhas).
-- Sol raio 7u, coronas [18/32/52/95/180u]
+**Vista galáctica v6** (`dashboard/index.html` ~3050 linhas):
 - 24 anéis orbitais, ring 0 = orbit 20u, ring 23 = orbit 375u
-- **luna-base** como planeta independente orbit 100u (não mais satélite do sbrchecks)
-- **ISS Obi-Wan** em posição fixa elevada `(80,120,60)` — acima do plano eclíptico, scale 3x
-- **Sistema de mensagens**: `sendObiWanMessage(targetId, text)` — ISS viaja em arco cúbico até o destino, linha de rota pontilhada, rastro de partículas, toast de entrega
-- **Relógio real**: `_updateRealClock()` — data/hora do browser, `setInterval` 1s
-- **Câmera**: radius 320, reset 300, zoom max 900u
+- Obi-Wan ISS: exílio `(80,120,60)`, wander autônomo quando idle (visita planetas por `bodyType==='planet'`)
+- sentinel-core: satélite que orbita a ISS — fora do `actualMeshes`, não é planeta
+- Zona de decadência (BH): todos os corpos com hitbox no raycaster (tooltip + card)
+- Toggle de luzes da ISS: abrir painel Obi-Wan → botão "luzes: on/off"
 
-**Issues de refinamento abertas:** #2 (Obi-Wan visual) · #3 (luna-base) · #4 (relógio) · #5 (performance/polish)
+**Novos planetas a adicionar ao mapa forçado:** `mybots-telegram` (ver issue #9)
 
-Próximas evoluções: pack de stickers · `sbrgestao` CI fix · refinamentos do dashboard (ver issues #2-5).
+### 5. Artoo — ✅ IMPLEMENTADO
 
-### 7. Federação M2M — ⏳ DESIGN (theuniverse#1)
+`scripts/artoo.py` — abre Issues de alerta em planetas + notifica Telegram.
+`scripts/carta_apresentacao.py` — enviada a 29/31 planetas.
 
-**Issue:** [theuniverse#1](https://github.com/paulinett1508-dev/theuniverse/issues/1) — endpoint `POST /ask` na Polaris para comunicação síncrona planeta ↔ Obi-Wan.
+### 6. mybots-telegram — ⏳ NÃO INDEXADO (issue #9)
 
-**Contexto:** nexus-labsobral (SHELDON) foi o primeiro planeta a solicitar federação síncrona. Canal assíncrono atual (GitHub Issues + `observatory-alert`) já está no ar no lado do planeta.
+Repo `mybots-telegram` detectado pelo censo. Ainda sem:
+- Ficha em `planets/mybots-telegram.md`
+- Entrada em `_GAL_FORCED_RING` ou posição no mapa galáxico
+- Webhook registrado
 
-**O que falta (decisão do TheGod):** porta, política de tokens (1 por planeta vs global), modo de resposta (síncrono vs callback assíncrono).
+### 7. sbrgestao CI — ⏳ ESTRELA DA MORTE (issue #10)
 
-**Lado do planeta:** quando o endpoint existir, SHELDON liga o cliente — rastreado em issue própria no repo do planeta.
-
-### 5. Artoo — Mensageiro Cósmico | ✅ IMPLEMENTADO (2026-06-20)
-
-**Arquivo:** `scripts/artoo.py`  
-**Nome:** Artoo (R2-D2) — decisão do TheGod.
-
-Quando o Observatório detecta uma ameaça num planeta, Artoo abre uma Issue no repo afetado
-e notifica TheGod via Telegram em dois momentos:
-- 🛸 lançamento: "Artoo em rota para {repo} — ameaça: CI falhou"
-- ✅ entrega: "Artoo chegou · sbrgestao · issue #N aberta" + link direto
-
-**Integração automática:** `sentinel.py` chama Artoo para todo evento `ci_falhou`.  
-**Invocação manual:** `python scripts/artoo.py sbrgestao --reason "CI falhou" --detail "agnvendas-unit-tests"`
-
-Labels criadas nos repos: `observatory-alert` (vermelho escuro), `observatory` (azul — comunicados gerais).
-
-**Testado ao vivo (2026-06-20):** `sbrgestao` · issue #6 aberta com sucesso. TheGod recebeu 🛸 lançamento + ✅ entrega via Telegram. Órbita atravessada.
-
-**Carta de Apresentação (2026-06-21):** `scripts/carta_apresentacao.py` — abre issue `📡 Carta do Observatório — TheUniverse se apresenta` em todos os planetas. Enviada a **29/31** planetas (2 arquivados: `agnvendas-painelsbr`, `pedidomobile` — 403 esperado).
-
-**Regra de ouro do Artoo:** Guardião nunca escreve em outro repo — mas Artoo é um agente autorizado explicitamente pelo TheGod. A única escrita externa permitida são Issues de alerta e comunicados oficiais.
-
-### 6. Subsistema D — DESCARTADO
-
-Cada planeta decide sua própria IA se precisar. Não é responsabilidade do observatório.
+`agnvendas-unit-tests failure` — CI vermelho. Dashboard mostra alerta. Investigar antes de próxima sessão de produção.
 
 ## Regras de ouro (não violar)
 
@@ -198,6 +140,7 @@ Cada planeta decide sua própria IA se precisar. Não é responsabilidade do obs
 - Token vive só no `.vault` (local) e no `/opt/obi-wan/.env` (Polaris). Nunca commitar.
 - `UNIVERSE_OWNERS` em `gh.py` é o controle de escopo — alterar só com decisão do TheGod.
 - Após adicionar repo ao universo: rodar `python scripts/setup-webhooks.py` para registrar webhook.
+- **Issue resolvida = comentar evidência (linhas de código) + fechar com `completed` imediatamente.**
 
 ## 💻 Setup em novo computador (arquivos local-only, NÃO versionados)
 
