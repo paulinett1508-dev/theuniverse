@@ -264,7 +264,7 @@ body.panel-open #gal-legend{display:none!important}
 <canvas id="gal-canvas"></canvas>
 
 <div id="hdr">
-  <h1>the<em>universe</em> &middot; observatório <span style="font-size:.55em;opacity:.45;font-weight:400;letter-spacing:.08em">v3</span></h1>
+  <h1>the<em>universe</em> &middot; observatório <span id="hdr-version" style="font-size:.55em;opacity:.45;font-weight:400;letter-spacing:.08em"></span></h1>
   <div id="view-btns">
     <button class="vb active" data-view="galactic" title="Via Láctea">━ galáctica</button>
   </div>
@@ -355,6 +355,7 @@ body.panel-open #gal-legend{display:none!important}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script>
+const _VERSION='1.2.1';
 // ═══════════════════════════════════════════════════════
 // CANVAS — starfield + comets + meteors
 // ═══════════════════════════════════════════════════════
@@ -3139,6 +3140,7 @@ async function loadPlanets(){
 }
 
 async function main(){
+  const _vEl=document.getElementById('hdr-version');if(_vEl)_vEl.textContent='v'+_VERSION;
   cometCd=200+Math.floor(Math.random()*300);
   meteorCd=80+Math.floor(Math.random()*120);
   const planets=await loadPlanets();
