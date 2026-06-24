@@ -2502,7 +2502,12 @@ function _galInitScene(planets){
     if(!matches.length){results.innerHTML='<div class="sr-empty">nenhum resultado</div>';results.style.display='block';return;}
     matches.forEach(m=>{
       const item=document.createElement('div');item.className='sr-item';
-      item.innerHTML=`<div class="sr-dot" style="background:${m.userData.colorHex??'#fff'}"></div><div><div class="sr-name">${m.userData.name??m.userData.id}</div><div class="sr-cluster">${m.userData.cluster??''}</div></div>`;
+      const dot=document.createElement('div');dot.className='sr-dot';
+      const hex=m.userData.colorHex||'';dot.style.background=/^#[0-9a-fA-F]{3,8}$/.test(hex)?hex:'#fff';
+      const wrap=document.createElement('div');
+      const nm=document.createElement('div');nm.className='sr-name';nm.textContent=m.userData.name||m.userData.id;
+      const cl=document.createElement('div');cl.className='sr-cluster';cl.textContent=m.userData.cluster||'';
+      wrap.appendChild(nm);wrap.appendChild(cl);item.appendChild(dot);item.appendChild(wrap);
       item.addEventListener('click',()=>{
         focusMesh=m;cam.radiusGoal=(m.userData.radius??2)*8+20;
         document.getElementById('search-input').value='';
