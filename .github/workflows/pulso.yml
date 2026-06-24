@@ -21,8 +21,8 @@ jobs:
       - name: Run Sentinel · Pulso
         env:
           GITHUB_TOKEN: ${{ secrets.SENTINEL_GITHUB_TOKEN }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          SOL_CHAT_ID: ${{ secrets.SOL_CHAT_ID }}
         run: python scripts/pulso.py
 
       - name: Save state
