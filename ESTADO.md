@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-24 (Heartbeat Sentinel · radar postura · busca autocomplete · Pulso · Deps · Deploy)
+> Última atualização: 2026-06-24 (Pulso · Deps · Deploy · Grupo Telegram TheUniverse · tópicos roteados)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -53,7 +53,29 @@ Gravidade = agnostic-core (submodule).
 
 ## ✅ Concluído nesta jornada
 
-### Sessão 2026-06-24 (esta)
+### Sessão 2026-06-24 — parte 2 (esta)
+
+**Grupo Telegram TheUniverse — tópicos por sentinela:**
+- Grupo criado: `TheUniverse` · chat_id `-1004472865546` · supergrupo com forum ativo
+- 8 tópicos mapeados: Planetas(2) · Alertas(4) · CI(6) · Pulso(8) · Deps(10) · Deploy(12) · Segurança(14) · Heartbeat(16)
+- `send_telegram(text, thread_id=None)` — assinatura atualizada em `sentinel.py`
+- Todos os scripts roteiam para o tópico certo: sentinel, artoo, secret_scan, pulso, deps, deploy_health
+- `SOL_CHAT_ID` e `TELEGRAM_TOKEN` adicionados ao `.vault` local
+- ⚠️ **PENDENTE**: webhook notifier B2 no Polaris ainda usa o SOL_CHAT_ID antigo (chat direto). Atualizar `/opt/obi-wan/.env` com o novo chat_id e `message_thread_id=2` (Planetas)
+
+**Três novos sentinelas implementados (TDD, 30 testes):**
+- Sentinel · Pulso — uptime via `homepage` da API GitHub · cron 15min
+- Sentinel · Deps — CVEs via OSV.dev · cron diário 06h
+- Sentinel · Deploy — GitHub Deployments API · cron 30min
+
+**Issues abertas:**
+- #11 `proxima-sessao` — repos com personalidade cosmológica (estrela jovem, anã branca, Estrela da Morte)
+- #12 `proxima-sessao` — Artoo com voz própria aprofundada
+- #13 `trigger-based` — James Webb como segundo observatório · plano B revisão 04/07/2026
+
+**Memória salva:** `reference_public_apis.md` — 24 APIs avaliadas, fit por repo, decisão de não usar pop culture como persona
+
+### Sessão 2026-06-24 — parte 1
 
 **Sentinel — Heartbeat do ciclo:**
 - `build_heartbeat_report()` + `send_heartbeat()` implementados via TDD (4 testes novos)
