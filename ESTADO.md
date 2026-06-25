@@ -61,7 +61,7 @@ Gravidade = agnostic-core (submodule).
 - `send_telegram(text, thread_id=None)` — assinatura atualizada em `sentinel.py`
 - Todos os scripts roteiam para o tópico certo: sentinel, artoo, secret_scan, pulso, deps, deploy_health
 - `SOL_CHAT_ID` e `TELEGRAM_TOKEN` adicionados ao `.vault` local
-- ⚠️ **PENDENTE**: webhook notifier B2 no Polaris ainda usa o SOL_CHAT_ID antigo (chat direto). Atualizar `/opt/obi-wan/.env` com o novo chat_id e `message_thread_id=2` (Planetas)
+- ✅ webhook notifier B2 no Polaris atualizado: `/opt/obi-wan/.env` com novo `SOL_CHAT_ID` e `message_thread_id=2` (Planetas)
 
 **Três novos sentinelas implementados (TDD, 30 testes):**
 - Sentinel · Pulso — uptime via `homepage` da API GitHub · cron 15min
