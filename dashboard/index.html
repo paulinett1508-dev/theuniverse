@@ -467,6 +467,7 @@ function drawMeteor(m){
 }
 
 function drawBg(){
+  if(currentView==='galactic') return;
   ctx.clearRect(0,0,cnv.width,cnv.height);
   // em galactic com Three.js ativo, só o starfield de fundo (sem overlay canvas)
 
@@ -2850,7 +2851,7 @@ function _galInitScene(planets){
       });
       // pivôs de luas binárias
       moonPivots.forEach(({pivot,moonMesh,orbitSpeed,selfRotSpeed,name})=>{
-        pivot.rotateOnWorldAxis(new THREE.Vector3(0,1,0),orbitSpeed*dt);
+        pivot.rotateOnWorldAxis(_localY,orbitSpeed*dt);
         if(name==='luna-base'){
           moonMesh.rotation.y+=selfRotSpeed*dt;
           moonMesh.rotation.x+=.08*dt;
@@ -2884,7 +2885,7 @@ function _galInitScene(planets){
       // sentinel orbita a ISS em tempo real
       const _issWp=new THREE.Vector3();_obiWanISS.getWorldPosition(_issWp);
       _sentinelPivot.position.copy(_issWp);
-      _sentinelPivot.rotateOnWorldAxis(new THREE.Vector3(0,1,0),dt*2.5);
+      _sentinelPivot.rotateOnWorldAxis(_localY,dt*2.5);
       _sentinelMesh.children[1].rotation.x+=dt*1.5;
       _sentinelMesh.children[0].rotation.y+=dt*.8;
       _sentinelMesh.children[0].material.emissiveIntensity=.8+Math.sin(_simYear*3600)*.4;
@@ -3223,7 +3224,7 @@ function updateStats(planets){
   const alerts=planets.filter(p=>p.health==='alert');
   const el=document.getElementById('alerts');
   if(alerts.length){
-    el.innerHTML=alerts.map(p=>`<span class="ai">💥 Estrela da Morte · ${p.name}</span>`).join(' &nbsp;·&nbsp; ');
+    el.innerHTML=alerts.map(p=>`<span class="ai">💥 Estrela da Morte · ${esc(p.name)}</span>`).join(' &nbsp;·&nbsp; ');
   } else {
     el.innerHTML='✨ Órbita estável — sem ameaças ativas';
     el.style.color='#2a4030';
@@ -3238,7 +3239,7 @@ const seenEvents = new Set();
 const FX_DUR = { push:1600, pr:2800, pr_merged:2800, issue:2400, create:1800 };
 
 function triggerEffect(repoName, type){
-  const wrapper = univ.querySelector(`[data-planet="${repoName}"]`);
+  const wrapper = univ.querySelector(`[data-planet="${CSS.escape(repoName)}"]`);
   if(!wrapper) return;
   const dot = wrapper.querySelector('.pd');
   if(!dot) return;
