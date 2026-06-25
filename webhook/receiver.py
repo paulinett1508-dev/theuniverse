@@ -21,8 +21,11 @@ log = logging.getLogger("webhook")
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 SOL_CHAT_ID = os.environ["SOL_CHAT_ID"]
+GROUP_CHAT_ID = os.environ.get("GROUP_CHAT_ID") or SOL_CHAT_ID
 WEBHOOK_SECRET = os.environ["WEBHOOK_SECRET"]
 TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+
+TOPIC_PLANETAS = 2
 
 app = FastAPI(title="Universe Webhook Receiver")
 
@@ -38,15 +41,17 @@ def _verify(payload: bytes, sig_header: str) -> bool:
 
 # ── telegram ──────────────────────────────────────────────────────────────────
 
-def _send(text: str) -> None:
+def _send(text: str, thread_id: int | None = None) -> None:
+    params: dict = {
+        "chat_id": GROUP_CHAT_ID,
+        "text": text,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True,
+    }
+    if thread_id is not None:
+        params["message_thread_id"] = thread_id
     try:
-        r = httpx.post(TELEGRAM_API, json={
-            "chat_id": SOL_CHAT_ID,
-            "text": text,
-            "parse_mode": "HTML",
-            "disable_web_page_preview": True,
-            "message_thread_id": 2,  # tópico Planetas no grupo TheUniverse
-        }, timeout=10)
+        r = httpx.post(TELEGRAM_API, json=params, timeout=10)
         r.raise_for_status()
     except Exception as e:
         log.error("telegram send failed: %s", e)
@@ -191,12 +196,15 @@ async def receive(request: Request):
     log.info("event=%s repo=%s", event, repo)
 
     text = None
+    thread_id = None
     if event == "push":
         text = _fmt_push(data)
+        thread_id = TOPIC_PLANETAS
     elif event == "pull_request":
         text = _fmt_pr(data)
+        thread_id = TOPIC_PLANETAS
 
     if text:
-        _send(text)
+        _send(text, thread_id=thread_id)
 
     return JSONResponse({"ok": True})

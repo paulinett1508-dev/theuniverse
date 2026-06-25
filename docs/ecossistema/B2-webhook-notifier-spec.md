@@ -39,7 +39,8 @@ TheGod
 | variável | descrição |
 |---|---|
 | `TELEGRAM_TOKEN` | já existente (obi-wan) |
-| `SOL_CHAT_ID` | já existente (obi-wan) |
+| `SOL_CHAT_ID` | já existente (obi-wan) — fallback se GROUP_CHAT_ID ausente |
+| `GROUP_CHAT_ID` | ID do grupo TheUniverse (`-1004472865546`) — destino real dos eventos |
 | `WEBHOOK_SECRET` | HMAC secret — gerado na instalação, em `.vault` local |
 
 ---
