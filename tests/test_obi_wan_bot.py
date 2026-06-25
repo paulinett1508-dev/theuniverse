@@ -131,13 +131,14 @@ def test_handle_update_answers_authorized():
     assert captured["ch"] == [{"source": "x.md", "text": "ctx"}]
 
 
-def test_handle_update_group_ignores_plain_msg():
+def test_handle_update_group_responds_to_plain_msg():
+    # privacy mode off — bot responde a mensagens sem @mention no grupo autorizado
     upd = {"message": {"chat": {"id": -1004472865546, "type": "supergroup"},
-                        "text": "oi galera"}}
+                        "text": "olá universo"}}
     out = bot.handle_update(upd, CfgWithGroup(), FakeRag(), "tok",
-                            brain_fn=lambda q, c, ch: "NUNCA",
+                            brain_fn=lambda q, c, ch: "olá TheGod",
                             context_fn=lambda t: "ctx")
-    assert out is None
+    assert out == "olá TheGod"
 
 
 def test_handle_update_group_responds_to_mention():

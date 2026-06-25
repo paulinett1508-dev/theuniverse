@@ -159,9 +159,8 @@ def handle_update(upd, cfg, rag, tg_token, brain_fn, context_fn,
         log.warning("Ignorado chat_id não autorizado: %s", chat_id)
         return None
 
-    # Group: only respond to @mentions or replies-to-bot
-    if group and not should_respond_in_group(msg, bot_username):
-        return None
+    # Group: respond to everything (privacy mode off) — @mention stripped when present
+    # If bot was not mentioned and message is just a stray notification echo, still ok to answer
 
     question = (msg.get("text") or "").strip()
     if not question:
