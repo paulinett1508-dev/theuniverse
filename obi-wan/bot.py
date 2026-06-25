@@ -9,6 +9,7 @@ import httpx
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 from gh import token as gh_token  # noqa: E402
+from model_router import route as model_route
 
 from config import Config
 from rag import Rag
@@ -238,7 +239,7 @@ def main():
             if facts.get("repo"):
                 state["ctx_repo"] = facts["repo"]
                 repo = state["ctx_repo"]
-        result = brain.answer(q, c, ch, cfg.groq_api_key, cfg.groq_model,
+        result = brain.answer(q, c, ch, cfg.groq_api_key, model_route(q),
                               reply_context=reply_context,
                               history=list(state["history"]),
                               ctx_repo=repo)
