@@ -6,10 +6,8 @@ Quando o Observatório detecta uma ameaça num planeta, Artoo atravessa a
 órbita e entrega um alerta diretamente no mundo deles (GitHub Issue).
 O mundo deles não sabe da ameaça — até Artoo chegar.
 
-TheGod é notificado em dois momentos:
-  🛸 lançamento — "Artoo em rota para X"
-  ✅ entrega confirmada — "Artoo chegou · issue #N aberta"
-  ❌ perdido — "Artoo perdido na órbita · erro: ..."
+Personalidade evolui com missões acumuladas (state/artoo-state.json):
+  novice (0-9) · journeyman (10-49) · veteran (50+)
 
 Uso manual:
   python scripts/artoo.py sbrgestao --reason "CI falhou" --detail "agnvendas-unit-tests"
@@ -23,6 +21,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
+from artoo_voice import format_rota, format_chegou, format_perdido
 from gh import API, ROOT
 
 def token():
@@ -44,6 +43,22 @@ OBSERVATORY_LABEL = "observatory-alert"
 OBSERVATORY_LABEL_COLOR = "b60205"
 DASHBOARD_URL = "https://theuniverse-lake.vercel.app"
 _GH = f"https://github.com/{OWNER}"
+_STATE_FILE = ROOT / "state" / "artoo-state.json"
+_HISTORY_MAX = 20
+
+
+def _load_state():
+    if _STATE_FILE.exists():
+        try:
+            return json.loads(_STATE_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"missions": 0, "history": []}
+
+
+def _save_state(state):
+    _STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    _STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def _tg_send(text):
@@ -127,14 +142,12 @@ def dispatch(repo, reason, detail="", tok=None, notify=True):
     full_name = f"{OWNER}/{repo}"
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
+    state = _load_state()
+    mc = state.get("missions", 0)
+
     if notify:
         try:
-            _tg_send(
-                f"🛸 <b>Artoo</b> em rota\n\n"
-                f"destino: <b>{repo}</b>\n"
-                f"ameaça: {reason}"
-                + (f"\ndetalhe: <i>{detail}</i>" if detail else "")
-            )
+            _tg_send(format_rota(repo, reason, detail=detail, mission_count=mc))
         except Exception as e:
             print(f"  Telegram (launch) falhou: {e}", file=sys.stderr)
 
@@ -148,14 +161,15 @@ def dispatch(repo, reason, detail="", tok=None, notify=True):
         issue_url = issue["html_url"]
         issue_number = issue["number"]
 
+        state["missions"] = mc + 1
+        history = state.get("history") or []
+        history.append({"repo": repo, "reason": reason, "issue": issue_number, "date": today})
+        state["history"] = history[-_HISTORY_MAX:]
+        _save_state(state)
+
         if notify:
             try:
-                _tg_send(
-                    f"✅ <b>Artoo chegou</b>\n\n"
-                    f"<b>{repo}</b> · issue #{issue_number} aberta\n"
-                    f"o mundo deles foi alertado\n\n"
-                    f'<a href="{issue_url}">↗ ver issue</a>'
-                )
+                _tg_send(format_chegou(repo, issue_number, issue_url, mission_count=mc))
             except Exception as e:
                 print(f"  Telegram (delivered) falhou: {e}", file=sys.stderr)
 
@@ -166,11 +180,7 @@ def dispatch(repo, reason, detail="", tok=None, notify=True):
         err = str(e)
         if notify:
             try:
-                _tg_send(
-                    f"❌ <b>Artoo perdido na órbita</b>\n\n"
-                    f"destino: <b>{repo}</b>\n"
-                    f"erro: <code>{err[:200]}</code>"
-                )
+                _tg_send(format_perdido(repo, err, mission_count=mc))
             except Exception:
                 pass
         print(f"❌ Falha ao alertar {repo}: {err}", file=sys.stderr)
