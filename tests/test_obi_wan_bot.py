@@ -164,3 +164,75 @@ def test_handle_update_group_strips_mention():
                       brain_fn=brain_fn, context_fn=lambda t: "ctx")
     assert "@guardiao_universo_bot" not in captured.get("q", "")
     assert "Matrix" in captured.get("q", "")
+
+
+# ── handle_reaction ────────────────────────────────────────────────────────────
+
+def _reaction_upd(message_id=42, user_id=1030157568, emojis=None):
+    return {"message_reaction": {
+        "chat": {"id": -1004472865546},
+        "message_id": message_id,
+        "user": {"id": user_id},
+        "new_reaction": [{"type": "emoji", "emoji": e} for e in (emojis or ["✅"])],
+        "old_reaction": [],
+    }}
+
+
+def test_handle_reaction_closes_issue():
+    ack = {"42": "https://github.com/paulinett1508-dev/nexus/issues/7"}
+    closed = []
+
+    result = bot.handle_reaction(
+        _reaction_upd(),
+        CfgWithGroup(),
+        gh_token="tok",
+        ack_load_fn=lambda: ack,
+        close_fn=lambda url: closed.append(url),
+    )
+
+    assert closed == ["https://github.com/paulinett1508-dev/nexus/issues/7"]
+    assert result is not None and len(result) > 0
+
+
+def test_handle_reaction_ignores_unknown_message():
+    result = bot.handle_reaction(
+        _reaction_upd(message_id=999),
+        CfgWithGroup(),
+        gh_token="tok",
+        ack_load_fn=lambda: {"42": "https://gh/issues/7"},
+        close_fn=lambda url: None,
+    )
+    assert result is None
+
+
+def test_handle_reaction_ignores_non_checkmark():
+    result = bot.handle_reaction(
+        _reaction_upd(emojis=["👍"]),
+        CfgWithGroup(),
+        gh_token="tok",
+        ack_load_fn=lambda: {"42": "https://gh/issues/7"},
+        close_fn=lambda url: None,
+    )
+    assert result is None
+
+
+def test_handle_reaction_ignores_unauthorized_user():
+    result = bot.handle_reaction(
+        _reaction_upd(user_id=9999),
+        CfgWithGroup(),
+        gh_token="tok",
+        ack_load_fn=lambda: {"42": "https://gh/issues/7"},
+        close_fn=lambda url: None,
+    )
+    assert result is None
+
+
+def test_handle_reaction_returns_none_if_no_reaction_key():
+    result = bot.handle_reaction(
+        {"message": {"text": "oi"}},
+        CfgWithGroup(),
+        gh_token="tok",
+        ack_load_fn=lambda: {},
+        close_fn=lambda url: None,
+    )
+    assert result is None

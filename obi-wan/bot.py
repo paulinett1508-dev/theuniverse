@@ -64,6 +64,39 @@ def should_respond_in_group(msg: dict, bot_username: str = BOT_USERNAME) -> bool
     return reply_from.get("username") == bot_username
 
 
+def handle_reaction(upd: dict, cfg, gh_token: str, ack_load_fn, close_fn) -> str | None:
+    """Processa message_reaction update. Fecha issue GitHub se ✅ de usuário autorizado."""
+    rxn = upd.get("message_reaction") or {}
+    if not rxn:
+        return None
+
+    user_id = (rxn.get("user") or {}).get("id")
+    message_id = rxn.get("message_id")
+    new_reactions = rxn.get("new_reaction") or []
+
+    allowed = {cfg.sol_chat_id}
+    gid = getattr(cfg, "group_chat_id", None)
+    if gid:
+        allowed.add(gid)
+    if not is_authorized(user_id, allowed):
+        return None
+
+    emojis = {r.get("emoji") for r in new_reactions if r.get("type") == "emoji"}
+    if "✅" not in emojis:
+        return None
+
+    ack_map = ack_load_fn()
+    issue_url = ack_map.get(str(message_id))
+    if not issue_url:
+        return None
+
+    try:
+        close_fn(issue_url)
+        return "✅ Alerta encerrado."
+    except Exception as e:
+        return f"⚠️ Não consegui fechar a issue: {e}"
+
+
 def extract_reply_context(msg: dict) -> str | None:
     reply_to = msg.get("reply_to_message") or {}
     text = (reply_to.get("text") or "").strip()
@@ -248,13 +281,35 @@ def main():
             state["history"].pop(0)
         return result
 
+    import json as _json
+    import ack_map as _ack_map
+
+    def _ack_load():
+        return _ack_map.load(tok)
+
+    def _ack_close(url):
+        _ack_map.close_issue(url, tok)
+
     offset = None
     while True:
         try:
             resp = httpx.get(f"https://api.telegram.org/bot{cfg.telegram_token}/getUpdates",
-                             params={"offset": offset, "timeout": 30}, timeout=40)
+                             params={"offset": offset, "timeout": 30,
+                                     "allowed_updates": _json.dumps(["message", "message_reaction"])},
+                             timeout=40)
             for upd in resp.json().get("result", []):
                 offset = upd["update_id"] + 1
+
+                # Reaction ACK — ✅ fecha issue do Artoo
+                if "message_reaction" in upd:
+                    reply = handle_reaction(upd, cfg, tok, _ack_load, _ack_close)
+                    if reply:
+                        rxn = upd["message_reaction"]
+                        rxn_chat = (rxn.get("chat") or {}).get("id")
+                        _send(cfg.telegram_token, rxn_chat, reply,
+                              thread_id=TOPICS["alertas"])
+                    continue
+
                 msg      = upd.get("message") or {}
                 chat_id  = (msg.get("chat") or {}).get("id")
                 group    = is_group_msg(msg)
@@ -269,12 +324,11 @@ def main():
                 if reply:
                     _send(cfg.telegram_token, chat_id, reply, thread_id=thread_id)
                 elif state["pending"] and not prev_pending:
-                    # Orbit proposed — send sticker + prompt
                     p = state["pending"]
                     _send_sticker(cfg.telegram_token, chat_id, "orbit_proposed", thread_id)
                     _send(cfg.telegram_token, chat_id, orbit_prompt(p["repo"]), thread_id=thread_id)
                 elif reply is None and not state["pending"] and not group:
-                    pass  # denied orbit or empty — sticker already handled elsewhere
+                    pass
 
         except Exception:
             log.exception("erro no loop de polling")

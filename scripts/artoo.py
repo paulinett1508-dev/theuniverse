@@ -61,7 +61,7 @@ def _save_state(state):
     _STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-def _tg_send(text):
+def _tg_send(text) -> int | None:
     from sentinel import TOPICS
     tg_token = os.environ["TELEGRAM_TOKEN"]
     chat_id = os.environ["SOL_CHAT_ID"]
@@ -77,6 +77,8 @@ def _tg_send(text):
     with urllib.request.urlopen(req, timeout=30) as r:
         if r.status != 200:
             raise RuntimeError(f"Telegram HTTP {r.status}")
+        resp = json.loads(r.read())
+        return (resp.get("result") or {}).get("message_id")
 
 
 def _gh_request(method, path, tok, payload=None):
@@ -169,7 +171,13 @@ def dispatch(repo, reason, detail="", tok=None, notify=True):
 
         if notify:
             try:
-                _tg_send(format_chegou(repo, issue_number, issue_url, mission_count=mc))
+                msg_id = _tg_send(format_chegou(repo, issue_number, issue_url, mission_count=mc))
+                if msg_id:
+                    try:
+                        from ack_map import save_entry
+                        save_entry(msg_id, issue_url, tok)
+                    except Exception as e:
+                        print(f"  ack-map save falhou: {e}", file=sys.stderr)
             except Exception as e:
                 print(f"  Telegram (delivered) falhou: {e}", file=sys.stderr)
 
