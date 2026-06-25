@@ -18,9 +18,8 @@ Resolve o conflito planeta↔servidor: planeta é a *obra* (repo); estrela é a 
 
 | estrela | designação anterior | papel | hospeda |
 |---|---|---|---|
-| **Polaris** ⭐ | vps-universo | a estrela-guia / vidente | Obi-Wan do universo (IP: 195.200.5.145) |
+| **Polaris** ⭐ | vps-universo / srv1323779.hstgr.cloud | a estrela-guia / vidente | Obi-Wan, antigravity, cartola (4 containers), hqplus (5 containers), traefik-ai1k — IP: 195.200.5.145 · conta: paulinett1508@gmail.com (Hostinger) |
 | **Antares** ⭐ | Zion (sbr-vps-zion) | o coração — refúgio de produção | sistemas Sobral em prod |
-| **Sirius** ⭐ | VPS Hostinger | a mais brilhante (face pública) | SuperCartola (scm-prod) |
 
 ## Aglomerado do Lab (servers internos — LAN)
 
@@ -40,7 +39,7 @@ Resolve o conflito planeta↔servidor: planeta é a *obra* (repo); estrela é a 
 
 ## Notas
 
-- Nomes de estrelas reais escolhidos pelo significado: Polaris guia, Antares é "coração", Sirius é a mais brilhante, Atlas sustenta, Mira ("a maravilhosa") observa.
+- Nomes de estrelas reais escolhidos pelo significado: Polaris guia, Antares é "coração", Atlas sustenta, Mira ("a maravilhosa") observa.
 - As designações anteriores (Obi-Wan/Zion = tema Matrix) ficam registradas — o universo honra sua própria história.
 - Frota 100% mapeada (2026-06-19): Rigel/Bellatrix/Vega confirmados pelo Sol.
 - Vega (monitoramento) e Mira (Zabbix) coexistem — vigílias distintas; detalhar a divisão de papéis quando relevante.
