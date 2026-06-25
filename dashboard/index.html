@@ -208,6 +208,15 @@ input.gc-range::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9p
 @keyframes nebula-pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.18);opacity:1}}
 .body-observatory .pd{background:#c8d8f8!important;box-shadow:0 0 6px rgba(180,200,255,.7),0 0 18px rgba(140,170,255,.35)!important}
 .body-observatory .pd::before{content:'';position:absolute;width:calc(100% + 14px);height:calc(100% + 14px);border:1px dashed rgba(180,210,255,.45);border-radius:50%;top:-7px;left:-7px;pointer-events:none}
+.body-young-star .pd{background:radial-gradient(circle at 40% 35%,#ffffff,#a0d8ff 45%,#2060c0)!important;box-shadow:0 0 10px #a0d8ff,0 0 28px rgba(100,180,255,.7),0 0 60px rgba(60,120,220,.4)!important;animation:young-star-flicker 1.2s ease-in-out infinite alternate!important}
+@keyframes young-star-flicker{from{box-shadow:0 0 10px #a0d8ff,0 0 28px rgba(100,180,255,.7)}to{box-shadow:0 0 18px #ffffff,0 0 44px rgba(160,210,255,.9),0 0 80px rgba(80,150,255,.5)}}
+.body-white-dwarf .pd{background:radial-gradient(circle at 40% 35%,#f0f4ff,#c0cce8 50%,#8090b0)!important;box-shadow:0 0 4px rgba(200,210,255,.6),0 0 12px rgba(160,180,240,.25)!important;opacity:.75}
+.body-death-star .pd{background:radial-gradient(circle at 40% 35%,#404050,#202030 55%,#0a0a14)!important;box-shadow:0 0 8px rgba(255,30,30,.5),0 0 24px rgba(200,0,0,.35),0 0 50px rgba(150,0,0,.2)!important;animation:death-star-pulse 2s ease-in-out infinite alternate!important}
+@keyframes death-star-pulse{from{box-shadow:0 0 8px rgba(255,30,30,.5),0 0 24px rgba(200,0,0,.35)}to{box-shadow:0 0 14px rgba(255,60,20,.8),0 0 40px rgba(220,0,0,.6),0 0 70px rgba(180,0,0,.3)}}
+.body-red-giant .pd{background:radial-gradient(circle at 40% 35%,#ffcc80,#e06020 45%,#803000)!important;box-shadow:0 0 12px #e08040,0 0 36px rgba(200,80,20,.6),0 0 80px rgba(160,50,10,.3)!important;animation:red-giant-breathe 4s ease-in-out infinite alternate!important}
+@keyframes red-giant-breathe{from{transform:scale(1);box-shadow:0 0 12px #e08040,0 0 36px rgba(200,80,20,.6)}to{transform:scale(1.12);box-shadow:0 0 18px #ff9050,0 0 50px rgba(220,100,30,.7),0 0 100px rgba(180,60,10,.35)}}
+.body-imminent-supernova .pd{background:radial-gradient(circle at 40% 35%,#ffe080,#c05000 50%,#5a1a00)!important;box-shadow:0 0 10px #d06000,0 0 28px rgba(200,80,0,.55),0 0 60px rgba(150,50,0,.25)!important;animation:imm-supernova-flicker .9s ease-in-out infinite alternate!important}
+@keyframes imm-supernova-flicker{from{box-shadow:0 0 10px #d06000,0 0 28px rgba(200,80,0,.55);filter:brightness(1)}to{box-shadow:0 0 20px #ff8000,0 0 50px rgba(240,120,0,.7),0 0 90px rgba(200,80,0,.35);filter:brightness(1.2)}}
 
 /* ── simulated clock (top-right, galactic only) ── */
 #gal-clock{position:fixed;top:56px;right:32px;text-align:right;z-index:15;display:none;pointer-events:none}
@@ -529,6 +538,31 @@ const THEMES={
     bands:['#102040','#1a3070','#2050a0','#163468','#1c3878','#122848','#1e4090','#183060'],
     atm:'rgba(100,150,255,.3)', glow:'#6090e0',
   },
+  'young-star':{
+    base:['#e8f4ff','#80c8ff','#2060d0'],
+    bands:['#a0d8ff','#80c0ff','#6090e8','#4070d0','#80c8ff','#a0e0ff','#60a0e0','#4080c8'],
+    atm:'rgba(140,200,255,.35)', glow:'#a0d8ff',
+  },
+  'white-dwarf':{
+    base:['#b0b8d0','#d0d8f0','#9098b8'],
+    bands:['#c8d0e8','#b8c0d8','#a8b0c8','#9098b8','#c0c8e0','#b0b8d0','#a0a8c0','#9098b0'],
+    atm:null, glow:'#c8d0f0',
+  },
+  'death-star':{
+    base:['#141420','#282838','#080810'],
+    bands:['#202030','#181828','#242434','#1c1c2c','#202038','#181820','#1c1c28','#141422'],
+    atm:'rgba(255,20,20,.3)', glow:'#cc0000',
+  },
+  'red-giant':{
+    base:['#803000','#d06020','#ff9040'],
+    bands:['#e07030','#c06020','#d07830','#b05018','#e08040','#c06828','#d07030','#b85820'],
+    atm:'rgba(255,130,60,.3)', glow:'#e08040',
+  },
+  'imminent-supernova':{
+    base:['#5a1a00','#b04800','#ff8000'],
+    bands:['#c05800','#a04000','#d06000','#903800','#b85000','#a04800','#c06000','#984000'],
+    atm:'rgba(200,80,0,.3)', glow:'#c05000',
+  },
 };
 
 function hashStr(s){
@@ -705,7 +739,7 @@ function drawPlanet(pc,W,H,planet,seed,rot,hasRings){
   const cx=W/2, cy=H/2;
   const R=Math.min(W,H)*(hasRings?.30:.38);
   const bt=planet.bodyType||'planet';
-  const thKey=bt==='station'?'station':bt==='satellite'?'satellite':bt==='supernova'?'supernova':bt==='nebula'?'nebula':bt==='observatory'?'observatory':planet.health;
+  const thKey=bt==='station'?'station':bt==='satellite'?'satellite':bt==='supernova'?'supernova':bt==='nebula'?'nebula':bt==='observatory'?'observatory':bt==='young-star'?'young-star':bt==='white-dwarf'?'white-dwarf':bt==='death-star'?'death-star':bt==='red-giant'?'red-giant':bt==='imminent-supernova'?'imminent-supernova':planet.health;
   const th=THEMES[thKey]||THEMES.dormant;
 
   // ── atmosphere glow ──
@@ -953,7 +987,12 @@ function _galBaseCol(p){
   if(bt==='satellite')   return 0x8090a8;
   if(bt==='supernova')   return 0xff4400;
   if(bt==='nebula')      return 0xa050e0;
-  if(bt==='observatory') return 0x6090e0;
+  if(bt==='observatory')        return 0x6090e0;
+  if(bt==='young-star')         return 0xa0d8ff;
+  if(bt==='white-dwarf')        return 0xd0d8f0;
+  if(bt==='death-star')         return 0x202030;
+  if(bt==='red-giant')          return 0xd06020;
+  if(bt==='imminent-supernova') return 0xc05000;
   return _galPlanetDNA(p).col;
 }
 function _galAtmCol(p){
@@ -963,7 +1002,12 @@ function _galAtmCol(p){
   if(bt==='supernova')   return '#ff8800';
   if(bt==='nebula')      return '#c060ff';
   if(bt==='station')     return '#6090e0';
-  if(bt==='observatory') return '#88aaff';
+  if(bt==='observatory')        return '#88aaff';
+  if(bt==='young-star')         return '#a0d8ff';
+  if(bt==='white-dwarf')        return null;
+  if(bt==='death-star')         return '#ff2200';
+  if(bt==='red-giant')          return '#ff8844';
+  if(bt==='imminent-supernova') return '#ff7700';
   const h=p.health;
   if(h==='dormant')      return null;
   if(h==='alert')        return '#ff4466';
@@ -981,7 +1025,12 @@ function _galRadius(p){
   if(bt==='moon')        return 0.65;
   if(bt==='supernova')   return 2.2;
   if(bt==='nebula')      return 2.0;
-  if(bt==='observatory') return 1.4;
+  if(bt==='observatory')        return 1.4;
+  if(bt==='young-star')         return 1.6;
+  if(bt==='white-dwarf')        return 0.55;
+  if(bt==='death-star')         return 2.0;
+  if(bt==='red-giant')          return 2.4;
+  if(bt==='imminent-supernova') return 1.8;
   return 0.7+((p.magnitude||3)/5)*1.4;
 }
 
@@ -3050,7 +3099,7 @@ function switchView(v){
 // TOOLTIP
 // ═══════════════════════════════════════════════════════
 const tip=document.getElementById('tip');
-const bodyTypeLabel={'station':'estação espacial','satellite':'satélite','observatory':'observatório','supernova':'supernova','nebula':'nebulosa','moon':'lua'};
+const bodyTypeLabel={'station':'estação espacial','satellite':'satélite','observatory':'observatório','supernova':'supernova','nebula':'nebulosa','moon':'lua','young-star':'estrela jovem','white-dwarf':'anã branca','death-star':'estrela da morte','red-giant':'gigante vermelha','imminent-supernova':'supernova iminente'};
 function daysStr(d){
   if(d===999)return'nunca'; if(d===0)return'hoje'; if(d===1)return'ontem'; return`${d}d atrás`;
 }

@@ -48,6 +48,15 @@ query($login: String!, $after: String) {
   }
 }`;
 
+function _deriveBodyType(isArchived, ci, daysSincePush, commits, diskKB, issues) {
+  if (isArchived)                              return 'white-dwarf';
+  if (ci === 'FAILURE' || ci === 'ERROR')      return 'death-star';
+  if (daysSincePush > 180 && issues > 0)       return 'imminent-supernova';
+  if (daysSincePush < 14  && commits > 200)    return 'young-star';
+  if (daysSincePush > 90  && diskKB > 1500)    return 'red-giant';
+  return 'planet';
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate');
@@ -100,7 +109,7 @@ module.exports = async function handler(req, res) {
         const contributors = repo.mentionableUsers?.totalCount ?? 0;
         const lastPR = repo.pullRequests?.nodes?.[0] ?? null;
 
-        const bodyType = SPECIAL_BODIES[repo.name] || 'planet';
+        const bodyType = SPECIAL_BODIES[repo.name] || _deriveBodyType(repo.isArchived, ci, daysSincePush, commits, diskKB, issues);
 
         planets.push({ name: repo.name, pushedAt: repo.pushedAt, daysSincePush, ci, issues, health, commits, diskKB, rawScore, lang, contributors, lastPR, bodyType });
       }
