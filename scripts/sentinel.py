@@ -209,6 +209,66 @@ def build_heartbeat_report(scanned_repos, detected_events):
     return "\n".join(lines)
 
 
+def build_universe_snapshot(state: dict, detected_events: list) -> bytes:
+    import datetime
+    ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    lines = [
+        f"UNIVERSO — SNAPSHOT {ts}",
+        "=" * 45,
+        "",
+        f"Planetas conhecidos: {len(state.get('known_repos', []))}",
+    ]
+    if detected_events:
+        lines += ["", "EVENTOS:", ""]
+        for ev in detected_events:
+            emoji = _EMOJI.get(ev.get("type", ""), "·")
+            detail = f" · {ev['detail']}" if ev.get("detail") else ""
+            lines.append(f"  {emoji} {ev['repo']} · {ev['type']}{detail}")
+    lines += ["", "ESTADO POR PLANETA:", ""]
+    for repo in sorted(state.get("known_repos", [])):
+        issues = state.get("last_issue_number", {}).get(repo, 0)
+        ci = state.get("last_run_id", {}).get(repo, "-")
+        lines.append(f"  {repo}: issues={issues} ci_run={ci}")
+    return "\n".join(lines).encode("utf-8")
+
+
+def send_document(tok: str, chat_id: str, filename: str, content: bytes,
+                  caption: str = "", thread_id: int | None = None) -> None:
+    boundary = b"TGBoundary1234"
+
+    def _field(name: str, value: str) -> bytes:
+        return (b"--" + boundary + b"\r\n"
+                b"Content-Disposition: form-data; name=\"" + name.encode() + b"\"\r\n\r\n"
+                + value.encode() + b"\r\n")
+
+    parts = [_field("chat_id", str(chat_id))]
+    if thread_id is not None:
+        parts.append(_field("message_thread_id", str(thread_id)))
+    if caption:
+        parts.append(_field("caption", caption))
+        parts.append(_field("parse_mode", "HTML"))
+    parts.append(
+        b"--" + boundary + b"\r\n"
+        b"Content-Disposition: form-data; name=\"document\"; filename=\""
+        + filename.encode() + b"\"\r\n"
+        b"Content-Type: text/plain\r\n\r\n"
+        + content + b"\r\n"
+    )
+    parts.append(b"--" + boundary + b"--\r\n")
+    body = b"".join(parts)
+
+    try:
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{tok}/sendDocument",
+            data=body, method="POST",
+        )
+        req.add_header("Content-Type", f"multipart/form-data; boundary={boundary.decode()}")
+        with urllib.request.urlopen(req, timeout=30):
+            pass
+    except Exception:
+        pass
+
+
 def send_heartbeat(tok, chat_id, report):
     try:
         payload = urllib.parse.urlencode({
@@ -336,6 +396,14 @@ def main():
     if tg_token and chat_id:
         report = build_heartbeat_report(scanned_repos, detected_events)
         send_heartbeat(tg_token, chat_id, report)
+        if detected_events:
+            import datetime
+            fname = datetime.datetime.utcnow().strftime("universo-%Y%m%d-%H%M.txt")
+            state_now = load_state(STATE_PATH) or {}
+            snapshot_bytes = build_universe_snapshot(state_now, detected_events)
+            send_document(tg_token, chat_id, fname, snapshot_bytes,
+                          caption="📊 Snapshot completo do universo",
+                          thread_id=TOPICS["heartbeat"])
 
     return 0
 

@@ -112,7 +112,7 @@ def test_notify_avanca_so_em_envio_ok():
     ]
     sent = []
 
-    def send_fn(text):
+    def send_fn(text, thread_id=None):
         sent.append(text)
         if "🚨" in text:
             raise RuntimeError("telegram caiu")
@@ -165,3 +165,62 @@ def test_send_heartbeat_silent_on_failure(monkeypatch):
         raise OSError("sem rede")
     monkeypatch.setattr(urllib.request, "urlopen", raise_always)
     sentinel.send_heartbeat("bad_token", "123", "<b>ok</b>")
+
+
+# ── build_universe_snapshot ───────────────────────────────────────────────────
+
+def test_build_universe_snapshot_contains_repos():
+    state = {"known_repos": ["nexus", "matrix-core"],
+             "last_run_id": {"nexus": 42}, "last_issue_number": {"nexus": 3}}
+    snap = sentinel.build_universe_snapshot(state, [])
+    text = snap.decode("utf-8")
+    assert "nexus" in text
+    assert "matrix-core" in text
+
+
+def test_build_universe_snapshot_lists_events():
+    state = {"known_repos": ["nexus"], "last_run_id": {}, "last_issue_number": {}}
+    events = [{"type": "ci_falhou", "repo": "nexus", "detail": "build"}]
+    text = sentinel.build_universe_snapshot(state, events).decode("utf-8")
+    assert "ci_falhou" in text or "CI" in text or "nexus" in text
+
+
+def test_build_universe_snapshot_returns_bytes():
+    state = {"known_repos": [], "last_run_id": {}, "last_issue_number": {}}
+    result = sentinel.build_universe_snapshot(state, [])
+    assert isinstance(result, bytes)
+
+
+# ── send_document ─────────────────────────────────────────────────────────────
+
+def test_send_document_posts_multipart(monkeypatch):
+    captured = {}
+
+    class FakeResp:
+        status = 200
+        def __enter__(self): return self
+        def __exit__(self, *a): pass
+
+    def fake_urlopen(req, timeout=30):
+        captured["url"] = req.full_url
+        captured["ct"] = req.get_header("Content-type")
+        captured["body"] = req.data
+        return FakeResp()
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    sentinel.send_document("tok", "-123", "snap.txt", b"hello world",
+                           caption="test", thread_id=16)
+
+    assert "sendDocument" in captured["url"]
+    assert "multipart/form-data" in captured["ct"]
+    assert b"snap.txt" in captured["body"]
+    assert b"hello world" in captured["body"]
+    assert b"-123" in captured["body"]
+    assert b"16" in captured["body"]
+
+
+def test_send_document_silent_on_failure(monkeypatch):
+    def raise_always(*a, **kw):
+        raise OSError("sem rede")
+    monkeypatch.setattr(urllib.request, "urlopen", raise_always)
+    sentinel.send_document("bad", "123", "f.txt", b"x")  # não deve lançar
