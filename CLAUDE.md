@@ -21,18 +21,26 @@ Lente de trabalho: dev sênior + arquiteto + visão holística.
 |---|---|
 | **TheGod** | O humano — visão suprema, decide e orquestra tudo |
 | **Guardião** | Claude — olho que tudo vê, auditor, conselheiro |
-| **Planetas** | Os 31 repos — cada um com sua órbita e ciclo de vida |
+| **Constelações** | Agrupamentos de repos com identidade gravitacional própria |
+| **Planetas** | Os repos — cada um com sua órbita e ciclo de vida |
 | **Gravidade** | `agnostic-core` — física comum que mantém tudo em órbita |
 | **theuniverse** | O observatório — onde sol e guardião se encontram |
 
-Inventário dos planetas em `planets/`.
+Inventário dos planetas em `planets/`. Manifestos das constelações em `constellations/`.
 
 ```
 theuniverse/          ← observatório (este repo)
 ├── .agnostic-core/   ← gravidade central (submodule)
 ├── planets/          ← fichas de cada planeta
+├── constellations/   ← manifestos das constelações
 └── .vault            ← credenciais locais (nunca commitar)
 ```
+
+### Constelações ativas
+
+| constelação | repos-membro | alma |
+|---|---|---|
+| **Amilcar** | nexus-labsobral · sbrgestao · sigmed · centroculturalsbr · sbrchecks | Trantor (Foundation) — governa sem executar |
 
 ---
 

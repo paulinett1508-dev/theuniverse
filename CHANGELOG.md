@@ -6,6 +6,23 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-25 — Constelação Amilcar
+
+### 🌌 Nova categoria cosmológica: Constelações
+- Conceito de constelação introduzido no universo — agrupamentos de repos com identidade gravitacional própria
+- **Amilcar** — primeira constelação: cortex do conglomerado de inteligência do Lab Sobral
+  - Estrelas: `nexus-labsobral` (Sheldon) · `sbrgestao` (Theo)
+  - Planetas: `sigmed` · `centroculturalsbr`
+  - Satélite: `sbrchecks`
+  - A caminho: Seraph
+  - Alma de Trantor (Foundation/Asimov): governa sem executar
+- `the-matrix` em transição — ajustes internos a serem feitos no repo
+- Issue `the-matrix#4` fechada com a decisão do nome
+
+### 🛠 Skills e infra
+- `/abrirsessao` e `/fecharsessao` — commands do Claude Code registrados em `.claude/commands/`
+- Broadcast para 19 repos do ecossistema via `scripts/broadcast_skills.py`
+
 ## 2026-06-24 — Censo automático
 
 ### 🆕 Planetas descobertos

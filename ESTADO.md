@@ -21,6 +21,7 @@
 | Spec Obi-Wan (subsistema A) | `docs/ecossistema/A-obi-wan-spec.md` |
 | Spec Webhook Notifier (subsistema B2) | `docs/ecossistema/B2-webhook-notifier-spec.md` |
 | Sentinel · Escudos (C1) | `scripts/c1-update-github-ips.py` |
+| Manifestos das constelações | `constellations/*.md` |
 | Fichas dos planetas | `planets/*.md` + `planets/_index.md` |
 | Diário de bordo | `CHANGELOG.md` |
 | Censo (auto-descoberta) | `scripts/censo.py` + `.github/workflows/censo.yml` |
@@ -31,7 +32,7 @@
 
 O theuniverse é um **observatório pessoal** — olho omnisciente sobre TODOS os repos da conta `paulinett1508-dev`. Observa, diagnostica, organiza. Nunca executa em outros repos.
 
-O mundo **Matrix** (repo `the-matrix`) é um ecossistema separado do Laboratório Sobral com cosmologia própria (SHELDON, THEO, Hermes). Theuniverse observa seus repos de fora como qualquer outro planeta — sem acoplamento temático.
+**Constelação Amilcar** — agrupamento do cortex do Lab Sobral (nexus-labsobral, sbrgestao, sigmed, centroculturalsbr, sbrchecks). Alma de Trantor: governa sem executar. Manifesto em `constellations/amilcar.md`. O repo `the-matrix` está em transição para refletir essa identidade.
 
 Gravidade = agnostic-core (submodule).
 
@@ -40,7 +41,8 @@ Gravidade = agnostic-core (submodule).
 **27+ planetas** — todos de `paulinett1508-dev`.
 
 **Excluídos do universo (decisão do TheGod):**
-- `the-matrix`, `matrix-core` — mundo Matrix separado
+- `the-matrix` — em transição para manifesto da constelação Amilcar (ajustes internos por lá)
+- `matrix-core` — mundo Matrix separado
 - `baileys-whatsapp-server`, `bitrix-buddy-chat` — repos de terceiros (`rvsigor`)
 - `agnvendas-painelsbr`, `pedidomobile` — arquivados (na zona de decadência do BH)
 - `Lab-Sobral-Dev/*` — org fora de escopo
@@ -188,7 +190,7 @@ Repo `mybots-telegram` detectado pelo censo. Ainda sem:
 ## Regras de ouro (não violar)
 
 - Guardião **nunca** escreve em outro repo. Só observa (leitura) e escreve em casa (theuniverse). Exceção explícita: **Artoo** (autorizado pelo TheGod) pode abrir Issues de alerta em planetas afetados.
-- Mundo Matrix (`the-matrix`, `matrix-core`) = ecossistema separado. Observar de fora, não acoplar.
+- Constelação Amilcar (`the-matrix` em transição) = ecossistema do Lab Sobral. Manifesto canônico em `constellations/amilcar.md`.
 - Token vive só no `.vault` (local) e no `/opt/obi-wan/.env` (Polaris). Nunca commitar.
 - `UNIVERSE_OWNERS` em `gh.py` é o controle de escopo — alterar só com decisão do TheGod.
 - Após adicionar repo ao universo: rodar `python scripts/setup-webhooks.py` para registrar webhook.
