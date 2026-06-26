@@ -6,6 +6,11 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+
+## 2026-06-26 — Censo automático
+
+### 🆕 Planetas descobertos
+- **Amilcar-Constellation** — entrou no universo
 ## 2026-06-25 — Constelação Amilcar
 
 ### 🌌 Nova categoria cosmológica: Constelações
