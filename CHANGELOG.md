@@ -8,6 +8,12 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+
+## 2026-06-28 — Censo automático
+
+### 🆕 Planetas descobertos
+- **amilcar-cortex** — entrou no universo
+- **amilcar-dominios** — entrou no universo
 ## 2026-06-27 — Censo automático
 
 ### 🆕 Planetas descobertos
