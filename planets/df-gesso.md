@@ -23,8 +23,10 @@ Site institucional + plataforma de vendas e fidelização para a DF Gesso — em
 |---|---|
 | framework | Next.js 15 (App Router) |
 | estilo | Tailwind CSS |
-| hospedagem | Vercel (free → pro conforme escala) |
-| DB (F2+) | PostgreSQL via Neon |
+| domínio | Hostinger |
+| produção | Polaris VPS — Docker + Nginx + Traefik |
+| preview/visual | Vercel — staging para validação rápida e revisão do designer |
+| DB (F2+) | PostgreSQL via Neon ou container na Polaris |
 | auth (F2+) | NextAuth.js |
 | app (F5) | PWA sobre Next.js ou React Native |
 
