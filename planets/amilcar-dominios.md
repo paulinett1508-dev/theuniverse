@@ -4,7 +4,8 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/amilcar-dominios |
 | visibilidade  | privado |
-| cluster       | nao-classificado |
+| cinturão      | compartilhado |
+| cluster       | sobral-core |
 | status        | **ativo** (0 dias sem commit) |
 | linguagem     | Python |
 | tamanho       | 23 KB |

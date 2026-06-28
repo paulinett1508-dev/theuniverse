@@ -3,14 +3,15 @@
 | campo         | valor |
 |---|---|
 | url           | https://github.com/paulinett1508-dev/FinanceFlow |
-| visibilidade  | publico |
+| visibilidade  | privado |
+| cinturão      | profissional |
 | cluster       | produtos |
-| status        | **recente** (68 dias sem commit) |
+| status        | **ativo** (4 dias sem commit) |
 | linguagem     | TypeScript |
-| tamanho       | 9839 KB |
-| issues        | 0 abertas |
+| tamanho       | 9840 KB |
+| issues        | 2 abertas |
 | criado        | 2026-01-01 |
-| ultimo-commit | 2026-04-11 —  |
+| ultimo-commit | 2026-06-23 |
 
 ## Descrição
 
@@ -30,4 +31,3 @@ files: .gitignore, .replit, CLAUDE.md, DEPLOYMENT.md, components.json, design_gu
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

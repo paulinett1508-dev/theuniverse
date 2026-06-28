@@ -5,6 +5,7 @@
 | url           | https://github.com/Lab-Sobral-Dev/serverpfsense |
 | owner         | Lab-Sobral-Dev |
 | visibilidade  | privado |
+| cinturão      | profissional |
 | cluster       | meta-infra |
 | status        | **recente** (65 dias sem commit) |
 | linguagem     | - |

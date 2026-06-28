@@ -4,7 +4,8 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/amilcar-cortex |
 | visibilidade  | privado |
-| cluster       | nao-classificado |
+| cinturão      | compartilhado |
+| cluster       | sobral-core |
 | status        | **ativo** (0 dias sem commit) |
 | linguagem     | - |
 | tamanho       | 6 KB |

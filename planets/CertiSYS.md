@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/CertiSYS |
 | visibilidade  | publico |
+| cinturão      | pessoal |
 | cluster       | gov-publico |
-| status        | **recente** (61 dias sem commit) |
+| status        | **recente** (70 dias sem commit) |
 | linguagem     | TypeScript |
 | tamanho       | 7940 KB |
-| issues        | 0 abertas |
+| issues        | 2 abertas |
 | criado        | 2026-01-01 |
-| ultimo-commit | 2026-04-18 —  |
+| ultimo-commit | 2026-04-18 |
 
 ## Descrição
 
@@ -30,4 +31,3 @@ files: .agnostic-core, .gitignore, .gitmodules, .replit, CLAUDE.md, components.j
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

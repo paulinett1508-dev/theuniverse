@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/hqplus |
 | visibilidade  | publico |
+| cinturão      | pessoal |
 | cluster       | produtos |
-| status        | **recente** (43 dias sem commit) |
+| status        | **recente** (53 dias sem commit) |
 | linguagem     | TypeScript |
 | tamanho       | 208 KB |
-| issues        | 0 abertas |
+| issues        | 2 abertas |
 | criado        | 2026-04-28 |
-| ultimo-commit | 2026-05-06 —  |
+| ultimo-commit | 2026-05-06 |
 
 ## Descrição
 
@@ -30,4 +31,3 @@ files: .agnostic-core, .dockerignore, .env.example, .gitignore, .gitmodules, CLA
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

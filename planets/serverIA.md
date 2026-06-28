@@ -5,6 +5,7 @@
 | url           | https://github.com/Lab-Sobral-Dev/serverIA |
 | owner         | Lab-Sobral-Dev |
 | visibilidade  | privado |
+| cinturão      | profissional |
 | cluster       | mcp-ia |
 | status        | **recente** (65 dias sem commit) |
 | linguagem     | Python |

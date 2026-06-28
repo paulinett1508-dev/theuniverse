@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/temperodemamae |
 | visibilidade  | publico |
+| cinturão      | nao-classificado |
 | cluster       | landing-clientes |
-| status        | **recente** (60 dias sem commit) |
+| status        | **recente** (70 dias sem commit) |
 | linguagem     | HTML |
 | tamanho       | 27781 KB |
-| issues        | 0 abertas |
+| issues        | 1 abertas |
 | criado        | 2026-03-24 |
-| ultimo-commit | 2026-04-19 —  |
+| ultimo-commit | 2026-04-19 |
 
 ## Descrição
 
@@ -30,4 +31,3 @@ files: .agnostic-core, .gitignore, .gitmodules, CLAUDE.md, LICENSE, index.html, 
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

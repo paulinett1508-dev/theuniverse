@@ -5,6 +5,7 @@
 | url           | https://github.com/Lab-Sobral-Dev/Projeto-scale |
 | owner         | Lab-Sobral-Dev |
 | visibilidade  | publico |
+| cinturão      | profissional |
 | cluster       | sobral-core |
 | status        | **ativo** (2 dias sem commit) |
 | linguagem     | JavaScript |

@@ -5,6 +5,7 @@
 | url           | https://github.com/Lab-Sobral-Dev/SbrTask |
 | owner         | Lab-Sobral-Dev |
 | visibilidade  | publico |
+| cinturão      | profissional |
 | cluster       | sobral-core |
 | status        | **ativo** (13 dias sem commit) |
 | linguagem     | TypeScript |

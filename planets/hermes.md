@@ -4,7 +4,8 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/hermes |
 | visibilidade  | privado |
-| cluster       | nao-classificado |
+| cinturão      | compartilhado |
+| cluster       | mcp-ia |
 | status        | **ativo** (1 dias sem commit) |
 | linguagem     | - |
 | tamanho       | 0 KB |

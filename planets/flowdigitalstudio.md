@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/flowdigitalstudio |
 | visibilidade  | publico |
+| cinturão      | pessoal |
 | cluster       | produtos |
-| status        | **recente** (52 dias sem commit) |
+| status        | **recente** (61 dias sem commit) |
 | linguagem     | TypeScript |
 | tamanho       | 4105 KB |
-| issues        | 0 abertas |
+| issues        | 2 abertas |
 | criado        | 2026-04-25 |
-| ultimo-commit | 2026-04-27 —  |
+| ultimo-commit | 2026-04-27 |
 
 ## Descrição
 
@@ -30,4 +31,3 @@ files: .agnostic-core, .gitignore, .gitkeep, .gitmodules, .prettierignore, .pret
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

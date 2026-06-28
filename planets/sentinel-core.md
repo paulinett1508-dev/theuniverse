@@ -4,11 +4,12 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/sentinel-core |
 | visibilidade  | publico |
+| cinturão      | compartilhado |
 | cluster       | nao-classificado |
-| status        | **ativo** (0 dias sem commit) |
+| status        | **ativo** (4 dias sem commit) |
 | linguagem     | Shell |
 | tamanho       | 73 KB |
-| issues        | 0 abertas |
+| issues        | 1 abertas |
 | criado        | 2026-06-22 |
 | ultimo-commit | 2026-06-23 |
 

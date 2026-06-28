@@ -5,6 +5,7 @@
 | url           | https://github.com/Lab-Sobral-Dev/BI-sobral |
 | owner         | Lab-Sobral-Dev |
 | visibilidade  | publico |
+| cinturão      | profissional |
 | cluster       | sobral-core |
 | status        | **dormant** (278 dias sem commit) |
 | linguagem     | - |

@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/lpjaraujoinfo |
 | visibilidade  | publico |
+| cinturão      | pessoal |
 | cluster       | landing-clientes |
-| status        | **recente** (58 dias sem commit) |
+| status        | **recente** (68 dias sem commit) |
 | linguagem     | TypeScript |
 | tamanho       | 118 KB |
-| issues        | 0 abertas |
+| issues        | 1 abertas |
 | criado        | 2026-04-17 |
-| ultimo-commit | 2026-04-21 —  |
+| ultimo-commit | 2026-04-21 |
 
 ## Descrição
 
@@ -30,4 +31,3 @@ files: .agnostic-core, .gitignore, .gitmodules, CLAUDE.md, eslint.config.mjs, ne
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

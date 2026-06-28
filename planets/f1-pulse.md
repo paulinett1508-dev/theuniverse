@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/f1-pulse |
 | visibilidade  | publico |
+| cinturão      | pessoal |
 | cluster       | entretenimento |
-| status        | **recente** (61 dias sem commit) |
+| status        | **recente** (70 dias sem commit) |
 | linguagem     | TypeScript |
 | tamanho       | 409 KB |
-| issues        | 0 abertas |
+| issues        | 2 abertas |
 | criado        | 2026-02-26 |
-| ultimo-commit | 2026-04-18 —  |
+| ultimo-commit | 2026-04-18 |
 
 ## Descrição
 
@@ -18,7 +19,7 @@
 
 ## README (excerpt)
 
-
+Dashboard de Fórmula 1 com dados em tempo real. · npm install · npm run dev · npm run build · npm run preview
 
 ## Estrutura raiz
 
@@ -30,4 +31,3 @@ files: .agnostic-core, .dockerignore, .gitignore, .gitmodules, CLAUDE.md, Docker
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

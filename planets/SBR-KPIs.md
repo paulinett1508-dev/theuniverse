@@ -5,6 +5,7 @@
 | url           | https://github.com/Lab-Sobral-Dev/SBR-KPIs |
 | owner         | Lab-Sobral-Dev |
 | visibilidade  | publico |
+| cinturão      | profissional |
 | cluster       | sobral-core |
 | status        | **ativo** (9 dias sem commit) |
 | linguagem     | TypeScript |

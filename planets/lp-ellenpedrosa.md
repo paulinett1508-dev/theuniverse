@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/lp-ellenpedrosa |
 | visibilidade  | publico |
+| cinturão      | pessoal |
 | cluster       | landing-clientes |
-| status        | **recente** (70 dias sem commit) |
+| status        | **recente** (79 dias sem commit) |
 | linguagem     | - |
 | tamanho       | 0 KB |
-| issues        | 0 abertas |
+| issues        | 1 abertas |
 | criado        | 2026-04-09 |
-| ultimo-commit | 2026-04-09 —  |
+| ultimo-commit | 2026-04-09 |
 
 ## Descrição
 
@@ -29,4 +30,3 @@
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

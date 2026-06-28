@@ -31,7 +31,7 @@ CLUSTERS = {
     "sbrgestao": "sobral-core", "sbrchecks": "sobral-core", "agnvendas-painelsbr": "sobral-core",
     "pedidomobile": "sobral-core", "sigmed": "sobral-core", "nexus-labsobral": "sobral-core",
     "SBR-ocomon-5.0": "sobral-core", "SbrTask": "sobral-core", "centroculturalsbr": "sobral-core",
-    "SBR-KPIs": "sobral-core", "SBR-ocomon-5.0": "sobral-core", "gestao-sbr": "sobral-core",
+    "SBR-KPIs": "sobral-core", "gestao-sbr": "sobral-core",
     "serverIA": "mcp-ia", "BI-sobral": "sobral-core", "Projeto-scale": "sobral-core",
     "serverpfsense": "meta-infra",
     "amilcar-cortex": "sobral-core", "amilcar-dominios": "sobral-core", "hermes": "mcp-ia",
@@ -46,6 +46,55 @@ CLUSTERS = {
     "lp-restauranteflutuante": "landing-clientes", "lp-ellenpedrosa": "landing-clientes",
     "imersaobitrix24": "landing-clientes", "GessoExpress": "landing-clientes",
     "luna-base": "observatorio",
+}
+
+# Cinturões orbitais — natureza gravitacional de cada planeta
+# compartilhado: habita os dois mundos (frameworks, cortex, expertises)
+# pessoal: órbita livre do Sol enquanto indivíduo
+# profissional: órbita institucional do Lab Sobral
+NATUREZA = {
+    # compartilhado (1–12)
+    "agnostic-core": "compartilhado",
+    "amilcar-cortex": "compartilhado",
+    "amilcar-dominios": "compartilhado",
+    "Amilcar-Constellation": "compartilhado",
+    "hermes": "compartilhado",
+    "luna-base": "compartilhado",
+    "mcp-eventos": "compartilhado",
+    "sentinel-core": "compartilhado",
+    "tokentown": "compartilhado",
+    "nexus-labsobral": "compartilhado",
+    "sbrgestao": "compartilhado",
+    "sbrchecks": "compartilhado",
+    # pessoal (13, 16–31)
+    "sigmed": "pessoal",
+    "hqplus": "pessoal",
+    "flowdigitalstudio": "pessoal",
+    "contabilplus": "pessoal",
+    "CertiSYS": "pessoal",
+    "sicefsus-sistema": "pessoal",
+    "SuperCartolaManagerv5-production": "pessoal",
+    "bolaocopa2026": "pessoal",
+    "f1-pulse": "pessoal",
+    "vibegaminghub": "pessoal",
+    "AlgodaoAtelie": "pessoal",
+    "florianorun": "pessoal",
+    "lp-restauranteflutuante": "pessoal",
+    "lp-ellenpedrosa": "pessoal",
+    "lpjaraujoinfo": "pessoal",
+    "imersaobitrix24": "pessoal",
+    "GessoExpress": "pessoal",
+    # profissional (14–15 + todos Lab-Sobral-Dev)
+    "centroculturalsbr": "profissional",
+    "FinanceFlow": "profissional",
+    "SBR-KPIs": "profissional",
+    "SbrTask": "profissional",
+    "serverIA": "profissional",
+    "serverpfsense": "profissional",
+    "SBR-ocomon-5.0": "profissional",
+    "gestao-sbr": "profissional",
+    "Projeto-scale": "profissional",
+    "BI-sobral": "profissional",
 }
 
 
@@ -90,6 +139,7 @@ def write_ficha(r, tok=None):
     tok = token_for(owner)
     days = days_idle(r["pushed_at"])
     cluster = CLUSTERS.get(name, "nao-classificado")
+    natureza = NATUREZA.get(name, "nao-classificado")
     vis = "privado" if r["private"] else "publico"
     struct = root_struct(r["full_name"], tok)
     excerpt = readme_excerpt(r["full_name"], tok)
@@ -100,6 +150,7 @@ def write_ficha(r, tok=None):
 |---|---|
 | url           | {r['html_url']} |
 {owner_line}| visibilidade  | {vis} |
+| cinturão      | {natureza} |
 | cluster       | {cluster} |
 | status        | **{status_of(days)}** ({days} dias sem commit) |
 | linguagem     | {r.get('language') or '-'} |
@@ -132,24 +183,36 @@ def write_ficha(r, tok=None):
 def rebuild_index(repos):
     icon = {"ativo": "🟢", "recente": "🟡", "dormant": "🔴"}
     rows = []
+    belt_icon = {"compartilhado": "⚡", "pessoal": "🌙", "profissional": "🏛️"}
     for r in sorted(repos, key=lambda x: x["name"].lower()):
         days = days_idle(r["pushed_at"])
         cluster = CLUSTERS.get(r["name"], "nao-classificado")
+        natureza = NATUREZA.get(r["name"], "nao-classificado")
         lock = "🔒" if r["private"] else ""
+        belt = belt_icon.get(natureza, "❓")
         rows.append(f"| {icon[status_of(days)]}{lock} [{r['name']}](planets/{r['name']}.md) "
-                    f"| {cluster} | {r.get('language') or '-'} | {r['open_issues_count']} |")
+                    f"| {belt} {natureza} | {cluster} | {r.get('language') or '-'} | {r['open_issues_count']} |")
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     body = f"""# theuniverse — Mapa dos Planetas
 
 > Atualizado: {today} | {len(repos)} planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
+⚡ compartilhado · 🌙 pessoal · 🏛️ profissional
 
-| planeta | cluster | linguagem | issues |
-|---|---|---|---|
+| planeta | cinturão | cluster | linguagem | issues |
+|---|---|---|---|---|
 {chr(10).join(rows)}
 
 ---
+
+## Cinturões
+
+| cinturão | símbolo | descrição |
+|---|---|---|
+| compartilhado | ⚡ | Frameworks, cortex e expertises que habitam os dois mundos |
+| pessoal | 🌙 | Órbita livre — projetos do Sol enquanto indivíduo |
+| profissional | 🏛️ | Órbita institucional — Lab Sobral |
 
 ## Clusters
 
@@ -162,6 +225,7 @@ def rebuild_index(repos):
 | meta-infra | Infraestrutura transversal (skills, agentes) |
 | landing-clientes | Landing pages e projetos de clientes |
 | entretenimento | Projetos pessoais e lúdicos |
+| observatorio | O próprio universo e seus instrumentos |
 """
     (PLANETS / "_index.md").write_text(body, encoding="utf-8")
 
@@ -189,6 +253,7 @@ def log_changes(novos, explodidos):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--rebuild-all", action="store_true", help="Reescreve todas as fichas (não só novas)")
     args = ap.parse_args()
 
     tok = token()
@@ -210,7 +275,7 @@ def main():
         return 0
 
     for r in repos:
-        if r["name"] in novos:
+        if r["name"] in novos or args.rebuild_all:
             write_ficha(r, tok)
     for e in explodidos:
         (PLANETS / f"{e}.md").unlink(missing_ok=True)

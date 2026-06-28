@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/tokentown |
 | visibilidade  | publico |
+| cinturão      | compartilhado |
 | cluster       | produtos |
-| status        | **ativo** (4 dias sem commit) |
+| status        | **ativo** (13 dias sem commit) |
 | linguagem     | TypeScript |
 | tamanho       | 83 KB |
-| issues        | 1 abertas |
+| issues        | 3 abertas |
 | criado        | 2026-05-08 |
-| ultimo-commit | 2026-06-14 —  |
+| ultimo-commit | 2026-06-14 |
 
 ## Descrição
 
@@ -18,7 +19,7 @@
 
 ## README (excerpt)
 
-
+> o caos tech — telemetria do seu projeto como uma cidade viva. · React + Vite + Tailwind + PixiJS · Fastify + WS · Node collector local · pnpm + Turborepo · Docker + Caddy. · apps/ · web/        # cidade (React + Pixi) · server/     # WS hub (Fastify) — roda na VPS
 
 ## Estrutura raiz
 
@@ -30,4 +31,3 @@ files: .agnostic-core, .dockerignore, .env.example, .gitignore, .gitmodules, .nv
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

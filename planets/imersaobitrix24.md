@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/imersaobitrix24 |
 | visibilidade  | publico |
+| cinturão      | pessoal |
 | cluster       | landing-clientes |
-| status        | **recente** (64 dias sem commit) |
+| status        | **recente** (73 dias sem commit) |
 | linguagem     | HTML |
 | tamanho       | 6891 KB |
-| issues        | 0 abertas |
+| issues        | 1 abertas |
 | criado        | 2026-03-31 |
-| ultimo-commit | 2026-04-15 —  |
+| ultimo-commit | 2026-04-15 |
 
 ## Descrição
 
@@ -18,7 +19,7 @@ Capacitar os participantes a dominar o Bitrix24, transformando a ferramenta em u
 
 ## README (excerpt)
 
-
+Landing page de alta conversão para a **Imersão Bitrix24** da Traevo. · Evento semanal ao vivo, toda quarta-feira às 11h. Gratuito. · npm install · npm run dev · npm run build
 
 ## Estrutura raiz
 
@@ -30,4 +31,3 @@ files: .agnostic-core, .env.example, .gitignore, .gitmodules, CLAUDE.md, LICENSE
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

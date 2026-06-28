@@ -5,6 +5,7 @@
 | url           | https://github.com/Lab-Sobral-Dev/SBR-ocomon-5.0 |
 | owner         | Lab-Sobral-Dev |
 | visibilidade  | publico |
+| cinturão      | profissional |
 | cluster       | sobral-core |
 | status        | **dormant** (111 dias sem commit) |
 | linguagem     | JavaScript |

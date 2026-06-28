@@ -5,6 +5,7 @@
 | url           | https://github.com/Lab-Sobral-Dev/gestao-sbr |
 | owner         | Lab-Sobral-Dev |
 | visibilidade  | privado |
+| cinturão      | profissional |
 | cluster       | sobral-core |
 | status        | **dormant** (124 dias sem commit) |
 | linguagem     | - |

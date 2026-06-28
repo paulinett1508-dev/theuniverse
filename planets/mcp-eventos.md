@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/mcp-eventos |
 | visibilidade  | privado |
+| cinturão      | compartilhado |
 | cluster       | mcp-ia |
-| status        | **ativo** (2 dias sem commit) |
+| status        | **ativo** (8 dias sem commit) |
 | linguagem     | Python |
-| tamanho       | 10 KB |
-| issues        | 0 abertas |
+| tamanho       | 12 KB |
+| issues        | 2 abertas |
 | criado        | 2026-06-15 |
-| ultimo-commit | 2026-06-16 —  |
+| ultimo-commit | 2026-06-19 |
 
 ## Descrição
 
@@ -30,4 +31,3 @@ files: adapters.py, config.py, requirements.txt, server.py
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-

@@ -4,13 +4,14 @@
 |---|---|
 | url           | https://github.com/paulinett1508-dev/GessoExpress |
 | visibilidade  | privado |
+| cinturão      | pessoal |
 | cluster       | landing-clientes |
-| status        | **recente** (44 dias sem commit) |
+| status        | **recente** (53 dias sem commit) |
 | linguagem     | JavaScript |
 | tamanho       | 145915 KB |
-| issues        | 1 abertas |
+| issues        | 2 abertas |
 | criado        | 2026-04-12 |
-| ultimo-commit | 2026-05-05 —  |
+| ultimo-commit | 2026-05-05 |
 
 ## Descrição
 
@@ -30,4 +31,3 @@ files: .agnostic-core, .env.example, .gitignore, .gitmodules, .railwayignore, .v
 ## Notas do guardião
 
 <!-- observações, alertas, dependências cruzadas -->
-
