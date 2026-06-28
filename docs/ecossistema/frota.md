@@ -31,6 +31,20 @@ Resolve o conflito planeta↔servidor: planeta é a *obra* (repo); estrela é a 
 | **Bellatrix** ⭐ | labsrv05-218 | a guardiã — banco de dados |
 | **Vega** ⭐ | labtools01-150 | a vigia — monitoramento |
 
+## Naves (substrato / infra-cósmica)
+
+Não são corpos celestes — são o **chão onde as estrelas pousam**. A estrela pisa na nave; a nave não é a estrela.
+
+| nave | host | papel | multi-inquilino |
+|---|---|---|---|
+| **Oráculo-VPS** 🛰️ | `nexus-vps01` · 2.25.163.125 · Hostinger KVM4 (4vCPU/16GB/200GB/Ubuntu 24.04/Boston-EUA) | control plane off-site · olho externo da infra · host do Hermes | ⭐ Hermes (Qdrant + Ollama) · 👁️ olho do Sheldon · 🛡️ Greenbone/OpenVAS (17 containers) · nexus-sentinela |
+
+> Fonte de verdade: `amilcar-cortex/oraculo/no-oraculo-vps.md` (espelho legível ao Observatório)
+> Canônico interno: `Amilcar-Constellation/territorio/vps-oraculo.md`
+> Pauta que roda nesta nave: `Amilcar-Constellation#12`
+
+---
+
 ## Fronteira
 
 | corpo | designação anterior | papel |
