@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-24 (Pulso · Deps · Deploy · Grupo Telegram TheUniverse · tópicos roteados)
+> Última atualização: 2026-06-28 (Lab-Sobral-Dev incorporado · Cinturões orbitais · 40 planetas)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -55,7 +55,28 @@ Gravidade = agnostic-core (submodule).
 
 ## ✅ Concluído nesta jornada
 
-### Sessão 2026-06-24 — parte 2 (esta)
+### Sessão 2026-06-28
+
+**Lab-Sobral-Dev incorporado como Amilcar Prime:**
+- `gh.py`: `UNIVERSE_OWNERS` expandido para 2 contas · `all_tokens()` · `token_for(owner)` · `list_repos` varre ambas com token correto
+- `.vault`: `GITHUB_TOKEN_LAB` + `GITHUB_USER_LAB` adicionados (Fine-grained PAT, 17 permissões)
+- Censo: 40 planetas (era 29) · 11 novos · 8 de Lab-Sobral-Dev + 3 recentes de paulinett1508-dev (amilcar-cortex, amilcar-dominios, hermes)
+- `constellations/amilcar.md`: Amilcar Prime (Lab-Sobral-Dev) + Amilcar Secundária documentadas
+
+**Cinturões orbitais (nova dimensão do universo):**
+- 3 cinturões: ⚡ compartilhado (12) · 🌙 pessoal (18) · 🏛️ profissional (10)
+- `censo.py`: dict `NATUREZA` · campo `cinturão` nas fichas · coluna no `_index.md` · flag `--rebuild-all`
+- Todas as 40 fichas regravadas com `cinturão` definido
+
+**Issues:**
+- #9 `mybots-telegram` — já estava fechada
+- #17 aberta: investigar divergência SbrTask (Lab-Sobral-Dev vs paulinett1508-dev)
+
+**Pendente desta sessão:**
+- Dashboard sentinel-core: visualizar cinturões (nova frente — aguarda decisão de design)
+- Webhook setup para os 11 novos planetas (`python scripts/setup-webhooks.py`)
+
+### Sessão 2026-06-24 — parte 2
 
 **Grupo Telegram TheUniverse — tópicos por sentinela:**
 - Grupo criado: `TheUniverse` · chat_id `-1004472865546` · supergrupo com forum ativo
@@ -176,14 +197,21 @@ Infra: `api/planets.js` + `api/events.js` + `api/posture.js` (Vercel functions).
 `scripts/artoo.py` — abre Issues de alerta em planetas + notifica Telegram.
 `scripts/carta_apresentacao.py` — enviada a 29/31 planetas.
 
-### 6. mybots-telegram — ⏳ NÃO INDEXADO (issue #9)
+### 6. Webhooks — ⏳ 11 novos planetas sem webhook
 
-Repo `mybots-telegram` detectado pelo censo. Ainda sem:
-- Ficha em `planets/mybots-telegram.md`
-- Entrada em `_GAL_FORCED_RING` ou posição no mapa galáxico
-- Webhook registrado
+Após incorporação do Lab-Sobral-Dev, 11 planetas novos sem webhook registrado.
+Rodar: `python scripts/setup-webhooks.py`
 
-### 7. sbrgestao CI — ⏳ ESTRELA DA MORTE (issue #10)
+### 7. Dashboard — ⏳ CINTURÕES NÃO VISUALIZADOS
+
+Dado existe (`cinturão` em todas as fichas e na API). Falta representar visualmente no dashboard sentinel-core.
+Próxima sessão: planejar layout dos 3 cinturões orbitais.
+
+### 8. SbrTask sync — ⏳ DIVERGÊNCIA (issue #17)
+
+Desenvolvimento migrou de Lab-Sobral-Dev para paulinett1508-dev. Investigar e consolidar.
+
+### 9. sbrgestao CI — ⏳ ESTRELA DA MORTE (issue #10)
 
 `agnvendas-unit-tests failure` — CI vermelho. Dashboard mostra alerta. Investigar antes de próxima sessão de produção.
 
@@ -191,7 +219,7 @@ Repo `mybots-telegram` detectado pelo censo. Ainda sem:
 
 - Guardião **nunca** escreve em outro repo. Só observa (leitura) e escreve em casa (theuniverse). Exceção explícita: **Artoo** (autorizado pelo TheGod) pode abrir Issues de alerta em planetas afetados.
 - Constelação Amilcar (`the-matrix` em transição) = ecossistema do Lab Sobral. Manifesto canônico em `constellations/amilcar.md`.
-- Token vive só no `.vault` (local) e no `/opt/obi-wan/.env` (Polaris). Nunca commitar.
+- Token vive só no `.vault` (local) e no `/opt/obi-wan/.env` (Polaris). Nunca commitar. Dois tokens agora: `GITHUB_TOKEN` (paulinett1508-dev) + `GITHUB_TOKEN_LAB` (Lab-Sobral-Dev).
 - `UNIVERSE_OWNERS` em `gh.py` é o controle de escopo — alterar só com decisão do TheGod.
 - Após adicionar repo ao universo: rodar `python scripts/setup-webhooks.py` para registrar webhook.
 - **Issue resolvida = comentar evidência (linhas de código) + fechar com `completed` imediatamente.**
@@ -200,7 +228,7 @@ Repo `mybots-telegram` detectado pelo censo. Ainda sem:
 
 Ao clonar o theuniverse noutra máquina, estes itens **não vêm pelo git** e precisam ser recriados:
 
-1. **`.vault`** — `GITHUB_TOKEN=` + `GROQ_API_KEY=` + `WEBHOOK_SECRET=`. Sem ele, nada autentica.
+1. **`.vault`** — `GITHUB_TOKEN=` + `GITHUB_TOKEN_LAB=` + `GROQ_API_KEY=` + `TELEGRAM_TOKEN=` + `SOL_CHAT_ID=`. Sem ele, nada autentica.
 2. **Chave SSH `~/.ssh/vscode_key`** — cadastrada na Polaris via extensão Hostinger do VS Code. `root@195.200.5.145` porta 22.
 3. **Submodule** — `git submodule update --init` após clonar.
 4. **Credencial git de push** — configurar token no `.git/config`.
