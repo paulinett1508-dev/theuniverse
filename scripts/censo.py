@@ -15,7 +15,7 @@ import base64
 import argparse
 from datetime import datetime, timezone
 
-from gh import API, ROOT, SELF, token, api, list_repos
+from gh import API, ROOT, SELF, token, api, list_repos, token_for
 
 PLANETS = ROOT / "planets"
 CHANGELOG = ROOT / "CHANGELOG.md"
@@ -31,6 +31,10 @@ CLUSTERS = {
     "sbrgestao": "sobral-core", "sbrchecks": "sobral-core", "agnvendas-painelsbr": "sobral-core",
     "pedidomobile": "sobral-core", "sigmed": "sobral-core", "nexus-labsobral": "sobral-core",
     "SBR-ocomon-5.0": "sobral-core", "SbrTask": "sobral-core", "centroculturalsbr": "sobral-core",
+    "SBR-KPIs": "sobral-core", "SBR-ocomon-5.0": "sobral-core", "gestao-sbr": "sobral-core",
+    "serverIA": "mcp-ia", "BI-sobral": "sobral-core", "Projeto-scale": "sobral-core",
+    "serverpfsense": "meta-infra",
+    "amilcar-cortex": "sobral-core", "amilcar-dominios": "sobral-core", "hermes": "mcp-ia",
     "sicefsus-sistema": "gov-publico", "CertiSYS": "gov-publico",
     "tokentown": "produtos", "hqplus": "produtos",
     "flowdigitalstudio": "produtos", "contabilplus": "produtos", "FinanceFlow": "produtos",
@@ -80,9 +84,10 @@ def status_of(days):
     return "ativo" if days <= 30 else "recente" if days <= 90 else "dormant"
 
 
-def write_ficha(r, tok):
+def write_ficha(r, tok=None):
     name = r["name"]
     owner = r["full_name"].split("/")[0]
+    tok = token_for(owner)
     days = days_idle(r["pushed_at"])
     cluster = CLUSTERS.get(name, "nao-classificado")
     vis = "privado" if r["private"] else "publico"

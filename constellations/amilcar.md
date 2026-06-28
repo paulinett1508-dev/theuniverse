@@ -6,7 +6,28 @@ O cortex do conglomerado de inteligência do Laboratório Sobral. Não é um sis
 
 ---
 
-## Corpos celestes
+## Estrelas — Amilcar Prime (`Lab-Sobral-Dev`)
+
+Face institucional do Lab Sobral no GitHub. Repos de operação, dados e infraestrutura física.
+
+| corpo | repo | tipo | papel |
+|---|---|---|---|
+| **SBR-KPIs** | `SBR-KPIs` | ⭐ estrela | Indicadores de performance do Lab |
+| **SbrTask** | `SbrTask` | ⭐ estrela | Gestão de tarefas — ⚠️ defasado (ver nota abaixo) |
+| **serverIA** | `serverIA` 🔒 | 🪐 planeta | Servidor de IA do Lab |
+| **serverpfsense** | `serverpfsense` 🔒 | 🛰️ satélite | Infra de rede/firewall |
+| **SBR-ocomon-5.0** | `SBR-ocomon-5.0` | 🪐 planeta | Sistema de helpdesk Ocomon |
+| **gestao-sbr** | `gestao-sbr` 🔒 | 🪐 planeta | Gestão interna do Lab |
+| **Projeto-scale** | `Projeto-scale` | 🪐 planeta | Escala/expansão — 19 issues abertas |
+| **BI-sobral** | `BI-sobral` | 🪐 planeta | Business Intelligence do Lab |
+
+> **⚠️ SbrTask — divergência detectada:** o desenvolvimento migrou para `paulinett1508-dev`. Investigar sync e consolidar. Ver issue a abrir.
+
+---
+
+## Estrelas — Amilcar Secundária (`paulinett1508-dev`)
+
+Face de desenvolvimento — infra, inteligência e sistemas operacionais do Lab.
 
 | corpo | repo | tipo | papel |
 |---|---|---|---|
@@ -15,6 +36,9 @@ O cortex do conglomerado de inteligência do Laboratório Sobral. Não é um sis
 | **sigmed** | `sigmed` | 🪐 planeta | Sistema médico do ecossistema Sobral |
 | **centroculturalsbr** | `centroculturalsbr` | 🪐 planeta | Território cultural e presença institucional |
 | **sbrchecks** | `sbrchecks` | 🛰️ satélite | Monitoramento e validações do ecossistema |
+| **amilcar-cortex** | `amilcar-cortex` 🔒 | 🧠 cortex | Inteligência da constelação — lóbulos/especialistas |
+| **amilcar-dominios** | `amilcar-dominios` 🔒 | 🗺️ território | Monorepo departamental — dados locais |
+| **hermes** | `hermes` 🔒 | 📡 gateway | RAG + LLM local + gateway conversacional (5 issues) |
 | **Seraph** | *(a criar)* | 🪐 planeta | A caminho — identidade a definir |
 
 ---

@@ -13,19 +13,50 @@ API = "https://api.github.com"
 ROOT = Path(__file__).resolve().parent.parent
 SELF = "theuniverse"  # o observatório não é planeta
 # owners cujos repos entram no universo
-UNIVERSE_OWNERS = {"paulinett1508-dev"}
+UNIVERSE_OWNERS = {"paulinett1508-dev", "Lab-Sobral-Dev"}
+
+# mapeamento owner → chave no .vault / env
+_OWNER_TOKEN_KEYS = {
+    "paulinett1508-dev": "GITHUB_TOKEN",
+    "Lab-Sobral-Dev":    "GITHUB_TOKEN_LAB",
+}
+
+
+def _read_vault():
+    vault = ROOT / ".vault"
+    data = {}
+    if vault.exists():
+        for line in vault.read_text(encoding="utf-8").splitlines():
+            if "=" in line and not line.startswith("#"):
+                k, v = line.split("=", 1)
+                data[k.strip()] = v.strip()
+    return data
 
 
 def token():
-    t = os.getenv("GITHUB_TOKEN")
-    if t:
-        return t.strip()
-    vault = ROOT / ".vault"
-    if vault.exists():
-        for line in vault.read_text(encoding="utf-8").splitlines():
-            if line.startswith("GITHUB_TOKEN="):
-                return line.split("=", 1)[1].strip()
-    sys.exit("ERRO: GITHUB_TOKEN ausente (env ou .vault).")
+    """Token primário (paulinett1508-dev) — compatibilidade retroativa."""
+    t = os.getenv("GITHUB_TOKEN") or _read_vault().get("GITHUB_TOKEN")
+    if not t:
+        sys.exit("ERRO: GITHUB_TOKEN ausente (env ou .vault).")
+    return t.strip()
+
+
+def all_tokens():
+    """Retorna dict owner → token para todas as contas do universo."""
+    vault = _read_vault()
+    result = {}
+    for owner, key in _OWNER_TOKEN_KEYS.items():
+        t = os.getenv(key) or vault.get(key)
+        if t:
+            result[owner] = t.strip()
+    if not result:
+        sys.exit("ERRO: nenhum token encontrado no vault.")
+    return result
+
+
+def token_for(owner):
+    """Token correto para um owner específico."""
+    return all_tokens().get(owner, token())
 
 
 def api(path, tok):
@@ -40,21 +71,24 @@ def api(path, tok):
         return json.loads(r.read().decode()), r.headers
 
 
-def list_repos(tok, _api=None):
+def list_repos(tok=None, _api=None):
+    """Varre todas as contas do universo e retorna repos únicos."""
     _api = _api or api
-    repos, page = [], 1
-    while True:
-        batch, _ = _api(f"/user/repos?per_page=100&page={page}", tok)
-        if not batch:
-            break
-        repos.extend(batch)
-        page += 1
-    seen = set()
-    result = []
-    for r in repos:
-        owner = r["full_name"].split("/")[0]
-        key = r["full_name"]
-        if r["name"] != SELF and owner in UNIVERSE_OWNERS and key not in seen:
-            seen.add(key)
-            result.append(r)
+    seen, result = set(), []
+    for owner, owner_tok in all_tokens().items():
+        page = 1
+        while True:
+            batch, _ = _api(
+                f"/user/repos?per_page=100&page={page}&visibility=all&affiliation=owner",
+                owner_tok,
+            )
+            if not batch:
+                break
+            for r in batch:
+                repo_owner = r["full_name"].split("/")[0]
+                key = r["full_name"]
+                if r["name"] != SELF and repo_owner in UNIVERSE_OWNERS and key not in seen:
+                    seen.add(key)
+                    result.append(r)
+            page += 1
     return result

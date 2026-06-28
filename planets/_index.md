@@ -1,6 +1,6 @@
 # theuniverse — Mapa dos Planetas
 
-> Atualizado: 2026-06-26 | 29 planetas mapeados (Censo automático)
+> Atualizado: 2026-06-28 | 40 planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
 
@@ -8,7 +8,10 @@
 |---|---|---|---|
 | 🟢 [agnostic-core](planets/agnostic-core.md) | meta-infra | Shell | 7 |
 | 🟡 [AlgodaoAtelie](planets/AlgodaoAtelie.md) | landing-clientes | TypeScript | 1 |
-| 🟢🔒 [Amilcar-Constellation](planets/Amilcar-Constellation.md) | nao-classificado | - | 3 |
+| 🟢🔒 [Amilcar-Constellation](planets/Amilcar-Constellation.md) | nao-classificado | - | 6 |
+| 🟢🔒 [amilcar-cortex](planets/amilcar-cortex.md) | nao-classificado | - | 0 |
+| 🟢🔒 [amilcar-dominios](planets/amilcar-dominios.md) | nao-classificado | Python | 0 |
+| 🔴 [BI-sobral](planets/BI-sobral.md) | sobral-core | - | 0 |
 | 🟡 [bolaocopa2026](planets/bolaocopa2026.md) | entretenimento | TypeScript | 2 |
 | 🟢 [centroculturalsbr](planets/centroculturalsbr.md) | sobral-core | - | 2 |
 | 🟡 [CertiSYS](planets/CertiSYS.md) | gov-publico | TypeScript | 2 |
@@ -18,6 +21,8 @@
 | 🟡 [florianorun](planets/florianorun.md) | landing-clientes | TypeScript | 1 |
 | 🟡 [flowdigitalstudio](planets/flowdigitalstudio.md) | produtos | TypeScript | 2 |
 | 🟡🔒 [GessoExpress](planets/GessoExpress.md) | landing-clientes | JavaScript | 2 |
+| 🔴🔒 [gestao-sbr](planets/gestao-sbr.md) | sobral-core | - | 0 |
+| 🟢🔒 [hermes](planets/hermes.md) | nao-classificado | - | 5 |
 | 🟡 [hqplus](planets/hqplus.md) | produtos | TypeScript | 2 |
 | 🟡 [imersaobitrix24](planets/imersaobitrix24.md) | landing-clientes | HTML | 1 |
 | 🟡 [lp-ellenpedrosa](planets/lp-ellenpedrosa.md) | landing-clientes | - | 1 |
@@ -25,13 +30,19 @@
 | 🟡 [lpjaraujoinfo](planets/lpjaraujoinfo.md) | landing-clientes | TypeScript | 1 |
 | 🟢 [luna-base](planets/luna-base.md) | observatorio | - | 2 |
 | 🟢🔒 [mcp-eventos](planets/mcp-eventos.md) | mcp-ia | Python | 2 |
-| 🟢🔒 [nexus-labsobral](planets/nexus-labsobral.md) | sobral-core | Python | 136 |
-| 🟢🔒 [sbrchecks](planets/sbrchecks.md) | sobral-core | Python | 2 |
-| 🟢🔒 [sbrgestao](planets/sbrgestao.md) | sobral-core | TypeScript | 10 |
+| 🟢🔒 [nexus-labsobral](planets/nexus-labsobral.md) | sobral-core | Python | 141 |
+| 🟢 [Projeto-scale](planets/Projeto-scale.md) | sobral-core | JavaScript | 19 |
+| 🟢 [SBR-KPIs](planets/SBR-KPIs.md) | sobral-core | TypeScript | 0 |
+| 🔴 [SBR-ocomon-5.0](planets/SBR-ocomon-5.0.md) | sobral-core | JavaScript | 0 |
+| 🟢🔒 [sbrchecks](planets/sbrchecks.md) | sobral-core | Python | 3 |
+| 🟢🔒 [sbrgestao](planets/sbrgestao.md) | sobral-core | TypeScript | 12 |
+| 🟢 [SbrTask](planets/SbrTask.md) | sobral-core | TypeScript | 4 |
 | 🟢 [sentinel-core](planets/sentinel-core.md) | nao-classificado | Shell | 1 |
-| 🟢 [sicefsus-sistema](planets/sicefsus-sistema.md) | gov-publico | JavaScript | 30 |
+| 🟡🔒 [serverIA](planets/serverIA.md) | mcp-ia | Python | 0 |
+| 🟡🔒 [serverpfsense](planets/serverpfsense.md) | meta-infra | - | 0 |
+| 🟢 [sicefsus-sistema](planets/sicefsus-sistema.md) | gov-publico | JavaScript | 91 |
 | 🟢🔒 [sigmed](planets/sigmed.md) | sobral-core | TypeScript | 2 |
-| 🟢 [SuperCartolaManagerv5-production](planets/SuperCartolaManagerv5-production.md) | entretenimento | JavaScript | 3 |
+| 🟢 [SuperCartolaManagerv5-production](planets/SuperCartolaManagerv5-production.md) | entretenimento | JavaScript | 2 |
 | 🟡 [temperodemamae](planets/temperodemamae.md) | landing-clientes | HTML | 1 |
 | 🟢 [tokentown](planets/tokentown.md) | produtos | TypeScript | 3 |
 | 🟡 [vibegaminghub](planets/vibegaminghub.md) | entretenimento | JavaScript | 2 |
