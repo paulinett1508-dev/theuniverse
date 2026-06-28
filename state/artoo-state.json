@@ -1,5 +1,5 @@
 {
-  "missions": 2,
+  "missions": 3,
   "history": [
     {
       "repo": "sicefsus-sistema",
@@ -11,6 +11,12 @@
       "repo": "sicefsus-sistema",
       "reason": "CI falhou",
       "issue": 114,
+      "date": "2026-06-28"
+    },
+    {
+      "repo": "sicefsus-sistema",
+      "reason": "CI falhou",
+      "issue": 115,
       "date": "2026-06-28"
     }
   ]
