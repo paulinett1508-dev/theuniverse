@@ -20,7 +20,7 @@ jobs:
 
       - name: Run Sentinel · Deploy
         env:
-          GITHUB_TOKEN: ${{ secrets.SENTINEL_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.UNIVERSE_PAT }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           SOL_CHAT_ID: ${{ secrets.SOL_CHAT_ID }}
         run: python scripts/deploy_health.py

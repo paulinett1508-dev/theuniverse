@@ -34,10 +34,10 @@ jobs:
         run: |
           git config user.name  "guardiao-do-universo"
           git config user.email "guardiao@theuniverse.local"
-          if [ -n "$(git status --porcelain state/)" ]; then
-            git add state/sentinel-state.json
+          git add state/
+          if git diff --cached --quiet; then
+            echo "Estado inalterado."
+          else
             git commit -m "sentinel: atualiza estado do sistema nervoso"
             git push
-          else
-            echo "Estado inalterado."
           fi
