@@ -83,11 +83,39 @@ Gravidade = agnostic-core (submodule).
 - `samba_client.py` sugere ingestão de documentos via share de rede (Atlas/Antares)
 - Hermes (repo criado 2026-06-26, vazio) é a **evolução planejada** do serverIA — não está deployado ainda
 
-**Pendente desta sessão:**
+**Pendente desta sessão (parte 1 — 2026-06-28 manhã):**
 - Dashboard sentinel-core: visualizar cinturões (nova frente — aguarda decisão de design)
 - Webhook setup para os 11 novos planetas (`python scripts/setup-webhooks.py`)
 - Validar que os tópicos Telegram voltaram a funcionar após próximo cron
 - Definir se Hermes substitui ou expande o serverIA (decisão de arquitetura)
+
+### Sessão 2026-06-28 — parte 2 (tarde)
+
+**Novo planeta: df-gesso 🌙**
+- Repo `paulinett1508-dev/df-gesso` criado (privado)
+- Stack: Next.js 15 + Tailwind + TypeScript · Polaris VPS (prod) · Vercel (preview) · Hostinger (domínio)
+- Scaffold em `C:\Users\pmiranda\df-gesso` — aguarda issue #18 para path oficial
+- AGENTS.md: 4 especialistas (frontend · calculator · devops · commerce)
+- Ficha registrada: `planets/df-gesso.md` · `censo.py` atualizado · `_index.md` → 41 planetas
+- Identidade visual: designer externo tem logo+paleta+fontes — aguardar assets
+
+**Hermes SuperCartola — spec canônica fechada:**
+- Groq + Llama 3.3 70B · repo `hermes-agent` isolado · MVP: status+prd+monitor
+- Reporting: stdout + BigCartola bot com prefixo `[HERMES]` (monitor only)
+- Bot próprio: fora do MVP, só quando Hermes for conversacional
+
+**Transcrição de áudio — padrão estabelecido:**
+- `whisper` + `ffmpeg` instalados e funcionais no ambiente
+- `amilcar-cortex/ferramentas/transcritor` ainda não existe (gap a implementar)
+- ADR-011: uma fonte, instalação ou HTTP — nunca cópia
+
+**Issues abertas:**
+- #17: divergência SbrTask (Lab-Sobral-Dev vs paulinett1508-dev) — gap de sync
+- #18: definir convenção de workspace local para repos de planetas (gap crítico de docs)
+
+**Guard-rails:**
+- df-gesso scaffold em C: — não mover sem resolução da issue #18
+- amilcar-cortex/ferramentas/transcritor inexistente — usar whisper direto por enquanto
 
 ### Sessão 2026-06-24 — parte 2
 
