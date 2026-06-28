@@ -72,9 +72,22 @@ Gravidade = agnostic-core (submodule).
 - #9 `mybots-telegram` — já estava fechada
 - #17 aberta: investigar divergência SbrTask (Lab-Sobral-Dev vs paulinett1508-dev)
 
+**Correção crítica — Telegram tópicos silenciosos:**
+- Diagnóstico: 4 de 5 workflows em failure, `secret-audit` único passando
+- **Bug 1 — sentinel.yml**: `state/artoo-state.json` untracked ativava o `if` mas `git add state/sentinel-state.json` não o incluía → commit vazio → exit 1. Fix: `git add state/` + `git diff --cached --quiet` antes de commitar
+- **Bug 2 — pulso/deps/deploy-health**: usavam `secrets.SENTINEL_GITHUB_TOKEN` (secret inexistente). Python falhava antes de enviar qualquer mensagem. Fix: trocado por `secrets.UNIVERSE_PAT`
+- Resultado esperado: tópicos Pulso(8) · Deps(10) · Deploy(12) · Heartbeat(16) voltam a receber mensagens nos próximos crons
+
+**serverIA (Lab-Sobral-Dev) — stack RAG em produção:**
+- Ollama (CPU-only) + FastAPI + ChromaDB + Nginx + Scheduler
+- `samba_client.py` sugere ingestão de documentos via share de rede (Atlas/Antares)
+- Hermes (repo criado 2026-06-26, vazio) é a **evolução planejada** do serverIA — não está deployado ainda
+
 **Pendente desta sessão:**
 - Dashboard sentinel-core: visualizar cinturões (nova frente — aguarda decisão de design)
 - Webhook setup para os 11 novos planetas (`python scripts/setup-webhooks.py`)
+- Validar que os tópicos Telegram voltaram a funcionar após próximo cron
+- Definir se Hermes substitui ou expande o serverIA (decisão de arquitetura)
 
 ### Sessão 2026-06-24 — parte 2
 

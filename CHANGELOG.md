@@ -9,6 +9,28 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+## 2026-06-28 — Sessão: Lab-Sobral-Dev · Cinturões · Fix Telegram
+
+### 🌌 Lab-Sobral-Dev incorporado como Amilcar Prime
+- Segundo token (`GITHUB_TOKEN_LAB`) adicionado ao `.vault` — Fine-grained PAT, 17 permissões
+- `gh.py`: `UNIVERSE_OWNERS` {paulinett1508-dev, Lab-Sobral-Dev} · `all_tokens()` · `token_for(owner)` · `list_repos` varre as duas contas
+- 11 novos planetas (8 Lab-Sobral-Dev + 3 recentes paulinett1508-dev: amilcar-cortex, amilcar-dominios, hermes)
+- `constellations/amilcar.md`: Amilcar Prime + Amilcar Secundária documentadas
+
+### ⚡ Cinturões orbitais — nova dimensão
+- 3 cinturões definidos pelo Sol: ⚡ compartilhado (12) · 🌙 pessoal (18) · 🏛️ profissional (10)
+- `censo.py`: dict `NATUREZA` · campo `cinturão` nas fichas · coluna `_index.md` · flag `--rebuild-all`
+- 40 fichas regravadas
+
+### 🔧 Fix crítico — Telegram tópicos silenciosos
+- **sentinel.yml**: git commit falhava com `artoo-state.json` untracked → corrigido para `git add state/` + `git diff --cached`
+- **pulso/deps/deploy-health**: `SENTINEL_GITHUB_TOKEN` (inexistente) → `UNIVERSE_PAT`
+- Tópicos Pulso · Deps · Deploy · Heartbeat voltarão a funcionar nos próximos crons
+
+### 🔍 Descoberta: serverIA em produção
+- Stack RAG ativa: Ollama (CPU) + FastAPI + ChromaDB + Nginx + Scheduler
+- Hermes = evolução planejada, ainda não deployada
+
 ## 2026-06-28 — Censo automático
 
 ### 🆕 Planetas descobertos
