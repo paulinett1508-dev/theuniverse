@@ -1,0 +1,11 @@
+{
+  "missions": 1,
+  "history": [
+    {
+      "repo": "sicefsus-sistema",
+      "reason": "CI falhou",
+      "issue": 113,
+      "date": "2026-06-28"
+    }
+  ]
+}
