@@ -46,6 +46,7 @@ CLUSTERS = {
     "lp-restauranteflutuante": "landing-clientes", "lp-ellenpedrosa": "landing-clientes",
     "imersaobitrix24": "landing-clientes", "GessoExpress": "landing-clientes",
     "luna-base": "observatorio",
+    "df-gesso": "produtos",
 }
 
 # Cinturões orbitais — natureza gravitacional de cada planeta
@@ -84,6 +85,7 @@ NATUREZA = {
     "lpjaraujoinfo": "pessoal",
     "imersaobitrix24": "pessoal",
     "GessoExpress": "pessoal",
+    "df-gesso": "pessoal",
     # profissional (14–15 + todos Lab-Sobral-Dev)
     "centroculturalsbr": "profissional",
     "FinanceFlow": "profissional",

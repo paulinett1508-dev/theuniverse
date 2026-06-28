@@ -1,6 +1,6 @@
 # theuniverse — Mapa dos Planetas
 
-> Atualizado: 2026-06-28 | 40 planetas mapeados (Censo automático)
+> Atualizado: 2026-06-28 | 41 planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
 ⚡ compartilhado · 🌙 pessoal · 🏛️ profissional
@@ -16,6 +16,7 @@
 | 🟡 [bolaocopa2026](planets/bolaocopa2026.md) | 🌙 pessoal | entretenimento | TypeScript | 2 |
 | 🟢 [centroculturalsbr](planets/centroculturalsbr.md) | 🏛️ profissional | sobral-core | - | 2 |
 | 🟡 [CertiSYS](planets/CertiSYS.md) | 🌙 pessoal | gov-publico | TypeScript | 2 |
+| 🟢🔒 [df-gesso](planets/df-gesso.md) | 🌙 pessoal | produtos | TypeScript | 0 |
 | 🟡 [contabilplus](planets/contabilplus.md) | 🌙 pessoal | produtos | - | 2 |
 | 🟡 [f1-pulse](planets/f1-pulse.md) | 🌙 pessoal | entretenimento | TypeScript | 2 |
 | 🟢🔒 [FinanceFlow](planets/FinanceFlow.md) | 🏛️ profissional | produtos | TypeScript | 2 |
