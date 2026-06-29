@@ -185,7 +185,7 @@ def write_ficha(r, tok=None):
 def rebuild_index(repos):
     icon = {"ativo": "🟢", "recente": "🟡", "dormant": "🔴"}
     rows = []
-    belt_icon = {"compartilhado": "⚡", "pessoal": "🌙", "profissional": "🏛️"}
+    belt_icon = {"compartilhado": "⚡🏛️", "pessoal": "🌙", "profissional": "🏛️"}
     for r in sorted(repos, key=lambda x: x["name"].lower()):
         days = days_idle(r["pushed_at"])
         cluster = CLUSTERS.get(r["name"], "nao-classificado")
@@ -200,7 +200,7 @@ def rebuild_index(repos):
 > Atualizado: {today} | {len(repos)} planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
-⚡ compartilhado · 🌙 pessoal · 🏛️ profissional
+⚡🏛️ compartilhado · 🌙 pessoal · 🏛️ profissional puro
 
 | planeta | cinturão | cluster | linguagem | issues |
 |---|---|---|---|---|
@@ -212,7 +212,7 @@ def rebuild_index(repos):
 
 | cinturão | símbolo | descrição |
 |---|---|---|
-| compartilhado | ⚡ | Frameworks, cortex e expertises que habitam os dois mundos |
+| compartilhado | ⚡🏛️ | Infra, cortex e expertises profissionais que também sustentam projetos pessoais |
 | pessoal | 🌙 | Órbita livre — projetos do Sol enquanto indivíduo |
 | profissional | 🏛️ | Órbita institucional — Lab Sobral |
 
