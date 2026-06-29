@@ -7,10 +7,12 @@ import urllib.parse
 from datetime import datetime, timedelta
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-VAULT = ROOT / ".vault"
-LIMIT_FILE = Path.home() / ".claude" / "weekly-limit.json"
-STATE_FILE = ROOT / "state" / "weekly-usage-notify-state.json"
+CLAUDE_DIR = Path.home() / ".claude"
+LIMIT_FILE = CLAUDE_DIR / "weekly-limit.json"
+STATE_FILE = CLAUDE_DIR / "state" / "weekly-usage-notify-state.json"
+
+_cfg_raw = json.loads(LIMIT_FILE.read_text(encoding="utf-8"))
+VAULT    = Path(_cfg_raw.get("vaultPath", str(Path.home() / "theuniverse" / ".vault")))
 
 CCUSAGE = Path.home() / "AppData" / "Roaming" / "npm" / "node_modules" / "ccusage" / "dist" / "cli.js"
 
