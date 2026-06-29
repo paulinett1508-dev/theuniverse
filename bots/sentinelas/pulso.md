@@ -3,7 +3,7 @@ tipo: bot
 nome: Pulso
 username: universo_pulso_bot
 papel: outbound-notifier
-status: pendente
+status: ativo
 token_secret: TELEGRAM_TOKEN_PULSO
 telegram_topic: pulso
 script: scripts/pulso.py

@@ -3,7 +3,7 @@ tipo: bot
 nome: Deps
 username: universo_deps_bot
 papel: outbound-notifier
-status: pendente
+status: ativo
 token_secret: TELEGRAM_TOKEN_DEPS
 telegram_topic: deps
 script: scripts/deps.py

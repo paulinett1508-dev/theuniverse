@@ -3,7 +3,7 @@ tipo: bot
 nome: Artoo
 username: artoo_universo_bot
 papel: mensageiro
-status: pendente
+status: ativo
 token_secret: TELEGRAM_TOKEN_ARTOO
 telegram_topic: alertas
 script: scripts/artoo.py

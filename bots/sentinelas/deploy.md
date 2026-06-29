@@ -3,7 +3,7 @@ tipo: bot
 nome: Deploy Health
 username: universo_deploy_bot
 papel: outbound-notifier
-status: pendente
+status: ativo
 token_secret: TELEGRAM_TOKEN_DEPLOY
 telegram_topic: deploy
 script: scripts/deploy_health.py
