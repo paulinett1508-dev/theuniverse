@@ -1,18 +1,6 @@
 {
-  "missions": 33,
+  "missions": 35,
   "history": [
-    {
-      "repo": "sigmed",
-      "reason": "CI falhou",
-      "issue": 7,
-      "date": "2026-06-28"
-    },
-    {
-      "repo": "sicefsus-sistema",
-      "reason": "CI falhou",
-      "issue": 122,
-      "date": "2026-06-28"
-    },
     {
       "repo": "sicefsus-sistema",
       "reason": "CI falhou",
@@ -119,6 +107,18 @@
       "repo": "sicefsus-sistema",
       "reason": "CI falhou",
       "issue": 137,
+      "date": "2026-06-29"
+    },
+    {
+      "repo": "agnostic-core",
+      "reason": "CI falhou",
+      "issue": 40,
+      "date": "2026-06-29"
+    },
+    {
+      "repo": "sicefsus-sistema",
+      "reason": "CI falhou",
+      "issue": 138,
       "date": "2026-06-29"
     }
   ]
