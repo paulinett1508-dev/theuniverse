@@ -1,5 +1,16 @@
 const OWNER = 'paulinett1508-dev';
 
+const BELT = {
+  // gould — infra/cortex profissional que habita dois planos
+  'agnostic-core':'gould','amilcar-cortex':'gould','amilcar-dominios':'gould',
+  'Amilcar-Constellation':'gould','hermes':'gould','luna-base':'gould',
+  'mcp-eventos':'gould','sentinel-core':'gould','tokentown':'gould',
+  'nexus-labsobral':'gould','sbrgestao':'gould','sbrchecks':'gould',
+  // van-allen — institucional puro
+  'centroculturalsbr':'van-allen','FinanceFlow':'van-allen',
+  // kuiper — default (pessoal/livre)
+};
+
 const SPECIAL_BODIES = {
   'agnostic-core':  'station',
   'mcp-eventos':    'satellite',
@@ -111,7 +122,7 @@ module.exports = async function handler(req, res) {
 
         const bodyType = SPECIAL_BODIES[repo.name] || _deriveBodyType(repo.isArchived, ci, daysSincePush, commits, diskKB, issues);
 
-        planets.push({ name: repo.name, pushedAt: repo.pushedAt, daysSincePush, ci, issues, health, commits, diskKB, rawScore, lang, contributors, lastPR, bodyType });
+        planets.push({ name: repo.name, pushedAt: repo.pushedAt, daysSincePush, ci, issues, health, commits, diskKB, rawScore, lang, contributors, lastPR, bodyType, belt: BELT[repo.name] || 'kuiper' });
       }
 
       after = repos.pageInfo.hasNextPage ? repos.pageInfo.endCursor : null;

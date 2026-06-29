@@ -50,53 +50,53 @@ CLUSTERS = {
 }
 
 # Cinturões orbitais — natureza gravitacional de cada planeta
-# compartilhado: habita os dois mundos (frameworks, cortex, expertises)
-# pessoal: órbita livre do Sol enquanto indivíduo
-# profissional: órbita institucional do Lab Sobral
+# gould:     infra/cortex profissional que também sustenta projetos pessoais (habita dois planos)
+# kuiper:    órbita livre do Sol enquanto indivíduo — além do core institucional
+# van-allen: campo institucional puro — mais interno, próximo do núcleo Lab Sobral
 NATUREZA = {
-    # compartilhado (1–12)
-    "agnostic-core": "compartilhado",
-    "amilcar-cortex": "compartilhado",
-    "amilcar-dominios": "compartilhado",
-    "Amilcar-Constellation": "compartilhado",
-    "hermes": "compartilhado",
-    "luna-base": "compartilhado",
-    "mcp-eventos": "compartilhado",
-    "sentinel-core": "compartilhado",
-    "tokentown": "compartilhado",
-    "nexus-labsobral": "compartilhado",
-    "sbrgestao": "compartilhado",
-    "sbrchecks": "compartilhado",
-    # pessoal (13, 16–31)
-    "sigmed": "pessoal",
-    "hqplus": "pessoal",
-    "flowdigitalstudio": "pessoal",
-    "contabilplus": "pessoal",
-    "CertiSYS": "pessoal",
-    "sicefsus-sistema": "pessoal",
-    "SuperCartolaManagerv5-production": "pessoal",
-    "bolaocopa2026": "pessoal",
-    "f1-pulse": "pessoal",
-    "vibegaminghub": "pessoal",
-    "AlgodaoAtelie": "pessoal",
-    "florianorun": "pessoal",
-    "lp-restauranteflutuante": "pessoal",
-    "lp-ellenpedrosa": "pessoal",
-    "lpjaraujoinfo": "pessoal",
-    "imersaobitrix24": "pessoal",
-    "GessoExpress": "pessoal",
-    "df-gesso": "pessoal",
-    # profissional (14–15 + todos Lab-Sobral-Dev)
-    "centroculturalsbr": "profissional",
-    "FinanceFlow": "profissional",
-    "SBR-KPIs": "profissional",
-    "SbrTask": "profissional",
-    "serverIA": "profissional",
-    "serverpfsense": "profissional",
-    "SBR-ocomon-5.0": "profissional",
-    "gestao-sbr": "profissional",
-    "Projeto-scale": "profissional",
-    "BI-sobral": "profissional",
+    # gould — infra/cortex compartilhado
+    "agnostic-core": "gould",
+    "amilcar-cortex": "gould",
+    "amilcar-dominios": "gould",
+    "Amilcar-Constellation": "gould",
+    "hermes": "gould",
+    "luna-base": "gould",
+    "mcp-eventos": "gould",
+    "sentinel-core": "gould",
+    "tokentown": "gould",
+    "nexus-labsobral": "gould",
+    "sbrgestao": "gould",
+    "sbrchecks": "gould",
+    # kuiper — órbita pessoal
+    "sigmed": "kuiper",
+    "hqplus": "kuiper",
+    "flowdigitalstudio": "kuiper",
+    "contabilplus": "kuiper",
+    "CertiSYS": "kuiper",
+    "sicefsus-sistema": "kuiper",
+    "SuperCartolaManagerv5-production": "kuiper",
+    "bolaocopa2026": "kuiper",
+    "f1-pulse": "kuiper",
+    "vibegaminghub": "kuiper",
+    "AlgodaoAtelie": "kuiper",
+    "florianorun": "kuiper",
+    "lp-restauranteflutuante": "kuiper",
+    "lp-ellenpedrosa": "kuiper",
+    "lpjaraujoinfo": "kuiper",
+    "imersaobitrix24": "kuiper",
+    "GessoExpress": "kuiper",
+    "df-gesso": "kuiper",
+    # van-allen — institucional puro (Lab Sobral)
+    "centroculturalsbr": "van-allen",
+    "FinanceFlow": "van-allen",
+    "SBR-KPIs": "van-allen",
+    "SbrTask": "van-allen",
+    "serverIA": "van-allen",
+    "serverpfsense": "van-allen",
+    "SBR-ocomon-5.0": "van-allen",
+    "gestao-sbr": "van-allen",
+    "Projeto-scale": "van-allen",
+    "BI-sobral": "van-allen",
 }
 
 
@@ -185,7 +185,7 @@ def write_ficha(r, tok=None):
 def rebuild_index(repos):
     icon = {"ativo": "🟢", "recente": "🟡", "dormant": "🔴"}
     rows = []
-    belt_icon = {"compartilhado": "⚡🏛️", "pessoal": "🌙", "profissional": "🏛️"}
+    belt_icon = {"gould": "⚡🏛️", "kuiper": "🌙", "van-allen": "🏛️"}
     for r in sorted(repos, key=lambda x: x["name"].lower()):
         days = days_idle(r["pushed_at"])
         cluster = CLUSTERS.get(r["name"], "nao-classificado")
@@ -200,7 +200,7 @@ def rebuild_index(repos):
 > Atualizado: {today} | {len(repos)} planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
-⚡🏛️ compartilhado · 🌙 pessoal · 🏛️ profissional puro
+⚡🏛️ Gould · 🌙 Kuiper · 🏛️ Van Allen
 
 | planeta | cinturão | cluster | linguagem | issues |
 |---|---|---|---|---|
@@ -212,9 +212,9 @@ def rebuild_index(repos):
 
 | cinturão | símbolo | descrição |
 |---|---|---|
-| compartilhado | ⚡🏛️ | Infra, cortex e expertises profissionais que também sustentam projetos pessoais |
-| pessoal | 🌙 | Órbita livre — projetos do Sol enquanto indivíduo |
-| profissional | 🏛️ | Órbita institucional — Lab Sobral |
+| Gould     | ⚡🏛️ | Infra/cortex profissional que também sustenta projetos pessoais — habita dois planos |
+| Kuiper    | 🌙   | Órbita livre — projetos do Sol enquanto indivíduo, além do core institucional |
+| Van Allen | 🏛️   | Campo institucional puro — mais interno, núcleo Lab Sobral |
 
 ## Clusters
 

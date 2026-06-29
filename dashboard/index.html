@@ -173,6 +173,43 @@ body.panel-open #wrap{padding-right:0}
   #stats{display:none}
 }
 
+/* ── sidebar inventário ── */
+#sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;z-index:25;background:rgba(2,2,9,.96);border-right:1px solid rgba(100,120,200,.12);backdrop-filter:blur(18px);transform:translateX(-260px);transition:transform .32s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;overflow:hidden}
+#sidebar.open{transform:translateX(0)}
+#sb-toggle{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:26;background:rgba(4,4,14,.88);border:1px solid rgba(100,120,200,.18);border-left:none;border-radius:0 6px 6px 0;color:rgba(180,190,255,.45);font-size:13px;cursor:pointer;padding:10px 7px;line-height:1;transition:color .2s,background .2s;writing-mode:vertical-lr}
+#sb-toggle:hover{color:rgba(200,210,255,.85);background:rgba(20,20,50,.95)}
+#sidebar.open ~ #sb-toggle{left:260px}
+#sb-hdr{padding:18px 18px 14px;border-bottom:1px solid rgba(100,120,200,.1);flex-shrink:0}
+.sb-title{font-size:9px;letter-spacing:.45em;color:rgba(255,255,255,.18);text-transform:uppercase;display:block}
+.sb-subtitle{font-family:Georgia,serif;font-size:14px;color:rgba(180,195,255,.55);letter-spacing:.04em;margin-top:4px;display:block}
+.sb-ver{font-size:8px;color:rgba(255,200,80,.3);letter-spacing:.25em;margin-top:3px;display:block}
+#sb-content{flex:1;overflow-y:auto;padding:8px 0}
+#sb-content::-webkit-scrollbar{width:2px}
+#sb-content::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08)}
+.sb-group{border-bottom:1px solid rgba(255,255,255,.04)}
+.sb-group-hdr{display:flex;align-items:center;gap:8px;padding:10px 16px;cursor:pointer;user-select:none;transition:background .15s}
+.sb-group-hdr:hover{background:rgba(255,255,255,.04)}
+.sb-belt-icon{font-size:11px;flex-shrink:0}
+.sb-belt-name{font-size:9px;letter-spacing:.35em;color:rgba(255,255,255,.3);text-transform:uppercase;flex:1}
+.sb-count{font-size:9px;color:rgba(255,200,80,.3);letter-spacing:.1em}
+.sb-chevron{font-size:9px;color:rgba(255,255,255,.2);transition:transform .2s;margin-left:4px}
+.sb-group-hdr.collapsed .sb-chevron{transform:rotate(-90deg)}
+.sb-planets{padding:0 0 6px}
+.sb-planet{display:flex;align-items:center;gap:9px;padding:6px 20px 6px 28px;cursor:pointer;transition:background .12s}
+.sb-planet:hover{background:rgba(255,200,80,.05)}
+.sb-planet.active{background:rgba(255,200,80,.08)}
+.sb-planet.active .sb-pname{color:rgba(255,200,80,.85)}
+.sb-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.sb-dot.healthy,.sb-dot.healthy-v1,.sb-dot.healthy-v2,.sb-dot.healthy-v3,.sb-dot.healthy-v4,.sb-dot.healthy-v5{background:#00ff88}
+.sb-dot.warning,.sb-dot.warning-v1,.sb-dot.warning-v2,.sb-dot.warning-v3,.sb-dot.warning-v4,.sb-dot.warning-v5{background:#ffcc00}
+.sb-dot.alert,.sb-dot.alert-v1,.sb-dot.alert-v2,.sb-dot.alert-v3,.sb-dot.alert-v4,.sb-dot.alert-v5{background:#ff4466}
+.sb-dot.dormant{background:#3a3a60}
+.sb-pname{font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.sb-planet:hover .sb-pname{color:rgba(255,255,255,.7)}
+#sb-footer{padding:12px 16px;border-top:1px solid rgba(100,120,200,.08);flex-shrink:0}
+.sb-stat{font-size:8px;letter-spacing:.2em;color:rgba(255,255,255,.12);line-height:1.8}
+@media(max-width:600px){#sidebar{width:100%;transform:translateY(100%);top:auto;height:65vh;border-right:none;border-top:1px solid rgba(100,120,200,.12)}#sidebar.open{transform:translateY(0)}#sb-toggle{top:auto;bottom:0;left:50%;transform:translateX(-50%);writing-mode:horizontal-tb;border-radius:6px 6px 0 0;border-left:1px solid rgba(100,120,200,.18);border-bottom:none}#sidebar.open~#sb-toggle{left:50%;top:auto}}
+
 /* ── view toggle ── */
 #view-btns{display:flex;gap:5px;flex-shrink:0}
 .vb{background:none;border:1px solid rgba(100,120,200,.18);border-radius:4px;color:#3a4070;font-size:11px;cursor:pointer;padding:3px 9px;transition:all .15s;letter-spacing:.5px;font-family:inherit;white-space:nowrap}
@@ -273,6 +310,19 @@ body.panel-open #gal-legend{display:none!important}
 
 <canvas id="stars"></canvas>
 <canvas id="gal-canvas"></canvas>
+
+<div id="sidebar">
+  <div id="sb-hdr">
+    <span class="sb-title">theuniverse</span>
+    <span class="sb-subtitle">Observatório</span>
+    <span class="sb-ver">v1.2.1 · inventário completo</span>
+  </div>
+  <div id="sb-content"></div>
+  <div id="sb-footer">
+    <div class="sb-stat" id="sb-stat-line">carregando universo…</div>
+  </div>
+</div>
+<button id="sb-toggle" title="Inventário do Universo (I)">☰</button>
 
 <div id="hdr">
   <h1>the<em>universe</em> &middot; observatório <span id="hdr-version" style="font-size:.55em;opacity:.45;font-weight:400;letter-spacing:.08em"></span></h1>
@@ -3298,12 +3348,91 @@ async function loadPlanets(){
   }
 }
 
+// ═══════════════════════════════════════════════════════
+// SIDEBAR — inventário do universo por cinturão
+// ═══════════════════════════════════════════════════════
+const BELT_META = {
+  'gould':     {label:'Gould',     icon:'⚡🏛️', order:0, desc:'infra/cortex profissional'},
+  'van-allen': {label:'Van Allen', icon:'🏛️',   order:1, desc:'institucional puro'},
+  'kuiper':    {label:'Kuiper',    icon:'🌙',    order:2, desc:'órbita pessoal livre'},
+};
+
+let _sbOpen = false, _sbActiveName = null;
+
+function _buildSidebar(planets){
+  const content = document.getElementById('sb-content');
+  const groups = {};
+  for(const p of planets){
+    const b = p.belt || 'kuiper';
+    if(!groups[b]) groups[b] = [];
+    groups[b].push(p);
+  }
+  const sorted = Object.entries(groups)
+    .sort((a,b)=>(BELT_META[a[0]]?.order??99)-(BELT_META[b[0]]?.order??99));
+
+  content.innerHTML = sorted.map(([belt, ps])=>{
+    const m = BELT_META[belt] || {label:belt.toUpperCase(), icon:'❓', desc:''};
+    const items = ps.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`
+      <div class="sb-planet${_sbActiveName===p.name?' active':''}" data-name="${p.name}" onclick="_sbSelect('${p.name}')">
+        <span class="sb-dot ${p.health}"></span>
+        <span class="sb-pname">${p.name}</span>
+      </div>`).join('');
+    return `
+      <div class="sb-group">
+        <div class="sb-group-hdr" onclick="_sbToggleGroup(this)" title="${m.desc}">
+          <span class="sb-belt-icon">${m.icon}</span>
+          <span class="sb-belt-name">${m.label}</span>
+          <span class="sb-count">${ps.length}</span>
+          <span class="sb-chevron">▾</span>
+        </div>
+        <div class="sb-planets">${items}</div>
+      </div>`;
+  }).join('');
+
+  const total = planets.length;
+  const alert = planets.filter(p=>p.health==='alert').length;
+  const warn  = planets.filter(p=>p.health==='warning').length;
+  document.getElementById('sb-stat-line').innerHTML =
+    `${total} planetas · <span style="color:#00ff88">${total-alert-warn} saudáveis</span>` +
+    (warn  ? ` · <span style="color:#ffcc00">${warn} atenção</span>` : '') +
+    (alert ? ` · <span style="color:#ff4466">${alert} alerta</span>` : '');
+}
+
+function _sbToggleGroup(hdr){
+  const body = hdr.nextElementSibling;
+  const collapsed = hdr.classList.toggle('collapsed');
+  body.style.display = collapsed ? 'none' : '';
+}
+
+function _sbSelect(name){
+  _sbActiveName = name;
+  document.querySelectorAll('.sb-planet').forEach(el=>
+    el.classList.toggle('active', el.dataset.name===name));
+  const p = allPlanets.find(x=>x.name===name);
+  if(p) openPanel(p, null);
+}
+
+(function _initSidebar(){
+  const toggle = document.getElementById('sb-toggle');
+  const sidebar = document.getElementById('sidebar');
+  toggle.addEventListener('click', ()=>{
+    _sbOpen = !_sbOpen;
+    sidebar.classList.toggle('open', _sbOpen);
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key==='i'&&!e.ctrlKey&&!e.metaKey&&document.activeElement.tagName!=='INPUT'){
+      _sbOpen = !_sbOpen;
+      sidebar.classList.toggle('open', _sbOpen);
+    }
+  });
+})();
+
 async function main(){
   const _vEl=document.getElementById('hdr-version');if(_vEl)_vEl.textContent='v'+_VERSION;
   cometCd=200+Math.floor(Math.random()*300);
   meteorCd=80+Math.floor(Math.random()*120);
   const planets=await loadPlanets();
-  if(planets.length){allPlanets=planets;updateStats(planets);}
+  if(planets.length){allPlanets=planets;updateStats(planets);_buildSidebar(planets);}
   switchView('galactic');
   loop();
 
@@ -3314,7 +3443,7 @@ async function main(){
   setInterval(async()=>{
     const fresh=await loadPlanets();
     if(fresh.length){
-      allPlanets=fresh; updateStats(fresh);
+      allPlanets=fresh; updateStats(fresh); _buildSidebar(fresh);
       if(currentView==='orbital') buildOrbit(fresh); else buildGalactic(fresh);
     }
   },5*60*1000);
