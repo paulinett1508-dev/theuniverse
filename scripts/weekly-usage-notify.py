@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Notificador de uso semanal do Claude Code.
-
-Roda diariamente (Task Scheduler). Envia alerta no Telegram quando o uso
-do dia corrente atingir >= DAILY_ALERT_PCT do limite semanal configurado.
-"""
+"""Notificador de uso do Claude Code — digest a cada 2h + alerta de threshold."""
 import json
 import subprocess
 import urllib.request
@@ -43,7 +39,6 @@ def send_telegram(text, token, chat_id, thread_id=None):
 
 
 def week_start_str():
-    # janela deslizante de 7 dias — igual ao plano Max
     return (datetime.now() - timedelta(days=7)).strftime("%Y%m%d")
 
 
@@ -63,8 +58,7 @@ def get_today_tokens():
         capture_output=True, text=True, timeout=30
     )
     data = json.loads(result.stdout)
-    days = data.get("daily", [])
-    return sum(d.get("totalTokens", 0) for d in days)
+    return sum(d.get("totalTokens", 0) for d in data.get("daily", []))
 
 
 def load_state():
@@ -78,18 +72,30 @@ def save_state(state):
     STATE_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
 
+def fmt(n):
+    if n >= 1_000_000_000:
+        return f"{n/1_000_000_000:.1f}B".replace(".", ",")
+    if n >= 1_000_000:
+        return f"{n/1_000_000:.1f}M".replace(".", ",")
+    return f"{n:,}".replace(",", ".")
+
+
+def build_bar(pct, length=10):
+    filled = int(round(pct / 100 * length))
+    return "█" * min(filled, length) + "░" * max(length - filled, 0)
+
+
 def main():
     cfg = json.loads(LIMIT_FILE.read_text(encoding="utf-8"))
     limit = int(cfg["weeklyTokenLimit"])
     threshold = float(cfg.get("dailyAlertThreshold", 0.10))
 
-    today = datetime.now().strftime("%Y-%m-%d")
-    state = load_state()
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
+    hour_label = now.strftime("%H:%M")
 
-    # Não notifica duas vezes no mesmo dia
-    if state.get("lastAlertDate") == today:
-        print(f"[weekly-notify] alerta já enviado hoje ({today}), pulando.")
-        return
+    state = load_state()
+    threshold_flagged_today = state.get("thresholdFlaggedDate") == today
 
     weekly_tokens = get_weekly_tokens()
     today_tokens  = get_today_tokens()
@@ -97,48 +103,44 @@ def main():
     week_pct  = round(weekly_tokens / limit * 100, 1)
     today_pct = round(today_tokens  / limit * 100, 1)
 
-    print(f"[weekly-notify] semana: {weekly_tokens:,} tokens ({week_pct}%)")
-    print(f"[weekly-notify] hoje:   {today_tokens:,} tokens ({today_pct}%)")
+    print(f"[weekly-notify] {hour_label} · semana: {fmt(weekly_tokens)} ({week_pct}%) · hoje: {fmt(today_tokens)} ({today_pct}%)")
 
-    if today_pct >= threshold * 100:
-        vault = read_vault()
-        token = vault["TELEGRAM_TOKEN"]
-        chat_id = vault["SOL_CHAT_ID"]
+    vault = read_vault()
+    token = vault["TELEGRAM_TOKEN"]
+    chat_id = vault["SOL_CHAT_ID"]
 
-        bar_len = 10
-        filled  = int(round(week_pct / 100 * bar_len))
-        bar     = "█" * min(filled, bar_len) + "░" * max(bar_len - filled, 0)
+    alert_pct = int(threshold * 100)
+    threshold_crossed = today_pct >= threshold * 100
 
-        alert_pct = int(threshold * 100)
+    # Alerta de threshold — 1x por dia quando cruzar a meta
+    if threshold_crossed and not threshold_flagged_today:
         week_before = round(week_pct - today_pct, 1)
-
-        def fmt(n):
-            if n >= 1_000_000_000:
-                return f"{n/1_000_000_000:.1f}B".replace(".", ",")
-            if n >= 1_000_000:
-                return f"{n/1_000_000:.1f}M".replace(".", ",")
-            return f"{n:,}".replace(",", ".")
-
+        bar = build_bar(week_pct)
         msg = (
-            f"⚡ <b>Claude Code — Meta Diária Atingida</b>\n\n"
-            f"🔔 Você consumiu <b>{today_pct}%</b> da cota semanal hoje"
+            f"🔴 <b>Claude Code — Meta Diária Atingida</b>\n\n"
+            f"⚠️ Você consumiu <b>{today_pct}%</b> da cota semanal hoje"
             f" — meta de <b>{alert_pct}%</b> atingida.\n\n"
-            f"Cota semanal: <code>{bar}</code> <b>{week_pct}%</b> usada\n"
+            f"Semana: <code>{bar}</code> <b>{week_pct}%</b> usada\n"
             f"<i>(iniciou hoje em {week_before}% · +{today_pct}% no dia)</i>\n\n"
-            f"Hoje: <b>{fmt(today_tokens)}</b> tokens\n"
-            f"Semana (7 dias): <b>{fmt(weekly_tokens)}</b> tokens\n\n"
-            f"<i>Limite semanal: {fmt(limit)} · Reseta sex 08h BRT</i>"
+            f"Hoje: <b>{fmt(today_tokens)}</b> · Semana: <b>{fmt(weekly_tokens)}</b>\n"
+            f"<i>Limite: {fmt(limit)} · Reseta sex 08h BRT</i>"
         )
-
         send_telegram(msg, token, chat_id, thread_id=TOPIC_ALERTAS)
-        print(f"[weekly-notify] alerta enviado — {today_pct}% no dia")
-
-        state["lastAlertDate"] = today
-        state["lastAlertWeekPct"] = week_pct
-        state["lastAlertTodayPct"] = today_pct
+        print(f"[weekly-notify] alerta META enviado")
+        state["thresholdFlaggedDate"] = today
         save_state(state)
-    else:
-        print(f"[weekly-notify] abaixo do limiar ({threshold*100}%), sem alerta.")
+
+    # Digest a cada execução (sempre)
+    bar = build_bar(week_pct)
+    threshold_tag = f" · ⚠️ meta {alert_pct}% atingida" if threshold_crossed else ""
+    digest = (
+        f"⚡ <b>Claude Code</b> · {hour_label}\n\n"
+        f"Semana: <code>{bar}</code> <b>{week_pct}%</b>{threshold_tag}\n"
+        f"Hoje: <b>{today_pct}%</b> ({fmt(today_tokens)})\n\n"
+        f"<i>{fmt(weekly_tokens)} / {fmt(limit)} · Reseta sex 08h BRT</i>"
+    )
+    send_telegram(digest, token, chat_id, thread_id=TOPIC_ALERTAS)
+    print(f"[weekly-notify] digest enviado")
 
 
 if __name__ == "__main__":
