@@ -186,27 +186,54 @@ def format_event(event):
 
 def build_heartbeat_report(scanned_repos, detected_events):
     import datetime
-    ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M") + " UTC"
-    n_repos = len(scanned_repos)
+    from collections import Counter
+    brt = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
+    ts = brt.strftime("%d/%m · %H:%M BRT")
+    n = len(scanned_repos)
     n_ev = len(detected_events)
-    lines = [
-        "<b>🤖 Sentinel Heartbeat</b>",
-        f"🕐 {ts}",
-        "",
-        f"📦 {n_repos} repos · {n_ev} evento{'s' if n_ev != 1 else ''}",
+
+    header = f"🧠 <b>Sistema Nervoso · theuniverse</b>\n{ts} · {n} planetas"
+
+    if not n_ev:
+        return f"{header}\n\n✅ universo quieto"
+
+    _LABEL = {
+        "ci_falhou":      "CI-FALHOU",
+        "issue_nova":     "ISSUE",
+        "novo_planeta":   "PLANETA+",
+        "planeta_sumido": "PLANETA-",
+        "secret_exposto": "SECRET",
+    }
+    _EV_EMOJI = {
+        "ci_falhou":      "🔴",
+        "issue_nova":     "🚨",
+        "novo_planeta":   "🆕",
+        "planeta_sumido": "💥",
+        "secret_exposto": "🔑",
+    }
+
+    # Resumo por tipo
+    counts = Counter(ev["type"] for ev in detected_events)
+    summary_parts = [
+        f"{_EV_EMOJI.get(k,'·')} {v}x {_LABEL.get(k,k)}"
+        for k, v in counts.items()
     ]
-    if detected_events:
-        lines.append("")
-        for ev in detected_events:
-            emoji = _EMOJI.get(ev["type"], "•")
-            detail = f" · {ev['detail']}" if ev.get("detail") else ""
-            lines.append(f"{emoji} <b>{ev['repo']}</b> · {ev['type']}{detail}")
-        lines.append("")
-        lines.append("⚠️ Ciclo concluído com eventos")
-    else:
-        lines.append("")
-        lines.append("✅ Tudo limpo")
-    return "\n".join(lines)
+    summary = "  ".join(summary_parts)
+
+    # Tabela de eventos
+    rows = [f"{'TIPO':<12} {'REPO':<26} DETALHE", "─" * 52]
+    for ev in detected_events:
+        label = _LABEL.get(ev["type"], ev["type"])[:12]
+        repo  = ev["repo"][:26]
+        detail = (ev.get("detail") or "")[:18]
+        rows.append(f"{label:<12} {repo:<26} {detail}")
+
+    table = "\n".join(rows)
+    return (
+        f"{header} · {n_ev} evento{'s' if n_ev != 1 else ''}\n\n"
+        f"{summary}\n\n"
+        f"<pre>{table}</pre>"
+    )
 
 
 def build_universe_snapshot(state: dict, detected_events: list) -> bytes:
