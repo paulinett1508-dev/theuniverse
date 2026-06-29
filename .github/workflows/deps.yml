@@ -22,7 +22,7 @@ jobs:
       - name: Run Sentinel · Deps
         env:
           GITHUB_TOKEN: ${{ secrets.UNIVERSE_PAT }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN_DEPS }}
           SOL_CHAT_ID: ${{ secrets.SOL_CHAT_ID }}
         run: python scripts/deps.py
 

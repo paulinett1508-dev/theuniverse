@@ -27,6 +27,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.UNIVERSE_PAT }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_TOKEN_ARTOO: ${{ secrets.TELEGRAM_TOKEN_ARTOO }}
           SOL_CHAT_ID: ${{ secrets.SOL_CHAT_ID }}
         run: python scripts/sentinel.py
 

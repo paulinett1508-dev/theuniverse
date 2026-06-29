@@ -63,7 +63,7 @@ def _save_state(state):
 
 def _tg_send(text) -> int | None:
     from sentinel import TOPICS
-    tg_token = os.environ["TELEGRAM_TOKEN"]
+    tg_token = os.environ.get("TELEGRAM_TOKEN_ARTOO") or os.environ["TELEGRAM_TOKEN"]
     chat_id = os.environ["SOL_CHAT_ID"]
     payload = urllib.parse.urlencode({
         "chat_id": chat_id, "text": text,
