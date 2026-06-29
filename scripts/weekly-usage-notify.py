@@ -109,13 +109,25 @@ def main():
         filled  = int(round(week_pct / 100 * bar_len))
         bar     = "█" * min(filled, bar_len) + "░" * max(bar_len - filled, 0)
 
+        alert_pct = int(threshold * 100)
+        week_before = round(week_pct - today_pct, 1)
+
+        def fmt(n):
+            if n >= 1_000_000_000:
+                return f"{n/1_000_000_000:.1f}B".replace(".", ",")
+            if n >= 1_000_000:
+                return f"{n/1_000_000:.1f}M".replace(".", ",")
+            return f"{n:,}".replace(",", ".")
+
         msg = (
-            f"⚡ <b>Claude Code — Uso Semanal</b>\n\n"
-            f"Hoje você consumiu <b>{today_pct}%</b> do limite semanal.\n\n"
-            f"Semana: <code>{bar}</code> {week_pct}%\n"
-            f"Hoje: <b>{today_tokens:,}</b> tokens\n"
-            f"Semana: <b>{weekly_tokens:,}</b> tokens\n\n"
-            f"<i>Limite semanal: {limit:,} tokens</i>"
+            f"⚡ <b>Claude Code — Meta Diária Atingida</b>\n\n"
+            f"🔔 Você consumiu <b>{today_pct}%</b> da cota semanal hoje"
+            f" — meta de <b>{alert_pct}%</b> atingida.\n\n"
+            f"Cota semanal: <code>{bar}</code> <b>{week_pct}%</b> usada\n"
+            f"<i>(iniciou hoje em {week_before}% · +{today_pct}% no dia)</i>\n\n"
+            f"Hoje: <b>{fmt(today_tokens)}</b> tokens\n"
+            f"Semana (7 dias): <b>{fmt(weekly_tokens)}</b> tokens\n\n"
+            f"<i>Limite semanal: {fmt(limit)} · Reseta sex 08h BRT</i>"
         )
 
         send_telegram(msg, token, chat_id, thread_id=TOPIC_ALERTAS)
