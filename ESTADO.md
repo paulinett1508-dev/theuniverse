@@ -21,6 +21,7 @@
 | Spec Obi-Wan (subsistema A) | `docs/ecossistema/A-obi-wan-spec.md` |
 | Spec Webhook Notifier (subsistema B2) | `docs/ecossistema/B2-webhook-notifier-spec.md` |
 | Sentinel · Escudos (C1) | `scripts/c1-update-github-ips.py` |
+| Bots do Universo (10 bots) | `bots/` + `bots/_index.md` |
 | Manifestos das constelações | `constellations/*.md` |
 | Fichas dos planetas | `planets/*.md` + `planets/_index.md` |
 | Diário de bordo | `CHANGELOG.md` |

@@ -30,4 +30,12 @@ files: .agnostic-core, .gitignore, .gitmodules, CLAUDE.md, MATRIX-CAPACIDADES.md
 
 ## Notas do guardião
 
-<!-- observações, alertas, dependências cruzadas -->
+Repo central dos bots do universo. Cast completo:
+
+- [[bots/obi-wan]] — governante conversacional (inbound)
+- [[bots/artoo]] — cão de guarda / mensageiro
+- [[bots/sentinelas/nervoso]] · [[bots/sentinelas/pulso]] · [[bots/sentinelas/deps]]
+- [[bots/sentinelas/deploy]] · [[bots/sentinelas/farejador]] · [[bots/sentinelas/scout]]
+- [[bots/sentinelas/escudos]] · [[bots/sentinelas/usage]]
+
+Índice completo: [[bots/_index]]

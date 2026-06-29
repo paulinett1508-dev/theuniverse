@@ -23,7 +23,7 @@ Exemplos-alvo dTheGod:
 | Cérebro | **Groq** Llama 70B (`llama-3.3-70b-versatile`) — free tier, proven no SHELDON |
 | RAG | **BM25** (`rank-bm25`, puro Python) sobre os markdowns do theuniverse |
 | Contexto ao vivo | `gh.py` (já existe) + `state/sentinel-state.json` (já existe) injetados no prompt |
-| Bot | **mesmo `guardiao_universo_bot` do B** — B só faz `sendMessage` (não faz polling), então sem conflito de getUpdates. Um bot, duas bocas |
+| Bot | [[bots/obi-wan\|`guardiao_universo_bot`]] — inbound only (sentinelas têm bots próprios, sem conflito de polling) |
 | Acesso | whitelist de 1 `chat_id` (TheGod = `1030157568`). Resto ignorado em silêncio |
 | Casa do código | **`theuniverse/obi-wan/`** (Guardião escreve — consistente com o B) |
 | Runtime | serviço **systemd long-polling na Polaris** (Actions não hospeda processo 24/7). Deploy via SSH |
