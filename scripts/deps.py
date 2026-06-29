@@ -119,7 +119,7 @@ def _scan_repo(full_name, repo_name, tok):
             continue
         seen_pkg.add(key_pkg)
         for vuln in _osv_query(pkg):
-            cve = next((a["id"] for a in vuln.get("aliases", []) if a["id"].startswith("CVE")),
+            cve = next((a for a in vuln.get("aliases", []) if a.startswith("CVE")),
                        vuln["id"])
             severity = _severity(vuln)
             key = f"{repo_name}:{pkg['name']}:{cve}"
