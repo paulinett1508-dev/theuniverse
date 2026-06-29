@@ -9,6 +9,18 @@ Registro de eventos cósmicos: nascimentos, explosões, fusões e migrações de
 
 
 
+
+## 2026-06-29 — Censo automático
+
+### 💥 Planetas sumidos
+- **BI-sobral** — não consta mais no GitHub (ficha arquivada)
+- **Projeto-scale** — não consta mais no GitHub (ficha arquivada)
+- **SBR-KPIs** — não consta mais no GitHub (ficha arquivada)
+- **SBR-ocomon-5.0** — não consta mais no GitHub (ficha arquivada)
+- **SbrTask** — não consta mais no GitHub (ficha arquivada)
+- **gestao-sbr** — não consta mais no GitHub (ficha arquivada)
+- **serverIA** — não consta mais no GitHub (ficha arquivada)
+- **serverpfsense** — não consta mais no GitHub (ficha arquivada)
 ## 2026-06-28 — Sessão: Lab-Sobral-Dev · Cinturões · Fix Telegram
 
 ### 🌌 Lab-Sobral-Dev incorporado como Amilcar Prime
