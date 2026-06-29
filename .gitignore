@@ -21,3 +21,10 @@ dashboard-*.jpeg
 galactic-*.jpeg
 orbital-*.jpeg
 image.png
+
+# Obsidian — runtime (não rastrear)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/plugins/
+.obsidian/cache
+# rastreados: .obsidian/app.json, .obsidian/community-plugins.json
