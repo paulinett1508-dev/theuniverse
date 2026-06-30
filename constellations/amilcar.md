@@ -8,20 +8,18 @@ O cortex do conglomerado de inteligência do Laboratório Sobral. Não é um sis
 
 ## Estrelas — Amilcar Prime (`Lab-Sobral-Dev`)
 
-Face institucional do Lab Sobral no GitHub. Repos de operação, dados e infraestrutura física.
+Face institucional do Lab Sobral no GitHub. Repos de operação e dados.
 
 | corpo | repo | tipo | papel |
 |---|---|---|---|
 | **SBR-KPIs** | `SBR-KPIs` | ⭐ estrela | Indicadores de performance do Lab |
 | **SbrTask** | `SbrTask` | ⭐ estrela | Gestão de tarefas — ⚠️ defasado (ver nota abaixo) |
-| **serverIA** | `serverIA` 🔒 | 🪐 planeta | Servidor de IA do Lab |
-| **serverpfsense** | `serverpfsense` 🔒 | 🛰️ satélite | Infra de rede/firewall |
-| **SBR-ocomon-5.0** | `SBR-ocomon-5.0` | 🪐 planeta | Sistema de helpdesk Ocomon |
-| **gestao-sbr** | `gestao-sbr` 🔒 | 🪐 planeta | Gestão interna do Lab |
 | **Projeto-scale** | `Projeto-scale` | 🪐 planeta | Escala/expansão — 19 issues abertas |
 | **BI-sobral** | `BI-sobral` | 🪐 planeta | Business Intelligence do Lab |
 
-> **⚠️ SbrTask — divergência detectada:** o desenvolvimento migrou para `paulinett1508-dev`. Investigar sync e consolidar. Ver issue a abrir.
+> **⚠️ SbrTask — divergência detectada:** o desenvolvimento migrou para `paulinett1508-dev`. Investigar sync e consolidar. Ver issue #17.
+
+> **🗑️ Extintos (removidos do GitHub):** `serverIA`, `serverpfsense`, `SBR-ocomon-5.0`, `gestao-sbr`.
 
 ---
 

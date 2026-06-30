@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Checkpoint de uso do Claude Code — 3x/dia (12h, 18h, 22h BRT) + alerta de meta semanal."""
 import json
-import subprocess
 import urllib.request
 import urllib.parse
 from datetime import datetime, timezone, timedelta
@@ -14,7 +13,7 @@ STATE_FILE = CLAUDE_DIR / "state" / "weekly-usage-notify-state.json"
 _cfg_raw = json.loads(LIMIT_FILE.read_text(encoding="utf-8"))
 VAULT = Path(_cfg_raw.get("vaultPath", str(Path.home() / "theuniverse" / ".vault")))
 
-CCUSAGE = Path.home() / "AppData" / "Roaming" / "npm" / "node_modules" / "ccusage" / "dist" / "cli.js"
+RL_FILE = CLAUDE_DIR / "state" / "rate-limits.json"
 
 BRT = timezone(timedelta(hours=-3))
 
@@ -38,25 +37,11 @@ def send_telegram(text, token, chat_id):
         return json.loads(r.read())
 
 
-def get_blocks():
-    result = subprocess.run(
-        ["node.exe", str(CCUSAGE), "blocks", "--json"],
-        capture_output=True, text=True, timeout=30
-    )
-    return json.loads(result.stdout).get("blocks", [])
-
-
-def get_weekly_tokens(blocks):
-    """Soma todos os blocos dos últimos 7 dias (todos os modelos)."""
-    cutoff = datetime.now(timezone.utc) - timedelta(days=7)
-    total = 0
-    for b in blocks:
-        if b.get("isGap"):
-            continue
-        start = datetime.fromisoformat(b["startTime"].replace("Z", "+00:00"))
-        if start >= cutoff:
-            total += b.get("totalTokens", 0)
-    return total
+def get_rate_limits() -> dict:
+    """Lê rate_limits gravados pelo statusline.sh a cada interação com Claude Code."""
+    if not RL_FILE.exists():
+        return {}
+    return json.loads(RL_FILE.read_text(encoding="utf-8"))
 
 
 def get_active_block(blocks):
@@ -92,8 +77,8 @@ def save_state(state):
 
 def main():
     cfg = json.loads(LIMIT_FILE.read_text(encoding="utf-8"))
-    weekly_limit = int(cfg["weeklyTokenLimit"])
     daily_threshold = float(cfg.get("dailyAlertThreshold", 0.10))
+    threshold_pct = int(daily_threshold * 100)
 
     now_brt = datetime.now(BRT)
     today = now_brt.strftime("%Y-%m-%d")
@@ -102,40 +87,37 @@ def main():
     state = load_state()
     alert_flagged_today = state.get("alertFlaggedDate") == today
 
-    blocks = get_blocks()
-    weekly_tokens = get_weekly_tokens(blocks)
-    active = get_active_block(blocks)
+    rl = get_rate_limits()
+    seven_day = rl.get("seven_day") or {}
+    five_hour = rl.get("five_hour") or {}
+    updated_at = rl.get("updated_at", "?")
 
-    week_pct = round(weekly_tokens / weekly_limit * 100, 1)
-    threshold_pct = int(daily_threshold * 100)
+    week_pct = round(float(seven_day.get("used_percentage", 0)), 1)
+    day_pct = round(float(five_hour.get("used_percentage", 0)), 1)
 
-    print(f"[usage] {hour_label} BRT · semana: {fmt(weekly_tokens)} ({week_pct}%)")
+    if not rl:
+        print("[usage] AVISO: rate-limits.json ausente — abra uma sessão Claude Code primeiro")
+        return
+
+    print(f"[usage] {hour_label} BRT · semana: {week_pct}% · 5h: {day_pct}%")
 
     vault = read_vault()
     token = vault["TELEGRAM_TOKEN"]
     chat_id = vault["SOL_CHAT_ID"]
 
-    # Alerta de meta semanal — calculado sobre o dia de hoje nos blocos
-    today_tokens = sum(
-        b.get("totalTokens", 0) for b in blocks
-        if not b.get("isGap") and
-        datetime.fromisoformat(b["startTime"].replace("Z", "+00:00"))
-        .astimezone(BRT).strftime("%Y-%m-%d") == today
-    )
-    today_pct = round(today_tokens / weekly_limit * 100, 1)
-    threshold_crossed = today_pct >= threshold_pct
+    # Alerta de meta — today = janela de 5h atual como proxy do dia
+    threshold_crossed = day_pct >= threshold_pct
 
     if threshold_crossed and not alert_flagged_today:
         bar = build_bar(week_pct)
         msg = (
             f"🔴 <b>Claude Code — Meta Diária Atingida</b>\n\n"
-            f"Hoje: <b>{today_pct}%</b> da cota semanal · meta: <b>{threshold_pct}%</b>\n"
+            f"Janela 5h: <b>{day_pct}%</b> · meta: <b>{threshold_pct}%</b>\n"
             f"Semana: <code>{bar}</code> <b>{week_pct}%</b>\n\n"
-            f"Hoje: <b>{fmt(today_tokens)}</b> · Semana: <b>{fmt(weekly_tokens)}</b>\n"
-            f"<i>Limite: {fmt(weekly_limit)} · Reseta sex 08h BRT</i>"
+            f"<i>Reseta sex 08h BRT</i>"
         )
         send_telegram(msg, token, chat_id)
-        print(f"[usage] alerta META enviado")
+        print("[usage] alerta META enviado")
         state["alertFlaggedDate"] = today
         save_state(state)
 
@@ -143,27 +125,17 @@ def main():
     bar = build_bar(week_pct)
     alert_tag = f" · ⚠️ meta {threshold_pct}%" if threshold_crossed else ""
 
-    session_line = ""
-    if active:
-        session_tokens = active.get("totalTokens", 0)
-        cost = active.get("costUSD", 0)
-        proj = active.get("projection", {})
-        proj_cost = proj.get("totalCost", 0) if proj else 0
-        end_brt = datetime.fromisoformat(
-            active["endTime"].replace("Z", "+00:00")
-        ).astimezone(BRT).strftime("%Hh")
-        models = active.get("models", [])
-        model_tag = "opus+" if any("opus" in m for m in models) else "sonnet"
-        proj_tag = f" → proj ${proj_cost:.2f}" if proj_cost > cost else ""
-        session_line = (
-            f"\n   └ sessão até {end_brt}: {fmt(session_tokens)} · ${cost:.2f} [{model_tag}]{proj_tag}"
-        )
+    resets_at = seven_day.get("resets_at")
+    resets_str = ""
+    if resets_at:
+        resets_dt = datetime.fromtimestamp(resets_at, tz=BRT)
+        resets_str = f" · reseta {resets_dt.strftime('%d/%m %Hh')} BRT"
 
     checkpoint = (
         f"⚡ <b>Claude Code</b> · {hour_label}{alert_tag}\n\n"
-        f"   └ semana: <code>{bar}</code> <b>{week_pct}%</b>"
-        f"{session_line}\n\n"
-        f"<i>{fmt(weekly_tokens)} / {fmt(weekly_limit)} · Reseta sex 08h BRT</i>"
+        f"   └ semana: <code>{bar}</code> <b>{week_pct}%</b>\n"
+        f"   └ janela 5h: <b>{day_pct}%</b>\n\n"
+        f"<i>Fonte: Claude Code{resets_str}</i>"
     )
     send_telegram(checkpoint, token, chat_id)
     print(f"[usage] checkpoint {hour_label} enviado")
