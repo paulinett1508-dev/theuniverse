@@ -304,6 +304,32 @@ body.panel-open #gal-legend{display:none!important}
 #obiwan-body button{background:rgba(100,150,255,.12);border:1px solid rgba(100,150,255,.3);border-radius:3px;color:rgba(150,180,255,.8);font-family:'Courier New',monospace;font-size:9px;letter-spacing:.15em;padding:5px 8px;cursor:pointer}
 #obiwan-body button:hover{background:rgba(100,150,255,.22)}
 #travel-log{font-size:8px;color:rgba(255,255,255,.25);max-height:60px;overflow-y:auto;letter-spacing:.1em;line-height:1.6}
+
+/* ── satellite fleet HUD ── */
+#fleet-hud{background:rgba(4,4,12,.88);border:1px solid rgba(100,150,255,.15);border-radius:6px;overflow:hidden;min-width:210px;pointer-events:auto}
+#fleet-header{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;user-select:none}
+#fleet-header:hover{background:rgba(255,255,255,.04)}
+#fleet-title{font-size:9px;letter-spacing:.25em;color:rgba(255,255,255,.4);text-transform:uppercase;flex:1}
+#fleet-status-mini{font-size:8px;color:rgba(120,180,255,.5);letter-spacing:.1em}
+#fleet-chevron{font-size:10px;color:rgba(255,255,255,.25);transition:transform .2s}
+#fleet-body{padding:6px 0 8px}
+#fleet-canvas{display:block;margin:0 auto 4px}
+#fleet-list{padding:0 12px;display:flex;flex-direction:column;gap:2px}
+.fl-row{display:flex;align-items:center;gap:7px;padding:2px 0}
+.fl-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;transition:background .3s,box-shadow .3s}
+.fl-dot.idle{background:#2a3260;box-shadow:none}
+.fl-dot.active{background:#00aaff;box-shadow:0 0 5px #00aaff,0 0 10px rgba(0,170,255,.4)}
+.fl-dot.launching{background:#ffd700;box-shadow:0 0 6px #ffd700,0 0 14px rgba(255,210,0,.6);animation:fl-launch-blink .45s ease-in-out infinite}
+.fl-dot.alert{background:#ff4466;box-shadow:0 0 6px #ff4466;animation:fl-launch-blink .7s ease-in-out infinite}
+@keyframes fl-launch-blink{0%,100%{transform:scale(1)}50%{transform:scale(1.8)}}
+.fl-name{font-size:8px;letter-spacing:.14em;color:rgba(255,255,255,.28);flex:1;transition:color .3s}
+.fl-status{font-size:7px;letter-spacing:.08em;color:rgba(255,255,255,.14)}
+.fl-row.artoo .fl-name{color:rgba(255,220,80,.45)}
+.fl-row.artoo .fl-dot.launching{background:#ffd700;animation:fl-artoo-launch .3s ease-in-out infinite}
+@keyframes fl-artoo-launch{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(2.2);filter:brightness(2.5)}}
+.fl-row.obi .fl-dot{background:#4080ff;box-shadow:0 0 6px rgba(80,130,255,.6)}
+.fl-row.obi .fl-name{color:rgba(130,170,255,.6)}
+.fl-sep{height:1px;background:rgba(100,130,200,.08);margin:3px 0}
 </style>
 </head>
 <body>
@@ -2745,7 +2771,7 @@ function _galInitScene(planets){
     });
     // mostrar HUD
     const hud=document.getElementById('obiwan-hud');
-    if(hud)hud.style.display='block';
+    if(hud){hud.style.display='flex';_initFleetHud();}
   })();
 
   // ── comet ──
@@ -3056,7 +3082,7 @@ function switchView(v){
     document.getElementById('stars').style.display='none';
     if(allPlanets.length)buildGalactic(allPlanets);
     // HUD só fica visível se o gal já foi init (select já foi populado)
-    if(obiHud&&obiHud.querySelector('#msg-target')?.children.length>0)obiHud.style.display='block';
+    if(obiHud&&obiHud.querySelector('#msg-target')?.children.length>0){obiHud.style.display='flex';_initFleetHud();}
   } else {
     gc.style.display='none';gc.style.pointerEvents='none';
     if(gui)gui.classList.remove('visible');
@@ -3458,12 +3484,165 @@ window.addEventListener('resize',()=>{
   initStars();
   if(currentView==='orbital') resizeOrbit(); else resizeGalactic();
 });
+
+// ═══════════════════════════════════════════════════════
+// 🛸 SATELLITE FLEET HUD — Obi-Wan + 9 satélites em órbita
+// ═══════════════════════════════════════════════════════
+const _FLEET_BOTS=[
+  {id:'artoo',     name:'artoo',     col:'#ffd700', orbit:0, phase:0,    speed:.0009},
+  {id:'pulso',     name:'pulso',     col:'#ff6680', orbit:1, phase:0,    speed:.00045},
+  {id:'deps',      name:'deps',      col:'#44ccff', orbit:1, phase:45,   speed:.0004},
+  {id:'deploy',    name:'deploy',    col:'#00ff88', orbit:1, phase:90,   speed:.00038},
+  {id:'farejador', name:'farejador', col:'#ff8844', orbit:1, phase:135,  speed:.00042},
+  {id:'nervoso',   name:'nervoso',   col:'#aa88ff', orbit:1, phase:180,  speed:.00035},
+  {id:'escudos',   name:'escudos',   col:'#88ccff', orbit:1, phase:225,  speed:.0004},
+  {id:'scout',     name:'scout',     col:'#ffcc44', orbit:1, phase:270,  speed:.00036},
+  {id:'usage',     name:'usage',     col:'#ff44aa', orbit:1, phase:315,  speed:.00044},
+];
+const _ORBIT_R=[42,70];
+const _FLEET_ST={};  // id → 'idle'|'active'|'launching'|'alert'
+let _fleetOpen=false, _fleetRaf=null, _fleetLaunches={};
+
+_FLEET_BOTS.forEach(b=>{_FLEET_ST[b.id]='idle';});
+
+function _botAngle(bot,t){
+  return (bot.phase*Math.PI/180)+(t*bot.speed);
+}
+
+function _drawFleetCanvas(){
+  const cv=document.getElementById('fleet-canvas');
+  if(!cv)return;
+  const c=cv.getContext('2d');
+  const W=cv.width,H=cv.height,cx=W/2,cy=H/2+4;
+  const t=Date.now();
+  c.clearRect(0,0,W,H);
+
+  // orbit rings
+  [_ORBIT_R[0],_ORBIT_R[1]].forEach((r,i)=>{
+    c.beginPath();c.setLineDash([2,5]);
+    c.arc(cx,cy,r,0,Math.PI*2);
+    c.strokeStyle=`rgba(80,110,200,${i?0.13:0.22})`;
+    c.lineWidth=.5;c.stroke();c.setLineDash([]);
+  });
+
+  // Obi-Wan: hexágono girando + glow
+  const ha=t*.0008;
+  c.save();c.translate(cx,cy);c.rotate(ha);
+  const grd=c.createRadialGradient(0,0,2,0,0,18);
+  grd.addColorStop(0,'rgba(80,130,255,.55)');grd.addColorStop(1,'rgba(60,90,255,0)');
+  c.fillStyle=grd;c.beginPath();c.arc(0,0,18,0,Math.PI*2);c.fill();
+  c.beginPath();
+  for(let i=0;i<6;i++){const a=i/6*Math.PI*2;const x=Math.cos(a)*9,y=Math.sin(a)*9;i?c.lineTo(x,y):c.moveTo(x,y);}
+  c.closePath();c.strokeStyle='rgba(130,180,255,.75)';c.lineWidth=1;c.stroke();
+  c.fillStyle='rgba(60,100,220,.35)';c.fill();
+  c.restore();
+  c.fillStyle='rgba(140,170,255,.45)';c.font='6px Courier New';c.textAlign='center';
+  c.fillText('OBI-WAN',cx,cy+26);
+
+  // bots
+  _FLEET_BOTS.forEach(bot=>{
+    const a=_botAngle(bot,t);
+    const r=_ORBIT_R[bot.orbit];
+    const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r;
+    const st=_FLEET_ST[bot.id]||'idle';
+
+    // launch trail
+    if(st==='launching'){
+      const prog=(t%900)/900;
+      const tx=cx+Math.cos(a)*(r+22*prog), ty=cy+Math.sin(a)*(r+22*prog);
+      const gtr=c.createLinearGradient(x,y,tx,ty);
+      gtr.addColorStop(0,`rgba(255,220,50,${.7*(1-prog)})`);
+      gtr.addColorStop(1,'rgba(255,200,0,0)');
+      c.beginPath();c.moveTo(x,y);c.lineTo(tx,ty);
+      c.strokeStyle=gtr;c.lineWidth=1.5;c.stroke();
+    }
+
+    // glow
+    const glowCol=st==='idle'?'40,60,140':
+                  st==='active'?'0,170,255':
+                  st==='launching'?'255,210,0':'255,68,102';
+    const glowR=st==='idle'?4:st==='launching'?8:7;
+    const g2=c.createRadialGradient(x,y,0,x,y,glowR);
+    g2.addColorStop(0,`rgba(${glowCol},.85)`);g2.addColorStop(1,`rgba(${glowCol},0)`);
+    c.fillStyle=g2;c.beginPath();c.arc(x,y,glowR,0,Math.PI*2);c.fill();
+
+    // dot
+    const dotR=bot.id==='artoo'?3:2.2;
+    c.beginPath();c.arc(x,y,dotR,0,Math.PI*2);
+    c.fillStyle=st==='idle'?'#1e284a':bot.col;c.fill();
+
+    // label pequeno on hover (via canvas não dá; feito no list abaixo)
+  });
+
+  _fleetRaf=requestAnimationFrame(_drawFleetCanvas);
+}
+
+function _renderFleetList(){
+  const el=document.getElementById('fleet-list');if(!el)return;
+  const stLabel={idle:'em órbita',active:'ativo',launching:'em voo ✈',alert:'alerta'};
+  const obiRow=`<div class="fl-row obi"><div class="fl-dot active"></div><div class="fl-name" style="color:rgba(130,170,255,.6)">obi-wan</div><div class="fl-status">comando</div></div><div class="fl-sep"></div>`;
+  const rows=_FLEET_BOTS.map(b=>{
+    const st=_FLEET_ST[b.id]||'idle';
+    return `<div class="fl-row${b.id==='artoo'?' artoo':''}"><div class="fl-dot ${st}"></div><div class="fl-name">${b.name}</div><div class="fl-status">${stLabel[st]||'—'}</div></div>`;
+  }).join('');
+  el.innerHTML=obiRow+rows;
+  const active=Object.values(_FLEET_ST).filter(s=>s!=='idle').length;
+  const sm=document.getElementById('fleet-status-mini');
+  if(sm)sm.textContent=active>0?`${active} em voo`:'em órbita';
+}
+
+function setFleetBotStatus(id,st,ms=5000){
+  _FLEET_ST[id]=st;_renderFleetList();
+  if(_fleetLaunches[id])clearTimeout(_fleetLaunches[id]);
+  if(ms>0)_fleetLaunches[id]=setTimeout(()=>{_FLEET_ST[id]='idle';_renderFleetList();},ms);
+}
+window.setFleetBotStatus=setFleetBotStatus; // expõe globalmente para debug
+
+function _toggleFleetPanel(){
+  _fleetOpen=!_fleetOpen;
+  const body=document.getElementById('fleet-body');
+  const chv=document.getElementById('fleet-chevron');
+  if(body)body.style.display=_fleetOpen?'block':'none';
+  if(chv)chv.textContent=_fleetOpen?'▾':'▸';
+  if(_fleetOpen){cancelAnimationFrame(_fleetRaf);_renderFleetList();_drawFleetCanvas();}
+  else{cancelAnimationFrame(_fleetRaf);}
+}
+
+function _initFleetHud(){
+  _renderFleetList();
+  // demo: anima um bot a cada 20-40s pra dar vida
+  function _demoLaunch(){
+    const live=_FLEET_BOTS.filter(b=>_FLEET_ST[b.id]==='idle');
+    if(live.length){
+      const b=live[Math.floor(Math.random()*live.length)];
+      setFleetBotStatus(b.id,b.id==='artoo'?'launching':'active',4500);
+    }
+    setTimeout(_demoLaunch,18000+Math.random()*22000);
+  }
+  setTimeout(_demoLaunch,8000);
+}
+
 main();
 </script>
 <div id="bh-arrow" style="position:fixed;display:none;color:rgba(255,100,0,.7);font-size:11px;letter-spacing:.2em;pointer-events:none;text-shadow:0 0 8px rgba(255,80,0,.5);transform-origin:center center">⟶ buraco negro</div>
 
-<!-- ── OBI-WAN HUD ──────────────────────────────────────────── -->
-<div id="obiwan-hud" style="position:fixed;bottom:160px;right:24px;z-index:20;display:none;pointer-events:none;">
+<!-- ── OBI-WAN HUD + SATELLITE FLEET (stack) ─────────────── -->
+<div id="obiwan-hud" style="position:fixed;bottom:80px;right:24px;z-index:20;display:none;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;">
+
+  <!-- FLEET HUD (topo do stack = visualmente acima) -->
+  <div id="fleet-hud">
+    <div id="fleet-header" onclick="_toggleFleetPanel()">
+      <div id="fleet-title">🛸 frota · observatório</div>
+      <div id="fleet-status-mini">em órbita</div>
+      <div id="fleet-chevron">▸</div>
+    </div>
+    <div id="fleet-body" style="display:none">
+      <canvas id="fleet-canvas" width="188" height="172"></canvas>
+      <div id="fleet-list"></div>
+    </div>
+  </div>
+
+  <!-- OBI-WAN CONTROL PANEL -->
   <div id="obiwan-panel">
     <div id="obiwan-header" onclick="_toggleObiWanPanel()">
       <div class="panel-title">Estação Obi-Wan</div>
