@@ -25,7 +25,7 @@ SORT papel ASC
 | [[bots/sentinelas/farejador\|Farejador]] | `@universo_farejador_bot` | segurança outbound | pendente | `TELEGRAM_TOKEN_FAREJADOR` | `seguranca` |
 | [[bots/sentinelas/scout\|Model Scout]] | `@universo_scout_bot` | modelos outbound | pendente | `TELEGRAM_TOKEN_SCOUT` | `model-scout` |
 | [[bots/sentinelas/escudos\|Escudos]] | `@universo_escudos_bot` | firewall outbound | pendente | `TELEGRAM_TOKEN_ESCUDOS` | `escudos` |
-| [[bots/sentinelas/usage\|Claude Usage]] | `@universo_usage_bot` | uso Claude outbound | pendente | `TELEGRAM_TOKEN_USAGE` | `claude-usage` |
+| [[bots/sentinelas/usage\|Claude Usage]] | via `@guardiao_universo_bot` | uso Claude outbound | ativo | `TELEGRAM_TOKEN` + `SOL_CHAT_ID` | privado (chat TheGod) |
 
 ## Relacionado
 
