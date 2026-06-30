@@ -216,11 +216,11 @@ def build_posture(findings, repo_meta, ts):
 def format_finding(f):
     url = f"{_GH}/{f['repo']}/blob/HEAD/{f['path']}#L{f['line']}"
     return (
-        f"🔑 <b>{html.escape(f['repo'])}</b> · segredo hardcoded\n"
-        f"\n"
-        f"tipo: <code>{html.escape(f['label'])}</code>\n"
-        f"<code>{html.escape(f['path'])}:{f['line']}</code>\n"
-        f"<code>{html.escape(f['redacted'])}</code>\n"
+        f"🔑 <b>Farejador · theuniverse</b>\n\n"
+        f"   └ repo: <code>{html.escape(f['repo'])}</code>\n"
+        f"   └ tipo: <code>{html.escape(f['label'])}</code>\n"
+        f"   └ <code>{html.escape(f['path'])}:{f['line']}</code>\n"
+        f"   └ <code>{html.escape(f['redacted'])}</code>\n"
         f"\n"
         f'<a href="{url}">↗ ver linha</a>'
     )

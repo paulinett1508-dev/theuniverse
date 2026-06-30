@@ -119,13 +119,12 @@ def main():
         week_before = round(week_pct - today_pct, 1)
         bar = build_bar(week_pct)
         msg = (
-            f"🔴 <b>Claude Code — Meta Diária Atingida</b>\n\n"
-            f"⚠️ Você consumiu <b>{today_pct}%</b> da cota semanal hoje"
-            f" — meta de <b>{alert_pct}%</b> atingida.\n\n"
-            f"Semana: <code>{bar}</code> <b>{week_pct}%</b> usada\n"
-            f"<i>(iniciou hoje em {week_before}% · +{today_pct}% no dia)</i>\n\n"
-            f"Hoje: <b>{fmt(today_tokens)}</b> · Semana: <b>{fmt(weekly_tokens)}</b>\n"
-            f"<i>Limite: {fmt(limit)} · Reseta sex 08h BRT</i>"
+            f"📊 <b>Claude Usage · theuniverse</b>\n"
+            f"{hour_label} BRT · ⚠️ meta diária atingida\n\n"
+            f"   └ hoje: <b>{today_pct}%</b> da semana · meta: <b>{alert_pct}%</b>\n"
+            f"   └ semana: <code>{bar}</code> <b>{week_pct}%</b>\n\n"
+            f"<b>{fmt(today_tokens)}</b> hoje · <b>{fmt(weekly_tokens)}</b> semana\n"
+            f"<i>limite: {fmt(limit)} · reseta sex 08h BRT</i>"
         )
         send_telegram(msg, token, chat_id, thread_id=TOPIC_ALERTAS)
         print(f"[weekly-notify] alerta META enviado")
@@ -134,12 +133,13 @@ def main():
 
     # Digest a cada execução (sempre)
     bar = build_bar(week_pct)
-    threshold_tag = f" · ⚠️ meta {alert_pct}% atingida" if threshold_crossed else ""
+    threshold_tag = f" · ⚠️ meta {alert_pct}%" if threshold_crossed else ""
     digest = (
-        f"⚡ <b>Claude Code</b> · {hour_label}\n\n"
-        f"Semana: <code>{bar}</code> <b>{week_pct}%</b>{threshold_tag}\n"
-        f"Hoje: <b>{today_pct}%</b> ({fmt(today_tokens)})\n\n"
-        f"<i>{fmt(weekly_tokens)} / {fmt(limit)} · Reseta sex 08h BRT</i>"
+        f"📊 <b>Claude Usage · theuniverse</b>\n"
+        f"{hour_label} BRT{threshold_tag}\n\n"
+        f"   └ semana: <code>{bar}</code> <b>{week_pct}%</b>\n"
+        f"   └ hoje: <b>{today_pct}%</b> · <code>{fmt(today_tokens)}</code>\n\n"
+        f"<i>{fmt(weekly_tokens)} / {fmt(limit)} · reseta sex 08h BRT</i>"
     )
     send_telegram(digest, token, chat_id, thread_id=TOPIC_ALERTAS)
     print(f"[weekly-notify] digest enviado")

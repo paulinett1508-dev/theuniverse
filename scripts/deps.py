@@ -158,17 +158,29 @@ def compute_events(state, findings):
 
 
 def format_event(ev):
-    return (f"🔓 <b>{html.escape(ev['repo'])}</b> — {html.escape(ev['severity'])}\n"
-            f"pacote: <code>{html.escape(ev['pkg'])} {html.escape(ev['version'])}</code> "
+    return (f"🔓 <b>{html.escape(ev['repo'])}</b> · {html.escape(ev['severity'])}\n"
+            f"   └ <code>{html.escape(ev['pkg'])} {html.escape(ev['version'])}</code> "
             f"({html.escape(ev['ecosystem'])})\n"
-            f"CVE: <code>{html.escape(ev['cve'])}</code>")
+            f"   └ <code>{html.escape(ev['cve'])}</code>")
 
 
 def build_report(scanned, events):
-    footer = "✅ nenhuma vulnerabilidade nova" if not events else f"⚠️ {len(events)} CVE(s) nova(s)"
-    return (f"<b>Sentinel · Deps</b> — {time.strftime('%H:%M UTC', time.gmtime())}\n"
-            f"Repos varridos: {scanned}\n"
-            f"{footer}")
+    import datetime
+    brt = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
+    ts = brt.strftime("%d/%m · %H:%M BRT")
+    header = f"🛡️ <b>Deps · theuniverse</b>\n{ts} · {scanned} repos"
+    if not events:
+        return f"{header}\n\n✅ nenhuma vulnerabilidade nova"
+    n = len(events)
+    count = f" ({n})" if n > 1 else ""
+    lines = [f"{header} · {n} CVE{'s' if n != 1 else ''}\n\n🔓 <b>Vulnerabilidades{count}</b>"]
+    for ev in events:
+        lines.append(
+            f"   └ <code>{html.escape(ev['repo'])}</code> · "
+            f"<code>{html.escape(ev['pkg'])} {html.escape(ev['version'])}</code> · "
+            f"<code>{html.escape(ev['cve'])}</code> · {html.escape(ev['severity'])}"
+        )
+    return "\n".join(lines)
 
 
 def load_state(path):

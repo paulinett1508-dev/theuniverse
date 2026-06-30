@@ -72,27 +72,48 @@ def compute_events(state, results):
 def format_event(ev):
     if ev["kind"] == "url_caiu":
         return (f"🔴 <b>{html.escape(ev['repo'])}</b> caiu\n"
-                f"<code>{html.escape(ev['url'])}</code>\n"
-                f"HTTP {ev['status']} · {ev['latency_ms']} ms")
+                f"   └ <code>{html.escape(ev['url'])}</code>\n"
+                f"   └ HTTP <code>{ev['status']}</code> · <code>{ev['latency_ms']}ms</code>")
     return (f"🟢 <b>{html.escape(ev['repo'])}</b> voltou\n"
-            f"<code>{html.escape(ev['url'])}</code>\n"
-            f"HTTP {ev['status']} · {ev['latency_ms']} ms")
+            f"   └ <code>{html.escape(ev['url'])}</code>\n"
+            f"   └ HTTP <code>{ev['status']}</code> · <code>{ev['latency_ms']}ms</code>")
 
 
 def build_report(results, events):
+    import datetime
+    brt = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
+    ts = brt.strftime("%d/%m · %H:%M BRT")
     total = len(results)
     up = sum(1 for r in results if r["ok"])
     down = total - up
-    footer = "✅ tudo no ar" if not events else f"⚠️ {len(events)} mudança(s) detectada(s)"
-    lines = [
-        f"<b>Sentinel · Pulso</b> — {time.strftime('%H:%M UTC', time.gmtime())}",
-        f"URLs checadas: {total} · ✅ {up} · 🔴 {down}",
-        footer,
-    ]
-    if events:
-        for ev in events[:5]:
-            lines.append(f"  {format_event(ev)}")
-    return "\n".join(lines)
+    header = f"💓 <b>Pulso · theuniverse</b>\n{ts} · {total} URLs · ✅ {up} · 🔴 {down}"
+    if not events:
+        return f"{header}\n\n✅ tudo no ar"
+    quedas = [ev for ev in events if ev["kind"] == "url_caiu"]
+    retornos = [ev for ev in events if ev["kind"] == "url_voltou"]
+    blocks = []
+    if quedas:
+        count = f" ({len(quedas)})" if len(quedas) > 1 else ""
+        lines = [f"🔴 <b>Quedas{count}</b>"]
+        for ev in quedas:
+            lines.append(
+                f"   └ <code>{html.escape(ev['repo'])}</code> · "
+                f"<code>{html.escape(ev['url'])}</code> · "
+                f"HTTP <code>{ev['status']}</code> · <code>{ev['latency_ms']}ms</code>"
+            )
+        blocks.append("\n".join(lines))
+    if retornos:
+        count = f" ({len(retornos)})" if len(retornos) > 1 else ""
+        lines = [f"🟢 <b>Retornos{count}</b>"]
+        for ev in retornos:
+            lines.append(
+                f"   └ <code>{html.escape(ev['repo'])}</code> · "
+                f"<code>{html.escape(ev['url'])}</code> · "
+                f"HTTP <code>{ev['status']}</code> · <code>{ev['latency_ms']}ms</code>"
+            )
+        blocks.append("\n".join(lines))
+    n = len(events)
+    return f"{header} · {n} evento{'s' if n != 1 else ''}\n\n" + "\n\n".join(blocks)
 
 
 def load_state(path):

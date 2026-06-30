@@ -61,16 +61,43 @@ def compute_events(state, current):
 def format_event(ev):
     if ev["kind"] == "deploy_falhou":
         return (f"🚨 <b>{html.escape(ev['repo'])}</b> — deploy falhou\n"
-                f"env: {html.escape(ev['env'])} · id: {ev['deployment_id']}")
+                f"   └ env: <code>{html.escape(ev['env'])}</code> · id: <code>#{ev['deployment_id']}</code>")
     return (f"✅ <b>{html.escape(ev['repo'])}</b> — deploy recuperado\n"
-            f"env: {html.escape(ev['env'])} · id: {ev['deployment_id']}")
+            f"   └ env: <code>{html.escape(ev['env'])}</code> · id: <code>#{ev['deployment_id']}</code>")
 
 
 def build_report(checked, events):
-    footer = "✅ todos os deploys saudáveis" if not events else f"⚠️ {len(events)} evento(s)"
-    return (f"<b>Sentinel · Deploy</b> — {time.strftime('%H:%M UTC', time.gmtime())}\n"
-            f"Repos checados: {checked}\n"
-            f"{footer}")
+    import datetime
+    brt = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
+    ts = brt.strftime("%d/%m · %H:%M BRT")
+    header = f"🚀 <b>Deploy Health · theuniverse</b>\n{ts} · {checked} repos"
+    if not events:
+        return f"{header}\n\n✅ todos os deploys saudáveis"
+    falhas = [ev for ev in events if ev["kind"] == "deploy_falhou"]
+    recuperados = [ev for ev in events if ev["kind"] == "deploy_ok"]
+    blocks = []
+    if falhas:
+        count = f" ({len(falhas)})" if len(falhas) > 1 else ""
+        lines = [f"🚨 <b>Falhas{count}</b>"]
+        for ev in falhas:
+            lines.append(
+                f"   └ <code>{html.escape(ev['repo'])}</code> · "
+                f"<code>{html.escape(ev['env'])}</code> · "
+                f"<code>#{ev['deployment_id']}</code>"
+            )
+        blocks.append("\n".join(lines))
+    if recuperados:
+        count = f" ({len(recuperados)})" if len(recuperados) > 1 else ""
+        lines = [f"✅ <b>Recuperados{count}</b>"]
+        for ev in recuperados:
+            lines.append(
+                f"   └ <code>{html.escape(ev['repo'])}</code> · "
+                f"<code>{html.escape(ev['env'])}</code> · "
+                f"<code>#{ev['deployment_id']}</code>"
+            )
+        blocks.append("\n".join(lines))
+    n = len(events)
+    return f"{header} · {n} evento{'s' if n != 1 else ''}\n\n" + "\n\n".join(blocks)
 
 
 def load_state(path):

@@ -26,18 +26,18 @@ _ROTA = {
 
 _CHEGOU = {
     "novice": [
-        "✅ <b>Artoo chegou</b>\n\n<b>{repo}</b> · issue #{issue_number} aberta\no mundo deles foi alertado",
-        "✅ <b>Missão concluída</b>\n\n<b>{repo}</b> recebeu o alerta · issue #{issue_number}\naguardando resposta",
+        "✅ <b>Artoo chegou</b>\n\n<b>{repo}</b> · issue <code>#{issue_number}</code> aberta\no mundo deles foi alertado",
+        "✅ <b>Missão concluída</b>\n\n<b>{repo}</b> recebeu o alerta · issue <code>#{issue_number}</code>\naguardando resposta",
     ],
     "journeyman": [
-        "✅ <b>Artoo chegou</b>\n\n<b>{repo}</b> · issue #{issue_number}\nalerta entregue",
-        "✅ <b>Entrega confirmada</b>\n\n<b>{repo}</b> · issue #{issue_number}\no planeta foi avisado",
-        "✅ <b>Artoo voltou</b> · missão #{n}\n\n<b>{repo}</b> alertado · issue #{issue_number}",
+        "✅ <b>Artoo chegou</b>\n\n<b>{repo}</b> · issue <code>#{issue_number}</code>\nalerta entregue",
+        "✅ <b>Entrega confirmada</b>\n\n<b>{repo}</b> · issue <code>#{issue_number}</code>\no planeta foi avisado",
+        "✅ <b>Artoo voltou</b> · missão #{n}\n\n<b>{repo}</b> alertado · issue <code>#{issue_number}</code>",
     ],
     "veteran": [
-        "✅ <b>{repo}</b> · #{issue_number}\nalerta entregue",
+        "✅ <b>{repo}</b> · <code>#{issue_number}</code>\nalerta entregue",
         "✅ missão #{n} · <b>{repo}</b> alertado",
-        "✅ <b>{repo}</b> · issue #{issue_number} · feito",
+        "✅ <b>{repo}</b> · issue <code>#{issue_number}</code> · feito",
     ],
 }
 

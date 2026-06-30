@@ -7,7 +7,7 @@ import json
 import os
 import sys
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -106,18 +106,19 @@ def run(api_key: str | None = None) -> dict:
     _STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
     _STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    # Notifica só se houver mudanças
+    brt = datetime.now(timezone.utc) - timedelta(hours=3)
+    ts = brt.strftime("%d/%m · %H:%M BRT")
+    header = f"🔭 <b>Model Scout · theuniverse</b>\n{ts}"
+
     if changes:
-        lines = "\n".join(changes)
-        send_telegram(
-            f"🔭 <b>Model Scout</b> — mudanças detectadas\n\n{lines}",
-            thread_id=_TOPIC,
-        )
+        send_telegram(f"{header}\n\n" + "\n".join(changes), thread_id=_TOPIC)
     else:
+        tier_lines = "\n".join(
+            f"   └ <b>{tier}</b>: <code>{mid}</code>"
+            for tier, mid in sorted(tiers.items())
+        )
         send_telegram(
-            f"🔭 <b>Model Scout</b> · {len(models)} modelos · sem mudanças\n"
-            f"tiers: fast=<code>{tiers.get('fast','—')}</code> · "
-            f"balanced=<code>{tiers.get('balanced','—')}</code>",
+            f"{header} · {len(models)} modelos\n\n✅ sem mudanças\n\n{tier_lines}",
             thread_id=_TOPIC,
         )
 

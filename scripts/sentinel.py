@@ -186,7 +186,7 @@ def format_event(event):
 
 def build_heartbeat_report(scanned_repos, detected_events):
     import datetime
-    from collections import Counter
+    from collections import defaultdict
     brt = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
     ts = brt.strftime("%d/%m · %H:%M BRT")
     n = len(scanned_repos)
@@ -197,43 +197,33 @@ def build_heartbeat_report(scanned_repos, detected_events):
     if not n_ev:
         return f"{header}\n\n✅ universo quieto"
 
-    _LABEL = {
-        "ci_falhou":      "CI-FALHOU",
-        "issue_nova":     "ISSUE",
-        "novo_planeta":   "PLANETA+",
-        "planeta_sumido": "PLANETA-",
-        "secret_exposto": "SECRET",
-    }
-    _EV_EMOJI = {
-        "ci_falhou":      "🔴",
-        "issue_nova":     "🚨",
-        "novo_planeta":   "🆕",
-        "planeta_sumido": "💥",
-        "secret_exposto": "🔑",
-    }
-
-    # Resumo por tipo
-    counts = Counter(ev["type"] for ev in detected_events)
-    summary_parts = [
-        f"{_EV_EMOJI.get(k,'·')} {v}x {_LABEL.get(k,k)}"
-        for k, v in counts.items()
+    _SECTIONS = [
+        ("ci_falhou",      "🔴", "CI com falha"),
+        ("planeta_sumido", "💥", "Planetas sumidos"),
+        ("secret_exposto", "🔑", "Segredos expostos"),
+        ("issue_nova",     "🚨", "Issues novas"),
+        ("novo_planeta",   "🆕", "Novos planetas"),
     ]
-    summary = "  ".join(summary_parts)
 
-    # Tabela de eventos
-    rows = [f"{'TIPO':<12} {'REPO':<26} DETALHE", "─" * 52]
+    by_type = defaultdict(list)
     for ev in detected_events:
-        label = _LABEL.get(ev["type"], ev["type"])[:12]
-        repo  = ev["repo"][:26]
-        detail = (ev.get("detail") or "")[:18]
-        rows.append(f"{label:<12} {repo:<26} {detail}")
+        by_type[ev["type"]].append(ev)
 
-    table = "\n".join(rows)
-    return (
-        f"{header} · {n_ev} evento{'s' if n_ev != 1 else ''}\n\n"
-        f"{summary}\n\n"
-        f"<pre>{table}</pre>"
-    )
+    blocks = []
+    for kind, emoji, label in _SECTIONS:
+        evs = by_type.get(kind, [])
+        if not evs:
+            continue
+        count = f" ({len(evs)})" if len(evs) > 1 else ""
+        lines = [f"{emoji} <b>{label}{count}</b>"]
+        for ev in evs:
+            repo = ev["repo"]
+            detail = ev.get("detail") or ""
+            suffix = f" · {detail}" if detail else ""
+            lines.append(f"   └ <code>{repo}</code>{suffix}")
+        blocks.append("\n".join(lines))
+
+    return f"{header} · {n_ev} evento{'s' if n_ev != 1 else ''}\n\n" + "\n\n".join(blocks)
 
 
 def build_universe_snapshot(state: dict, detected_events: list) -> bytes:
