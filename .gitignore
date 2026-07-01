@@ -37,3 +37,6 @@ image.png
 
 # corpos — clones físicos dos planetas (cada um é seu próprio repo git)
 /corpos/
+
+# Vercel CLI — link local do projeto (orgId/projectId, por máquina)
+.vercel/
