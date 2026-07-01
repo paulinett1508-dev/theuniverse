@@ -20,7 +20,7 @@ Exemplos-alvo dTheGod:
 |---|---|
 | Receita | **Notifier do SHELDON** (instância nova, domínio do universo) — não reinventar |
 | Natureza | Obi-Wan conversacional inbound (two-way, linguagem natural) |
-| Cérebro | **Groq** Llama 70B (`llama-3.3-70b-versatile`) — free tier, proven no SHELDON |
+| Cérebro | **Groq** GPT-OSS 120B (`openai/gpt-oss-120b`) — free tier, proven no SHELDON |
 | RAG | **BM25** (`rank-bm25`, puro Python) sobre os markdowns do theuniverse |
 | Contexto ao vivo | `gh.py` (já existe) + `state/sentinel-state.json` (já existe) injetados no prompt |
 | Bot | [[bots/obi-wan\|`guardiao_universo_bot`]] — inbound only (sentinelas têm bots próprios, sem conflito de polling) |

@@ -37,7 +37,7 @@ def test_select_model_fallback_to_balanced():
 
 
 def test_select_model_fallback_to_hardcoded():
-    assert select_model("fast", {}) == "llama-3.3-70b-versatile"
+    assert select_model("fast", {}) == "openai/gpt-oss-120b"
 
 
 def test_route_returns_string():

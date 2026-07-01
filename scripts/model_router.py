@@ -8,12 +8,12 @@ import re
 from pathlib import Path
 
 _STATE_FILE = Path(__file__).resolve().parent.parent / "state" / "model-state.json"
-_FALLBACK_MODEL = "llama-3.3-70b-versatile"
+_FALLBACK_MODEL = "openai/gpt-oss-120b"
 
 DEFAULT_STATE = {
     "tiers": {
         "fast":     "llama-3.1-8b-instant",
-        "balanced": "llama-3.3-70b-versatile",
+        "balanced": "openai/gpt-oss-120b",
     },
     "models": [],
 }

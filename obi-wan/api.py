@@ -14,7 +14,7 @@ import brain
 
 # --- Config (lida do EnvironmentFile do systemd: /opt/obi-wan/.env) ---
 _GROQ_API_KEY = os.environ["GROQ_API_KEY"]
-_GROQ_MODEL   = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+_GROQ_MODEL   = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 _GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 _API_TOKEN    = os.environ["API_TOKEN"]   # Bearer token global compartilhado pelos planetas
 

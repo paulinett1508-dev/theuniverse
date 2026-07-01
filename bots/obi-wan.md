@@ -21,7 +21,7 @@ O governante do universo. Canal bidirecional entre TheGod e o ecossistema via Te
 | username | `@guardiao_universo_bot` |
 | papel | conversacional inbound |
 | runtime | systemd na Polaris (long-polling) |
-| cérebro | Groq Llama 70B (`llama-3.3-70b-versatile`) |
+| cérebro | Groq GPT-OSS 120B (`openai/gpt-oss-120b`) |
 | RAG | BM25 sobre markdowns do theuniverse |
 | whitelist | `chat_id = 1030157568` (TheGod only) |
 

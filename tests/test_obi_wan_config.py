@@ -14,4 +14,4 @@ def test_requires_groq_key():
 def test_parses_and_defaults():
     cfg = Config(env={"TELEGRAM_TOKEN": "t", "SOL_CHAT_ID": "1030157568", "GROQ_API_KEY": "gsk_x"})
     assert cfg.sol_chat_id == 1030157568
-    assert cfg.groq_model == "llama-3.3-70b-versatile"
+    assert cfg.groq_model == "openai/gpt-oss-120b"

@@ -8,7 +8,7 @@ class Config:
         self.telegram_token = self._require(env, "TELEGRAM_TOKEN")
         self.sol_chat_id = int(self._require(env, "SOL_CHAT_ID"))
         self.groq_api_key = self._require(env, "GROQ_API_KEY")
-        self.groq_model = env.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+        self.groq_model = env.get("GROQ_MODEL", "openai/gpt-oss-120b")
         gid = env.get("GROUP_CHAT_ID")
         self.group_chat_id = int(gid) if gid else None
 
