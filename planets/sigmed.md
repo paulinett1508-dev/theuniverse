@@ -30,4 +30,6 @@ files: .env.example, .gitignore, .gitmodules, .npmrc, .prettierrc, CLAUDE.md, ag
 
 ## Notas do guardião
 
-<!-- observações, alertas, dependências cruzadas -->
+Aparece no roster da constelação Amilcar (`constellations/amilcar.md`) como 🪐 planeta,
+mas isso é papel funcional, não cinturão. O cinturão real é `pessoal` (kuiper) — clone
+local fica em `corpos/kuiper/sobral-core/sigmed`, **não** em `C:\AMILCAR-CONSTELATTION\`.

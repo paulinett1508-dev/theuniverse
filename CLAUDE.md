@@ -28,6 +28,13 @@ Lente de trabalho: dev sênior + arquiteto + visão holística.
 
 Inventário dos planetas em `planets/`. Manifestos das constelações em `constellations/`.
 
+**⚠️ Três eixos diferentes, não confundir:**
+1. **"Planeta" genérico** = qualquer repo do universo (o termo desta tabela). Todo repo é um planeta.
+2. **Cinturão** (`gould` / `kuiper` / `van-allen`) = natureza da órbita/posse, campo `NATUREZA` em `scripts/censo.py`. Aplica a **todo** planeta, dentro ou fora de constelação.
+3. **Tipo de corpo dentro da Amilcar** (⭐ estrela / 🪐 planeta / 🛰️ satélite / 🧠 cortex / 🗺️ território) = papel funcional só pra membros da constelação Amilcar, definido em `constellations/amilcar.md`. Aqui "🪐 planeta" é um papel específico — **não é sinônimo do cinturão Kuiper nem do "planeta" genérico do item 1.**
+
+Exemplo real: `sigmed` é 🪐-planeta (papel) na Amilcar, mas cinturão `kuiper` (posse pessoal, não institucionalizada). As duas classificações não se implicam.
+
 ```
 theuniverse/          ← observatório (este repo)
 ├── .agnostic-core/   ← gravidade central (submodule)

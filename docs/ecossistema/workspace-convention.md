@@ -2,6 +2,13 @@
 
 > Resolve a issue #18. Define onde os planetas (repos) são clonados no filesystem local do TheGod.
 
+> **Antes de aplicar esta convenção a um planeta específico, cheque o campo `cinturão` dele
+> (`planets/<nome>.md` ou `NATUREZA` em `scripts/censo.py`) — não o papel dele dentro da
+> Amilcar.** Pertencer ao roster da Amilcar (`constellations/amilcar.md`, ⭐/🪐/🛰️/🧠/🗺️) é um
+> eixo diferente de cinturão (`gould`/`kuiper`/`van-allen`). Um planeta pode ser 🪐-planeta
+> na Amilcar e ainda assim cinturão `kuiper` (ex: `sigmed`) — nesse caso o clone vai em
+> `corpos/kuiper/`, não em `C:\AMILCAR-CONSTELATTION\`. **Só cinturão decide o local do clone.**
+
 ## Decisão
 
 `D:\theuniverse` é a raiz física oficial. Não existe mais "workspace solto" fora dela para
