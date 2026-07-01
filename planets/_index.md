@@ -1,15 +1,15 @@
 # theuniverse — Mapa dos Planetas
 
-> Atualizado: 2026-06-30 | 33 planetas mapeados (Censo automático)
+> Atualizado: 2026-07-01 | 33 planetas mapeados (Censo automático)
 
 🟢 ativo (≤30d) · 🟡 recente (31-90d) · 🔴 dormant (>90d) · 🔒 privado
 ⚡🏛️ Gould · 🌙 Kuiper · 🏛️ Van Allen
 
 | planeta | cinturão | cluster | linguagem | issues |
 |---|---|---|---|---|
-| 🟢 [agnostic-core](planets/agnostic-core.md) | ⚡🏛️ gould | meta-infra | Shell | 33 |
+| 🟢 [agnostic-core](planets/agnostic-core.md) | ⚡🏛️ gould | meta-infra | Shell | 59 |
 | 🟡 [AlgodaoAtelie](planets/AlgodaoAtelie.md) | 🌙 kuiper | landing-clientes | TypeScript | 1 |
-| 🟢🔒 [Amilcar-Constellation](planets/Amilcar-Constellation.md) | ⚡🏛️ gould | nao-classificado | - | 7 |
+| 🟢🔒 [Amilcar-Constellation](planets/Amilcar-Constellation.md) | ⚡🏛️ gould | nao-classificado | - | 8 |
 | 🟢🔒 [amilcar-cortex](planets/amilcar-cortex.md) | ⚡🏛️ gould | sobral-core | Python | 1 |
 | 🟢🔒 [amilcar-dominios](planets/amilcar-dominios.md) | ⚡🏛️ gould | sobral-core | Python | 1 |
 | 🟡 [bolaocopa2026](planets/bolaocopa2026.md) | 🌙 kuiper | entretenimento | TypeScript | 2 |
@@ -30,11 +30,11 @@
 | 🟡 [lpjaraujoinfo](planets/lpjaraujoinfo.md) | 🌙 kuiper | landing-clientes | TypeScript | 1 |
 | 🟢 [luna-base](planets/luna-base.md) | ⚡🏛️ gould | observatorio | - | 2 |
 | 🟢🔒 [mcp-eventos](planets/mcp-eventos.md) | ⚡🏛️ gould | mcp-ia | Python | 2 |
-| 🟢🔒 [nexus-labsobral](planets/nexus-labsobral.md) | ⚡🏛️ gould | sobral-core | Python | 141 |
+| 🟢🔒 [nexus-labsobral](planets/nexus-labsobral.md) | ⚡🏛️ gould | sobral-core | Python | 142 |
 | 🟢🔒 [sbrchecks](planets/sbrchecks.md) | ⚡🏛️ gould | sobral-core | Python | 3 |
 | 🟢🔒 [sbrgestao](planets/sbrgestao.md) | ⚡🏛️ gould | sobral-core | TypeScript | 13 |
 | 🟢 [sentinel-core](planets/sentinel-core.md) | ⚡🏛️ gould | nao-classificado | Shell | 2 |
-| 🟢 [sicefsus-sistema](planets/sicefsus-sistema.md) | 🌙 kuiper | gov-publico | JavaScript | 146 |
+| 🟢 [sicefsus-sistema](planets/sicefsus-sistema.md) | 🌙 kuiper | gov-publico | JavaScript | 27 |
 | 🟢🔒 [sigmed](planets/sigmed.md) | 🌙 kuiper | sobral-core | TypeScript | 10 |
 | 🟢 [SuperCartolaManagerv5-production](planets/SuperCartolaManagerv5-production.md) | 🌙 kuiper | entretenimento | JavaScript | 3 |
 | 🟡 [temperodemamae](planets/temperodemamae.md) | ❓ nao-classificado | landing-clientes | HTML | 1 |
