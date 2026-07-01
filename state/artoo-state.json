@@ -1,24 +1,6 @@
 {
-  "missions": 161,
+  "missions": 164,
   "history": [
-    {
-      "repo": "nexus-labsobral",
-      "reason": "CI falhou",
-      "issue": 209,
-      "date": "2026-07-01"
-    },
-    {
-      "repo": "sicefsus-sistema",
-      "reason": "CI falhou",
-      "issue": 195,
-      "date": "2026-07-01"
-    },
-    {
-      "repo": "agnostic-core",
-      "reason": "CI falhou",
-      "issue": 96,
-      "date": "2026-07-01"
-    },
     {
       "repo": "nexus-labsobral",
       "reason": "CI falhou",
@@ -119,6 +101,24 @@
       "repo": "sicefsus-sistema",
       "reason": "CI falhou",
       "issue": 201,
+      "date": "2026-07-01"
+    },
+    {
+      "repo": "agnostic-core",
+      "reason": "CI falhou",
+      "issue": 102,
+      "date": "2026-07-01"
+    },
+    {
+      "repo": "nexus-labsobral",
+      "reason": "CI falhou",
+      "issue": 220,
+      "date": "2026-07-01"
+    },
+    {
+      "repo": "sicefsus-sistema",
+      "reason": "CI falhou",
+      "issue": 202,
       "date": "2026-07-01"
     }
   ]
