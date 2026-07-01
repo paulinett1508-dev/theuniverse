@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-06-28 (Lab-Sobral-Dev incorporado · Cinturões orbitais · 40 planetas)
+> Última atualização: 2026-07-01 (Convenção de workspace local resolvida · #18 fechada · corpos/kuiper materializado)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -276,3 +276,16 @@ Ao clonar o theuniverse noutra máquina, estes itens **não vêm pelo git** e pr
 2. **Chave SSH `~/.ssh/vscode_key`** — cadastrada na Polaris via extensão Hostinger do VS Code. `root@195.200.5.145` porta 22.
 3. **Submodule** — `git submodule update --init` após clonar.
 4. **Credencial git de push** — configurar token no `.git/config`.
+
+### Sessão 2026-07-01 (tarde) — Convenção de workspace resolvida
+
+**Issue #18 fechada (commit `1c5db09`):**
+- `D:\theuniverse` é a raiz física oficial. Clones vivem em `corpos/<cinturão>/<cluster>/<planeta>`, git-ignorado, espelhando 1:1 `NATUREZA`+`CLUSTERS` do Censo.
+- `scripts/workspace.py` materializa a árvore (`--dry-run` disponível). Token usado só na hora do clone, nunca gravado em `.git/config`.
+- Doc: `docs/ecossistema/workspace-convention.md`.
+- **Escopo: só Kuiper.** 18 planetas privados clonados em `corpos/kuiper/`. Gould/Van Allen ficaram de fora — já têm local canônico próprio, não documentado ainda (ver #25).
+- Guard-rail: script filtra `ESCOPO = {"kuiper"}` de propósito — não expandir sem decisão do TheGod.
+
+**Issue #25 aberta:** definir local canônico de clone pra Gould/Van Allen.
+
+Handoff completo: `docs/handoffs/2026-07-01-17h.md`.
