@@ -1,56 +1,56 @@
 {
   "schema": "entity-exchange/posture-status@1",
   "entity": "sentinel",
-  "ts": 1782815870,
+  "ts": 1782902702,
   "repos": [
     {
       "repo": "AlgodaoAtelie",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "Amilcar-Constellation",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "CertiSYS",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "FinanceFlow",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "GessoExpress",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "SuperCartolaManagerv5-production",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "agnostic-core",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "agnvendas-painelsbr",
@@ -65,133 +65,133 @@
           "ref_key": "e9fbbc73384bcdb3"
         }
       ],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "amilcar-cortex",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "amilcar-dominios",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "bolaocopa2026",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "centroculturalsbr",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "contabilplus",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "df-gesso",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "f1-pulse",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "florianorun",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "flowdigitalstudio",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "hermes",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "hqplus",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "imersaobitrix24",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "lp-ellenpedrosa",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "lp-restauranteflutuante",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "lpjaraujoinfo",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "luna-base",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "matrix-core",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "mcp-eventos",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "nexus-labsobral",
@@ -234,21 +234,21 @@
           "ref_key": "3c4bf0c301c0eb96"
         }
       ],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "pedidomobile",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "sbrchecks",
       "visibilidade": "private",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "sbrgestao",
@@ -277,21 +277,21 @@
           "ref_key": "40a1ac3200006537"
         }
       ],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "sentinel-core",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "sicefsus-sistema",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "sigmed",
@@ -320,28 +320,28 @@
           "ref_key": "7cca00d11c6908d5"
         }
       ],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "temperodemamae",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "tokentown",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     },
     {
       "repo": "vibegaminghub",
       "visibilidade": "public",
       "score": 100,
       "achados_abertos": [],
-      "ultimaVarredura": 1782815870
+      "ultimaVarredura": 1782902702
     }
   ],
   "resumo": "4 repo(s) com achado aberto; 0 crítico(s)."
