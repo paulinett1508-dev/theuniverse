@@ -34,3 +34,6 @@ image.png
 
 # IDE local
 *.code-workspace
+
+# corpos — clones físicos dos planetas (cada um é seu próprio repo git)
+/corpos/

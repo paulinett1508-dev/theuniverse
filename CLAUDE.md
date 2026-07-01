@@ -33,8 +33,11 @@ theuniverse/          ← observatório (este repo)
 ├── .agnostic-core/   ← gravidade central (submodule)
 ├── planets/          ← fichas de cada planeta
 ├── constellations/   ← manifestos das constelações
+├── corpos/           ← clones físicos dos planetas Kuiper (git-ignorado)
 └── .vault            ← credenciais locais (nunca commitar)
 ```
+
+Convenção de workspace local (onde codar cada planeta): `docs/ecossistema/workspace-convention.md`.
 
 ### Constelações ativas
 

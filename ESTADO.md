@@ -28,6 +28,8 @@
 | Censo (auto-descoberta) | `scripts/censo.py` + `.github/workflows/censo.yml` |
 | Setup de webhooks | `scripts/setup-webhooks.py` |
 | Credenciais (LOCAL, nunca no git) | `.vault` |
+| Convenção de workspace local (onde clonar/codar planetas) | `docs/ecossistema/workspace-convention.md` |
+| Materializador de clones Kuiper | `scripts/workspace.py` (`--dry-run` disponível) |
 
 ## Cosmologia (resumo — detalhe no CLAUDE.md)
 
