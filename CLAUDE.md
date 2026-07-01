@@ -38,6 +38,7 @@ theuniverse/          ← observatório (este repo)
 ```
 
 Convenção de workspace local (onde codar cada planeta): `docs/ecossistema/workspace-convention.md`.
+Kuiper → `corpos/kuiper/<cluster>/<planeta>`. Gould/Van Allen (Amilcar) → `C:\AMILCAR-CONSTELATTION\`.
 
 ### Constelações ativas
 

@@ -27,12 +27,34 @@ inventado por fora: a árvore de pastas é um espelho físico do catálogo.
 
 ## Escopo: só Kuiper
 
-`corpos/` hoje materializa **só o cinturão Kuiper** (órbita privada/individual — os
-planetas que estavam "soltos"). Gould e Van Allen (cinturões profissionais) já têm
-local de clone canônico fora do theuniverse — não são duplicados aqui, para não recriar
+`corpos/` materializa **só o cinturão Kuiper** (órbita privada/individual — os
+planetas que estavam "soltos"). Gould e Van Allen (cinturões profissionais) têm local
+de clone canônico **fora do theuniverse** — não são duplicados aqui, para não recriar
 o problema original (dois clones do mesmo repo, sem saber qual é o "de verdade").
 
 Para codar um planeta Kuiper: abrir direto `corpos/kuiper/<cluster>/<planeta>`.
+
+## Gould / Van Allen — local canônico: `C:\AMILCAR-CONSTELATTION`
+
+Raiz local da constelação Amilcar (repos `Amilcar-Constellation` e `matrix-core`, este
+em transição de identidade). Não é organizada por cinturão/cluster do Censo — segue a
+própria taxonomia por **tipo de corpo** já documentada em `constellations/amilcar.md`:
+
+```
+C:\AMILCAR-CONSTELATTION\
+├── estrelas/     ← ⭐ hermes, nexus-labsobral, sbrgestao
+├── planetas/     ← 🪐 CENTROCULTURALSBR, FinanceFlow, M365, m365-portal
+├── satelites/    ← 🛰️ SbrChecks, SbrTask
+├── cortex/       ← 🧠 amilcar-cortex (clone direto, contém especialistas/ferramentas)
+├── dominios/     ← 🗺️ amilcar-dominios (monorepo departamental)
+└── nucleo/       ← AMILCARCONSTELATTION, amilcar-core, mcp-eventos, sentinel-core
+```
+
+Cada subpasta é um clone real (`.git` próprio), igual ao padrão do `corpos/`. A raiz em
+si não é um repo — é só o container do workspace (tem `.code-workspace` próprio).
+
+Para codar um planeta Gould/Van Allen: abrir a pasta correspondente dentro dessa árvore,
+não `corpos/`. `constellations/amilcar.md` é a fonte de verdade de qual corpo é qual.
 
 ## Ferramenta
 
@@ -49,7 +71,5 @@ Idempotente — só clona o que falta, nunca deleta, nunca sobrescreve. Token do
 
 ## Pendências
 
-- **Gould/Van Allen**: onde exatamente vivem os clones canônicos hoje? Não documentado
-  ainda — decisão do TheGod, fora do escopo desta convenção (ver issue de acompanhamento).
 - **`temperodemamae`**: cinturão `nao-classificado` no Censo — não entra em `corpos/`
   até ser classificado.
