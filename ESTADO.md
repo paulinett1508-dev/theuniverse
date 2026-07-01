@@ -276,6 +276,7 @@ Ao clonar o theuniverse noutra máquina, estes itens **não vêm pelo git** e pr
 2. **Chave SSH `~/.ssh/vscode_key`** — cadastrada na Polaris via extensão Hostinger do VS Code. `root@195.200.5.145` porta 22.
 3. **Submodule** — `git submodule update --init` após clonar.
 4. **Credencial git de push** — configurar token no `.git/config`.
+5. **`corpos/kuiper/`** — git-ignorado, não vem no clone. Rodar `python scripts/workspace.py` (depois do `.vault` recriado) pra reclonar os 18 planetas privados. Ver `docs/ecossistema/workspace-convention.md`.
 
 ### Sessão 2026-07-01 (tarde) — Convenção de workspace resolvida
 
