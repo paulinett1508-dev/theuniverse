@@ -35,7 +35,7 @@
 
 O theuniverse é um **observatório pessoal** — olho omnisciente sobre TODOS os repos da conta `paulinett1508-dev`. Observa, diagnostica, organiza. Nunca executa em outros repos.
 
-**Constelação Amilcar** — agrupamento do cortex do Lab Sobral (nexus-labsobral, sbrgestao, sigmed, centroculturalsbr, sbrchecks). Alma de Trantor: governa sem executar. Manifesto em `constellations/amilcar.md`. O repo `the-matrix` está em transição para refletir essa identidade.
+**Constelação Amilcar** — agrupamento do cortex do Lab Sobral (nexus-labsobral, sbrgestao, centroculturalsbr, sbrchecks). Alma de Trantor: governa sem executar. Manifesto em `constellations/amilcar.md`. O repo `the-matrix` está em transição para refletir essa identidade. (`sigmed` foi removido do roster em 2026-07-01 — é cinturão kuiper/pessoal, não institucional.)
 
 Gravidade = agnostic-core (submodule).
 

@@ -31,7 +31,6 @@ Face de desenvolvimento — infra, inteligência e sistemas operacionais do Lab.
 |---|---|---|---|
 | **Sheldon** | `nexus-labsobral` | ⭐ estrela | Núcleo de inteligência — hub de dados e lógica central |
 | **Theo** | `sbrgestao` | ⭐ estrela | Gestão e operações do Lab |
-| **sigmed** | `sigmed` | 🪐 planeta | Sistema médico do ecossistema Sobral |
 | **centroculturalsbr** | `centroculturalsbr` | 🪐 planeta | Território cultural e presença institucional |
 | **sbrchecks** | `sbrchecks` | 🛰️ satélite | Monitoramento e validações do ecossistema |
 | **amilcar-cortex** | `amilcar-cortex` 🔒 | 🧠 cortex | Inteligência da constelação — lóbulos/especialistas |
@@ -46,6 +45,7 @@ Face de desenvolvimento — infra, inteligência e sistemas operacionais do Lab.
 | repo | por quê |
 |---|---|
 | `sicefsus-sistema` | Planeta avulso — órbita pública/governamental independente |
+| `sigmed` | Projeto pessoal (cinturão kuiper) — ainda não institucionalizado no Lab Sobral, apesar do tema médico |
 
 ---
 

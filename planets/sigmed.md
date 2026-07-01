@@ -30,6 +30,7 @@ files: .env.example, .gitignore, .gitmodules, .npmrc, .prettierrc, CLAUDE.md, ag
 
 ## Notas do guardião
 
-Aparece no roster da constelação Amilcar (`constellations/amilcar.md`) como 🪐 planeta,
-mas isso é papel funcional, não cinturão. O cinturão real é `pessoal` (kuiper) — clone
-local fica em `corpos/kuiper/sobral-core/sigmed`, **não** em `C:\AMILCAR-CONSTELATTION\`.
+Removido do roster da constelação Amilcar em 2026-07-01 (decisão do TheGod): é projeto
+pessoal, cinturão `pessoal` (kuiper), não institucionalizado no Lab Sobral — mesmo com
+tema médico. Ver `constellations/amilcar.md` § Fora da constelação. Clone local fica em
+`corpos/kuiper/sobral-core/sigmed`, **não** em `C:\AMILCAR-CONSTELATTION\`.

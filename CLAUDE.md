@@ -33,7 +33,7 @@ Inventário dos planetas em `planets/`. Manifestos das constelações em `conste
 2. **Cinturão** (`gould` / `kuiper` / `van-allen`) = natureza da órbita/posse, campo `NATUREZA` em `scripts/censo.py`. Aplica a **todo** planeta, dentro ou fora de constelação.
 3. **Tipo de corpo dentro da Amilcar** (⭐ estrela / 🪐 planeta / 🛰️ satélite / 🧠 cortex / 🗺️ território) = papel funcional só pra membros da constelação Amilcar, definido em `constellations/amilcar.md`. Aqui "🪐 planeta" é um papel específico — **não é sinônimo do cinturão Kuiper nem do "planeta" genérico do item 1.**
 
-Exemplo real: `sigmed` é 🪐-planeta (papel) na Amilcar, mas cinturão `kuiper` (posse pessoal, não institucionalizada). As duas classificações não se implicam.
+Lição real: `sigmed` chegou a aparecer no roster da Amilcar como 🪐-planeta mesmo sendo cinturão `kuiper` (posse pessoal, não institucionalizada) — foi removido do roster por isso (ver `constellations/amilcar.md` § Fora da constelação). Roster da Amilcar e cinturão são eixos diferentes; não infira um a partir do outro.
 
 ```
 theuniverse/          ← observatório (este repo)
@@ -51,7 +51,7 @@ Kuiper → `corpos/kuiper/<cluster>/<planeta>`. Gould/Van Allen (Amilcar) → `C
 
 | constelação | repos-membro | alma |
 |---|---|---|
-| **Amilcar** | nexus-labsobral · sbrgestao · sigmed · centroculturalsbr · sbrchecks | Trantor (Foundation) — governa sem executar |
+| **Amilcar** | nexus-labsobral · sbrgestao · centroculturalsbr · sbrchecks | Trantor (Foundation) — governa sem executar |
 
 ---
 
