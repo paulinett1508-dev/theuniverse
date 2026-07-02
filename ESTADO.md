@@ -1,7 +1,7 @@
 # ESTADO DO UNIVERSO — Handoff entre sessões
 
 > **Documento auto-suficiente.** Tudo para retomar o trabalho está aqui — não é preciso colar nada da sessão anterior nem lembrar de nada externo. Este arquivo é injetado automaticamente no contexto a cada sessão (hook SessionStart). Ao lê-lo, você (o guardião) tem o universo inteiro na cabeça.
-> Última atualização: 2026-07-01 (Convenção de workspace local resolvida · #18 fechada · corpos/kuiper materializado)
+> Última atualização: 2026-07-01 (Hospital360 — planeta legado assumido, handover com dev original em andamento)
 
 ## ▶️ Primeiro job ao acordar
 
@@ -290,3 +290,29 @@ Ao clonar o theuniverse noutra máquina, estes itens **não vêm pelo git** e pr
 **Issue #25 aberta:** definir local canônico de clone pra Gould/Van Allen.
 
 Handoff completo: `docs/handoffs/2026-07-01-17h.md`.
+
+### Sessão 2026-07-01 (noite) — Hospital360 assumido, handover em andamento
+
+Planeta legado (HIS PHP+PostgreSQL pro SUS) herdado de dev original cooperativo (Cezar Fournier).
+Dossiê completo (backend/frontend/infra/segurança) + repo próprio criado + handover conduzido em
+tempo real via WhatsApp durante a sessão.
+
+- Repo de trabalho: `paulinett1508-dev/hospital360` (privado, cópia sanitizada). Ficha em
+  `planets/hospital360.md`, cinturão `kuiper`, cluster `gov-publico`.
+- Espelho de segurança do histórico real do Cezar: `paulinett1508-dev/hospital360-legacy`
+  (branch `hospital360-php-v1.1`, 164 commits) — independe da conta dele.
+- Projeto é **piloto sem clientes**, não produção validada — recalibra toda urgência de handover
+  pra baixo. Cloudsus (hospedagem) tem equipe própria de infra; Cezar nunca teve SSH/root.
+- Descoberto (via áudio de WhatsApp transcrito com `amilcar-cortex/ferramentas/transcritor`) que
+  a branch órfã `main` do repo do Cezar é um painel de chamadas SUS/UBS separado, a ser entregue
+  depois — não é lixo/engano.
+- Checklist completo de handover: `docs/handover-cezar.md` no repo Hospital360.
+- Investigada viabilidade de staging no Railway (Dockerfile + volume + Postgres) — viável, não
+  implementado ainda.
+
+**Issue aberta:** #26 (theuniverse — corrigir inconsistências do handoff 19h30, achado por code
+review nesta mesma sessão). Pendências do Hospital360 (login admin, repo de update, PAT do Cezar,
+integração do painel, staging Railway) **ainda não viraram issue** — usuário não confirmou a
+criação em tempo real (timeout na pergunta), ver handoff detalhado.
+
+Handoff completo: `docs/handoffs/2026-07-01-22h30.md`.
